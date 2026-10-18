@@ -1,3 +1,9 @@
+// @capacitor/local-notifications compiles with a Java 21 toolchain, while Android Studio 2026
+// ships Java 25. This lets Gradle download a matching JDK 21 once (into ~/.gradle/jdks).
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
 include ':app'
 include ':capacitor-cordova-android-plugins'
 project(':capacitor-cordova-android-plugins').projectDir = new File('./capacitor-cordova-android-plugins/')
