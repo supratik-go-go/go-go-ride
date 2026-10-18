@@ -66,6 +66,18 @@ set "VITE_ENABLE_OTP=true"
 if /i "%API_URL:~0,8%"=="https://" set "VITE_ENABLE_OTP=false"
 echo  [ok]    OTP sign-in: %VITE_ENABLE_OTP%
 
+rem Live builds are signed with the release key (android\keystore.properties);
+rem Wi-Fi test builds use the debug key.
+set "GRADLE_TASK=assembleDebug"
+set "APK_OUT=android\app\build\outputs\apk\debug\app-debug.apk"
+if /i "%VITE_ENABLE_OTP%"=="false" if exist "android\keystore.properties" (
+  set "GRADLE_TASK=assembleRelease"
+  set "APK_OUT=android\app\build\outputs\apk\release\app-release.apk"
+)
+echo  [ok]    Build type: %GRADLE_TASK%
+call node "%~dp0scripts\set-cap-config.mjs" "%API_URL%"
+if errorlevel 1 goto :fail
+
 rem ------------------------------------------------------------ packages
 if not exist "node_modules\@capacitor\android" (
   echo  [setup] Installing packages...
@@ -85,12 +97,12 @@ if errorlevel 1 goto :fail
 
 echo  [3/3] Building the APK - the first build downloads Gradle and takes several minutes...
 pushd android
-call "%~dp0android\gradlew.bat" assembleDebug
+call "%~dp0android\gradlew.bat" %GRADLE_TASK%
 set "GRADLE_ERR=%errorlevel%"
 popd
 if not "%GRADLE_ERR%"=="0" goto :fail
 
-copy /y "android\app\build\outputs\apk\debug\app-debug.apk" "GO-GO-Ride.apk" >nul
+copy /y "%APK_OUT%" "GO-GO-Ride.apk" >nul
 if errorlevel 1 goto :fail
 
 echo.

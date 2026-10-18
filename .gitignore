@@ -55,3 +55,7 @@ deploy-hostinger-cloud/gogoride-api.zip
 deploy-hostinger-cloud/build/
 backend-node/public/downloads/*.apk
 backend-node/public/downloads/app-info.json
+
+# Android release signing key (private - back up separately)
+go-go-ride apk/android/keystore.properties
+go-go-ride apk/android/keystore/
