@@ -60,6 +60,12 @@ for /f "tokens=1,* delims==" %%A in ('findstr /b "VITE_API_URL=" ".env.productio
 echo  [ok]    App will talk to: %API_URL%
 echo          (users can change it later in the app: Profile - Settings - Server)
 
+rem A live (https) server has no SMS gateway yet, so OTP sign-in is switched off
+rem and the app opens on password sign-in. Local Wi-Fi test builds keep OTP.
+set "VITE_ENABLE_OTP=true"
+if /i "%API_URL:~0,8%"=="https://" set "VITE_ENABLE_OTP=false"
+echo  [ok]    OTP sign-in: %VITE_ENABLE_OTP%
+
 rem ------------------------------------------------------------ packages
 if not exist "node_modules\@capacitor\android" (
   echo  [setup] Installing packages...

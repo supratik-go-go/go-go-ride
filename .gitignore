@@ -45,3 +45,13 @@ deploy-hostinger/gogoride-deploy.zip
 .vscode/
 Thumbs.db
 .DS_Store
+
+# Node API: local data, starter database (contains user accounts), local settings
+backend-node/data/
+backend-node/seed/*.db
+backend-node/seed/uploads/
+deploy-hostinger-cloud/production-secrets.txt
+deploy-hostinger-cloud/gogoride-api.zip
+deploy-hostinger-cloud/build/
+backend-node/public/downloads/*.apk
+backend-node/public/downloads/app-info.json
