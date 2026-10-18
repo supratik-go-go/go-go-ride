@@ -79,7 +79,7 @@ if errorlevel 1 goto :fail
 
 echo  [3/3] Building the APK - the first build downloads Gradle and takes several minutes...
 pushd android
-call gradlew.bat assembleDebug
+call "%~dp0android\gradlew.bat" assembleDebug
 set "GRADLE_ERR=%errorlevel%"
 popd
 if not "%GRADLE_ERR%"=="0" goto :fail
