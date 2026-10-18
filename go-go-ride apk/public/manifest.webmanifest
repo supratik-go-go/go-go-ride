@@ -1,0 +1,14 @@
+{
+  "name": "GO-GO Ride",
+  "short_name": "GO-GO Ride",
+  "description": "Smart local transport for West Bengal",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0b2a7a",
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

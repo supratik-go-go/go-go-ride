@@ -1,0 +1,37 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7j6mi0005vvgmex8dlkq6",
+   "name": "New Rider",
+   "phone": "9812345678",
+   "email": null,
+   "role": "PASSENGER",
+   "avatarUrl": null,
+   "status": "ACTIVE",
+   "phoneVerified": true,
+   "createdAt": "2026-09-20T19:26:34.314Z",
+   "lastLoginAt": "2026-09-20T19:26:34.414Z"
+  },
+  {
+   "id": "cmua7ig2h00015xwt9nft5jh8",
+   "name": "Admin User",
+   "phone": "9876500001",
+   "email": "admin@gogoride.com",
+   "role": "SUPER_ADMIN",
+   "avatarUrl": null,
+   "status": "ACTIVE",
+   "phoneVerified": true,
+   "createdAt": "2026-09-20T19:25:59.897Z",
+   "lastLoginAt": "2026-10-17T11:41:29.952Z"
+  },
+  "...1 more"
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 3,
+  "total": 14,
+  "totalPages": 5
+ }
+}

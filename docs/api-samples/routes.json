@@ -1,0 +1,158 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7ihe3001i346cz4jmlys7",
+   "name": "Howrah - New Town",
+   "routeNumber": "AC1",
+   "distanceKm": 17.2,
+   "status": "ACTIVE",
+   "fromStopId": null,
+   "toStopId": null,
+   "createdAt": null,
+   "updatedAt": null,
+   "fromStop": {
+    "id": "cmua7ihdx000e1j9kasf7h8qe",
+    "name": "Howrah Station",
+    "area": "Howrah",
+    "city": "Kolkata",
+    "latitude": 22.5839,
+    "longitude": 88.3425,
+    "status": "ACTIVE",
+    "createdAt": "2026-09-20T19:26:01.605Z",
+    "updatedAt": "2026-09-20T19:26:01.605Z"
+   },
+   "toStop": {
+    "id": "cmua7ihdx000qoygyld3vl137",
+    "name": "New Town",
+    "area": "New Town",
+    "city": "Kolkata",
+    "latitude": 22.5958,
+    "longitude": 88.4791,
+    "status": "ACTIVE",
+    "createdAt": "2026-09-20T19:26:01.605Z",
+    "updatedAt": "2026-09-20T19:26:01.605Z"
+   },
+   "stops": [
+    {
+     "id": "cmua7ihe4001owgk8rfto4hwy",
+     "routeId": "cmua7ihe3001i346cz4jmlys7",
+     "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+     "sequence": 1,
+     "distanceFromStartKm": 0.0,
+     "stop": {
+      "id": "cmua7ihdx000e1j9kasf7h8qe",
+      "name": "Howrah Station",
+      "area": "Howrah",
+      "city": "Kolkata",
+      "latitude": 22.5839,
+      "longitude": 88.3425,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     }
+    },
+    {
+     "id": "cmua7ihe4001p7cupyp144but",
+     "routeId": "cmua7ihe3001i346cz4jmlys7",
+     "stopId": "cmua7ihdx000isb1mz8nyi6x0",
+     "sequence": 2,
+     "distanceFromStartKm": 5.7,
+     "stop": {
+      "id": "cmua7ihdx000isb1mz8nyi6x0",
+      "name": "Esplanade",
+      "area": "Kolkata",
+      "city": "Kolkata",
+      "latitude": 22.5653,
+      "longitude": 88.3512,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     }
+    },
+    "...2 more"
+   ],
+   "totalBuses": 1
+  },
+  {
+   "id": "cmua7ihe0000x66883855bsvi",
+   "name": "Salt Lake - Howrah (AC)",
+   "routeNumber": "AC21",
+   "distanceKm": 15.3,
+   "status": "ACTIVE",
+   "fromStopId": null,
+   "toStopId": null,
+   "createdAt": null,
+   "updatedAt": null,
+   "fromStop": {
+    "id": "cmua7ihdx000klu613hahdoty",
+    "name": "Salt Lake Sector V",
+    "area": "Salt Lake",
+    "city": "Kolkata",
+    "latitude": 22.5697,
+    "longitude": 88.4324,
+    "status": "ACTIVE",
+    "createdAt": "2026-09-20T19:26:01.605Z",
+    "updatedAt": "2026-09-20T19:26:01.605Z"
+   },
+   "toStop": {
+    "id": "cmua7ihdx000e1j9kasf7h8qe",
+    "name": "Howrah Station",
+    "area": "Howrah",
+    "city": "Kolkata",
+    "latitude": 22.5839,
+    "longitude": 88.3425,
+    "status": "ACTIVE",
+    "createdAt": "2026-09-20T19:26:01.605Z",
+    "updatedAt": "2026-09-20T19:26:01.605Z"
+   },
+   "stops": [
+    {
+     "id": "cmua7ihe10014mgy5g8unwuhk",
+     "routeId": "cmua7ihe0000x66883855bsvi",
+     "stopId": "cmua7ihdx000klu613hahdoty",
+     "sequence": 1,
+     "distanceFromStartKm": 0.0,
+     "stop": {
+      "id": "cmua7ihdx000klu613hahdoty",
+      "name": "Salt Lake Sector V",
+      "area": "Salt Lake",
+      "city": "Kolkata",
+      "latitude": 22.5697,
+      "longitude": 88.4324,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     }
+    },
+    {
+     "id": "cmua7ihe10015nlelties4383",
+     "routeId": "cmua7ihe0000x66883855bsvi",
+     "stopId": "cmua7ihdx000jizjvdt415hpc",
+     "sequence": 2,
+     "distanceFromStartKm": 3.8,
+     "stop": {
+      "id": "cmua7ihdx000jizjvdt415hpc",
+      "name": "Sealdah",
+      "area": "Kolkata",
+      "city": "Kolkata",
+      "latitude": 22.5675,
+      "longitude": 88.3707,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     }
+    },
+    "...3 more"
+   ],
+   "totalBuses": 1
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 2,
+  "total": 7,
+  "totalPages": 4
+ }
+}

@@ -1,0 +1,35 @@
+{
+ "success": true,
+ "message": "4 stops within 3.0 km",
+ "data": [
+  {
+   "id": "cmua7ihdx000e1j9kasf7h8qe",
+   "name": "Howrah Station",
+   "area": "Howrah",
+   "city": "Kolkata",
+   "latitude": 22.5839,
+   "longitude": 88.3425,
+   "status": "ACTIVE",
+   "createdAt": null,
+   "updatedAt": null,
+   "busesAvailable": 5,
+   "routes": 4,
+   "distanceKm": 0.01
+  },
+  {
+   "id": "cmua7ihdx000f1c86jmk4qop5",
+   "name": "Howrah Bridge",
+   "area": "Howrah",
+   "city": "Kolkata",
+   "latitude": 22.5851,
+   "longitude": 88.3468,
+   "status": "ACTIVE",
+   "createdAt": null,
+   "updatedAt": null,
+   "busesAvailable": 3,
+   "routes": 3,
+   "distanceKm": 0.45
+  },
+  "...2 more"
+ ]
+}

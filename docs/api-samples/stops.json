@@ -1,0 +1,39 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7ihdx000vr98ach94lvu8",
+   "name": "Airport",
+   "area": "Dumdum",
+   "city": "Kolkata",
+   "latitude": 22.6547,
+   "longitude": 88.4467,
+   "status": "ACTIVE",
+   "createdAt": null,
+   "updatedAt": null,
+   "busesAvailable": 0,
+   "routes": 0
+  },
+  {
+   "id": "cmua7ihdx000p9kbc8c6fv960",
+   "name": "Bandel",
+   "area": "Hooghly",
+   "city": "Kolkata",
+   "latitude": 22.9333,
+   "longitude": 88.3833,
+   "status": "ACTIVE",
+   "createdAt": null,
+   "updatedAt": null,
+   "busesAvailable": 1,
+   "routes": 0
+  },
+  "...1 more"
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 3,
+  "total": 18,
+  "totalPages": 6
+ }
+}

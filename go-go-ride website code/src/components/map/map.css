@@ -1,0 +1,86 @@
+.map-view {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #e9eef7;
+  isolation: isolate;
+}
+
+.map-bus {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: var(--primary);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(11, 42, 122, 0.45);
+  transition: transform 200ms;
+}
+.map-bus.accent { background: var(--accent); box-shadow: 0 4px 14px rgba(255, 90, 31, 0.45); }
+.map-bus.success { background: var(--success); }
+.map-bus.muted { background: #8c96b2; box-shadow: none; }
+.map-bus.selected { transform: scale(1.18); }
+.map-bus::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+}
+.map-bus.selected::after,
+.map-bus.accent::after {
+  color: var(--accent);
+  animation: map-ping 1.8s infinite;
+}
+.map-bus-label {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy-900);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.map-stop {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--primary);
+  box-shadow: 0 2px 6px rgba(15, 27, 61, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-stop.start { border-color: var(--success); }
+.map-stop.end { border-color: var(--accent); }
+.map-stop.passed { border-color: #a9b2c9; }
+.map-stop.board { border-color: var(--primary); background: var(--primary); }
+.map-stop.alight { border-color: var(--accent); background: var(--accent); }
+.map-stop span { font-size: 9px; font-weight: 700; color: var(--primary); }
+
+.map-user {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35), 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes map-ping {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}

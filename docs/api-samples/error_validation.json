@@ -1,0 +1,11 @@
+{
+ "success": false,
+ "message": "Validation failed",
+ "code": "BAD_REQUEST",
+ "details": [
+  {
+   "field": "phone",
+   "message": "Value error, Enter a valid 10-digit mobile number"
+  }
+ ]
+}

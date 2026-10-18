@@ -1,0 +1,16 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "id": "cmua7ig2h0008af67g99rwmsv",
+  "name": "Ritaban Guchait",
+  "phone": "9123456789",
+  "email": null,
+  "role": "PASSENGER",
+  "avatarUrl": null,
+  "status": "ACTIVE",
+  "phoneVerified": true,
+  "createdAt": "2026-09-20T19:25:59.897Z",
+  "lastLoginAt": "2026-10-17T11:41:19.140Z"
+ }
+}

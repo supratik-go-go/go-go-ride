@@ -1,0 +1,50 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7k2e7000q1posgeiwxbkd",
+   "ticketRef": "TKTJGY3ZG",
+   "userId": null,
+   "name": "Riya",
+   "phone": "9123400000",
+   "email": null,
+   "category": "GENERAL",
+   "subject": "App issue",
+   "message": "Cannot set an alarm on S12 route.",
+   "status": "OPEN",
+   "priority": "NORMAL",
+   "response": null,
+   "createdAt": "2026-09-20T19:27:15.487Z",
+   "user": null
+  },
+  {
+   "id": "cmua7ihf7003qxhra1fhuizqr",
+   "ticketRef": "TKT100001",
+   "userId": "cmua7ig2h0008af67g99rwmsv",
+   "name": "Ritaban Guchait",
+   "phone": "9123456789",
+   "email": null,
+   "category": "BUS",
+   "subject": "S12 timing seems wrong",
+   "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+   "status": "OPEN",
+   "priority": "NORMAL",
+   "response": null,
+   "createdAt": "2026-09-20T19:26:01.651Z",
+   "user": {
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "name": "Ritaban Guchait",
+    "phone": "9123456789",
+    "email": null,
+    "avatarUrl": null
+   }
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 2,
+  "total": 2,
+  "totalPages": 1
+ }
+}

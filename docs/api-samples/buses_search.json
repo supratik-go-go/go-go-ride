@@ -1,0 +1,51 @@
+{
+ "success": true,
+ "message": "1 buses found",
+ "data": {
+  "date": "2026-10-17",
+  "from": {
+   "id": "cmua7ihdx000f1c86jmk4qop5",
+   "name": "Howrah"
+  },
+  "to": {
+   "id": "cmua7ihdx000isb1mz8nyi6x0",
+   "name": "Esplanade"
+  },
+  "total": 1,
+  "buses": [
+   {
+    "id": "cmua7ihe6001sx4rgeb0nvsvb",
+    "busNumber": "WB 01 AB 1234",
+    "busName": "S12 Howrah Express",
+    "routeName": "Howrah Station - Esplanade",
+    "routeNumber": "S12",
+    "type": "NON_AC",
+    "category": "NORMAL",
+    "operator": "WBTC",
+    "fare": 20.0,
+    "totalSeats": 45,
+    "rating": {
+     "average": 4.6,
+     "count": 256
+    },
+    "from": {
+     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "name": "Howrah Bridge"
+    },
+    "to": {
+     "id": "cmua7ihdx000isb1mz8nyi6x0",
+     "name": "Esplanade"
+    },
+    "departureTime": "07:42",
+    "departureTime12h": "07:42 AM",
+    "arrivalTime": "08:45",
+    "arrivalTime12h": "08:45 AM",
+    "durationMinutes": 63,
+    "durationLabel": "1h 3m",
+    "isRunning": true,
+    "notRunningReason": null,
+    "nextDepartureInMinutes": null
+   }
+  ]
+ }
+}

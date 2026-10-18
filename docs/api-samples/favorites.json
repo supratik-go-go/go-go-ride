@@ -1,0 +1,42 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "buses": [
+   {
+    "id": "cmua7ihe6001sx4rgeb0nvsvb",
+    "busNumber": "WB 01 AB 1234",
+    "busName": "S12 Howrah Express",
+    "type": "NON_AC",
+    "fare": 20.0,
+    "ratingAvg": 4.6,
+    "route": {
+     "name": "Howrah Station - Esplanade",
+     "routeNumber": "S12"
+    }
+   }
+  ],
+  "routes": [
+   {
+    "id": "cmua7ihdz000w2luvopqiq91y",
+    "name": "Howrah Station - Esplanade",
+    "routeNumber": "S12",
+    "distanceKm": 11.2
+   }
+  ],
+  "stops": [],
+  "localCars": [],
+  "raw": [
+   {
+    "id": "cmua7ihf2003fui9xayhdb7nk",
+    "itemType": "BUS",
+    "itemId": "cmua7ihe6001sx4rgeb0nvsvb"
+   },
+   {
+    "id": "cmua7ihf2003g799dfo3mlz74",
+    "itemType": "ROUTE",
+    "itemId": "cmua7ihdz000w2luvopqiq91y"
+   }
+  ]
+ }
+}

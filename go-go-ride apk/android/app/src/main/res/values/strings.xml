@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GO-GO Ride</string>
+    <string name="title_activity_main">GO-GO Ride</string>
+    <string name="package_name">com.gogoride.app</string>
+    <string name="custom_url_scheme">com.gogoride.app</string>
+</resources>

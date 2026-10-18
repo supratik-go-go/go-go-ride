@@ -1,0 +1,205 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7jo19000f3yhtwsc18vaw",
+   "busNumber": "WB 99 ZZ 0001",
+   "busName": "Test Travels",
+   "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+   "routeId": null,
+   "type": "AC",
+   "category": "SUPER_FAST",
+   "operator": "Shree Travels",
+   "totalSeats": 45,
+   "fare": 35.0,
+   "contactNumber": "03312345678",
+   "contactStart": "06:00",
+   "contactEnd": "22:00",
+   "serviceDays": "MON,TUE,WED,THU,FRI",
+   "status": "APPROVED",
+   "rejectionReason": null,
+   "ratingAvg": 0.0,
+   "ratingCount": 0,
+   "imageUrl": null,
+   "submittedAt": "2026-09-20T19:26:56.877Z",
+   "reviewedAt": "2026-09-20T19:27:07.468Z",
+   "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+   "createdAt": "2026-09-20T19:26:56.877Z",
+   "updatedAt": "2026-09-20T19:27:08.816Z",
+   "owner": {
+    "id": "cmua7ig2h00030d5ia9e9j3el",
+    "name": "Rakesh Sharma",
+    "phone": "9876543210",
+    "email": "rakesh@gmail.com",
+    "avatarUrl": null
+   },
+   "route": null,
+   "stopages": [
+    {
+     "id": "cmua7jpfn000h5e09m8m3e8gs",
+     "busId": "cmua7jo19000f3yhtwsc18vaw",
+     "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+     "sequence": 1,
+     "stop": {
+      "id": "cmua7ihdx000e1j9kasf7h8qe",
+      "name": "Howrah Station",
+      "area": "Howrah",
+      "city": "Kolkata",
+      "latitude": 22.5839,
+      "longitude": 88.3425,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     },
+     "arrivalTime": "06:30",
+     "departureTime": "06:40",
+     "distanceKm": 0.0,
+     "isStart": false,
+     "isEnd": false,
+     "arrivalTime12h": "06:30 AM",
+     "departureTime12h": "06:40 AM"
+    },
+    {
+     "id": "cmua7jpfn000ionxk96jopo6z",
+     "busId": "cmua7jo19000f3yhtwsc18vaw",
+     "stopId": "cmua7ihdx000o0q7ahgfi5wha",
+     "sequence": 2,
+     "stop": {
+      "id": "cmua7ihdx000o0q7ahgfi5wha",
+      "name": "Dankuni",
+      "area": "Hooghly",
+      "city": "Kolkata",
+      "latitude": 22.6787,
+      "longitude": 88.2933,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     },
+     "arrivalTime": "07:00",
+     "departureTime": "07:05",
+     "distanceKm": 12.0,
+     "isStart": false,
+     "isEnd": false,
+     "arrivalTime12h": "07:00 AM",
+     "departureTime12h": "07:05 AM"
+    },
+    "...1 more"
+   ],
+   "documents": []
+  },
+  {
+   "id": "cmua7ihef002xd6mrqajpch1h",
+   "busNumber": "WB 23 1102",
+   "busName": "T12 Rajarhat Shuttle",
+   "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+   "routeId": "cmua7ihe20019bef57scy2i3i",
+   "type": "NON_AC",
+   "category": "NORMAL",
+   "operator": "Private",
+   "totalSeats": 45,
+   "fare": 26.0,
+   "contactNumber": "03324567896",
+   "contactStart": "06:00",
+   "contactEnd": "22:00",
+   "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+   "status": "APPROVED",
+   "rejectionReason": null,
+   "ratingAvg": 4.2,
+   "ratingCount": 51,
+   "imageUrl": null,
+   "submittedAt": "2026-09-20T19:26:01.623Z",
+   "reviewedAt": null,
+   "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+   "createdAt": "2026-09-20T19:26:01.623Z",
+   "updatedAt": "2026-09-20T19:26:01.623Z",
+   "owner": {
+    "id": "cmua7ig2h00030d5ia9e9j3el",
+    "name": "Rakesh Sharma",
+    "phone": "9876543210",
+    "email": "rakesh@gmail.com",
+    "avatarUrl": null
+   },
+   "route": {
+    "id": "cmua7ihe20019bef57scy2i3i",
+    "name": "Sealdah - Rajarhat",
+    "routeNumber": "T12",
+    "distanceKm": 16.1
+   },
+   "stopages": [
+    {
+     "id": "cmua7ihf2003bphja2ho7ac2m",
+     "busId": "cmua7ihef002xd6mrqajpch1h",
+     "stopId": "cmua7ihdx000jizjvdt415hpc",
+     "sequence": 1,
+     "stop": {
+      "id": "cmua7ihdx000jizjvdt415hpc",
+      "name": "Sealdah",
+      "area": "Kolkata",
+      "city": "Kolkata",
+      "latitude": 22.5675,
+      "longitude": 88.3707,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     },
+     "arrivalTime": "10:00",
+     "departureTime": "10:00",
+     "distanceKm": 0.0,
+     "isStart": false,
+     "isEnd": false,
+     "arrivalTime12h": "10:00 AM",
+     "departureTime12h": "10:00 AM"
+    },
+    {
+     "id": "cmua7ihf2003cznaoor0gl1o6",
+     "busId": "cmua7ihef002xd6mrqajpch1h",
+     "stopId": "cmua7ihdx000klu613hahdoty",
+     "sequence": 2,
+     "stop": {
+      "id": "cmua7ihdx000klu613hahdoty",
+      "name": "Salt Lake Sector V",
+      "area": "Salt Lake",
+      "city": "Kolkata",
+      "latitude": 22.5697,
+      "longitude": 88.4324,
+      "status": "ACTIVE",
+      "createdAt": "2026-09-20T19:26:01.605Z",
+      "updatedAt": "2026-09-20T19:26:01.605Z"
+     },
+     "arrivalTime": "10:30",
+     "departureTime": "10:33",
+     "distanceKm": 6.5,
+     "isStart": false,
+     "isEnd": false,
+     "arrivalTime12h": "10:30 AM",
+     "departureTime12h": "10:33 AM"
+    },
+    "...2 more"
+   ],
+   "documents": [
+    {
+     "id": "cmua7ihf10038k7nf25y4w3dy",
+     "docType": "RC_BOOK",
+     "fileUrl": "/uploads/documents/sample-rc.pdf",
+     "originalName": "rc-book.pdf",
+     "uploadedAt": "2026-09-20T19:26:01.645Z"
+    },
+    {
+     "id": "cmua7ihf10039ygfmnbyif5yj",
+     "docType": "ROUTE_PERMIT",
+     "fileUrl": "/uploads/documents/sample-permit.pdf",
+     "originalName": "permit.pdf",
+     "uploadedAt": "2026-09-20T19:26:01.645Z"
+    }
+   ]
+  },
+  "...1 more"
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 20,
+  "total": 3,
+  "totalPages": 1
+ }
+}

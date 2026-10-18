@@ -1,0 +1,35 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7jjlx000c3swhxg0ziidh",
+   "userId": "cmua7ig2h0008af67g99rwmsv",
+   "title": "Booking confirmed",
+   "message": "Your booking GGRMSGD456T for 2026-09-21 is confirmed.",
+   "type": "USER",
+   "link": "/bookings/cmua7jjlo000bp25u4nrv96zo",
+   "isRead": false,
+   "readAt": null,
+   "createdAt": "2026-09-20T19:26:51.141Z"
+  },
+  {
+   "id": "cmua7ihf4003lnnohuq465fhz",
+   "userId": null,
+   "title": "New version 2.1.0 available",
+   "message": "Refresh the system to get the latest features.",
+   "type": "SYSTEM",
+   "link": null,
+   "isRead": false,
+   "readAt": null,
+   "createdAt": "2026-09-20T19:26:01.648Z"
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 3,
+  "total": 2,
+  "totalPages": 1,
+  "unread": 2
+ }
+}

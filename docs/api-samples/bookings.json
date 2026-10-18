@@ -1,0 +1,270 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7ihf8003rxc29udksdsac",
+   "bookingRef": "GGR100000",
+   "userId": "cmua7ig2h0008af67g99rwmsv",
+   "type": "BUS",
+   "travelDate": "2026-09-20T00:00:00.000Z",
+   "seats": 1,
+   "amount": 20.0,
+   "paymentMode": "CASH",
+   "paymentStatus": "PENDING",
+   "status": "CANCELLED",
+   "cancelReason": null,
+   "createdAt": "2026-09-21T00:56:01.624Z",
+   "user": {
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "name": "Ritaban Guchait",
+    "phone": "9123456789",
+    "email": null,
+    "avatarUrl": null
+   },
+   "bus": {
+    "id": "cmua7ihe6001sx4rgeb0nvsvb",
+    "busNumber": "WB 01 AB 1234",
+    "busName": "S12 Howrah Express",
+    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "routeId": "cmua7ihdz000w2luvopqiq91y",
+    "type": "NON_AC",
+    "category": "NORMAL",
+    "operator": "WBTC",
+    "totalSeats": 45,
+    "fare": 20.0,
+    "contactNumber": "03324567890",
+    "contactStart": "06:00",
+    "contactEnd": "22:00",
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "APPROVED",
+    "rejectionReason": null,
+    "ratingAvg": 4.6,
+    "ratingCount": 256,
+    "imageUrl": null,
+    "submittedAt": "2026-09-20T19:26:01.614Z",
+    "reviewedAt": null,
+    "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+    "createdAt": "2026-09-20T19:26:01.614Z",
+    "updatedAt": "2026-09-20T19:26:01.614Z",
+    "owner": {
+     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "name": "Rakesh Sharma",
+     "phone": "9876543210",
+     "email": "rakesh@gmail.com",
+     "avatarUrl": null
+    },
+    "route": {
+     "id": "cmua7ihdz000w2luvopqiq91y",
+     "name": "Howrah Station - Esplanade",
+     "routeNumber": "S12",
+     "distanceKm": 11.2
+    },
+    "stopages": [
+     {
+      "id": "cmua7ihe9002075dfxnzi1qvt",
+      "busId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+      "sequence": 1,
+      "stop": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "arrivalTime": "07:30",
+      "departureTime": "07:30",
+      "distanceKm": 0.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:30 AM",
+      "departureTime12h": "07:30 AM"
+     },
+     {
+      "id": "cmua7ihe90021beal9ib64q7h",
+      "busId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "stopId": "cmua7ihdx000f1c86jmk4qop5",
+      "sequence": 2,
+      "stop": {
+       "id": "cmua7ihdx000f1c86jmk4qop5",
+       "name": "Howrah Bridge",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.5851,
+       "longitude": 88.3468,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "arrivalTime": "07:40",
+      "departureTime": "07:42",
+      "distanceKm": 2.5,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:40 AM",
+      "departureTime12h": "07:42 AM"
+     },
+     "...3 more"
+    ],
+    "documents": [
+     {
+      "id": "cmua7ihe8001y6zyhtac0fp8s",
+      "docType": "RC_BOOK",
+      "fileUrl": "/uploads/documents/sample-rc.pdf",
+      "originalName": "rc-book.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.616Z"
+     },
+     {
+      "id": "cmua7ihe8001zc6vpfd73g8pp",
+      "docType": "ROUTE_PERMIT",
+      "fileUrl": "/uploads/documents/sample-permit.pdf",
+      "originalName": "permit.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.616Z"
+     }
+    ]
+   },
+   "ride": null,
+   "localCar": null
+  },
+  {
+   "id": "cmua7ihf8004jg5zqupcpjnqk",
+   "bookingRef": "GGR100028",
+   "userId": "cmua7ig2h0008af67g99rwmsv",
+   "type": "BUS",
+   "travelDate": "2026-09-20T00:00:00.000Z",
+   "seats": 2,
+   "amount": 40.0,
+   "paymentMode": "CASH",
+   "paymentStatus": "PAID",
+   "status": "CONFIRMED",
+   "cancelReason": null,
+   "createdAt": "2026-09-21T00:56:01.624Z",
+   "user": {
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "name": "Ritaban Guchait",
+    "phone": "9123456789",
+    "email": null,
+    "avatarUrl": null
+   },
+   "bus": {
+    "id": "cmua7ihe6001sx4rgeb0nvsvb",
+    "busNumber": "WB 01 AB 1234",
+    "busName": "S12 Howrah Express",
+    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "routeId": "cmua7ihdz000w2luvopqiq91y",
+    "type": "NON_AC",
+    "category": "NORMAL",
+    "operator": "WBTC",
+    "totalSeats": 45,
+    "fare": 20.0,
+    "contactNumber": "03324567890",
+    "contactStart": "06:00",
+    "contactEnd": "22:00",
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "APPROVED",
+    "rejectionReason": null,
+    "ratingAvg": 4.6,
+    "ratingCount": 256,
+    "imageUrl": null,
+    "submittedAt": "2026-09-20T19:26:01.614Z",
+    "reviewedAt": null,
+    "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+    "createdAt": "2026-09-20T19:26:01.614Z",
+    "updatedAt": "2026-09-20T19:26:01.614Z",
+    "owner": {
+     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "name": "Rakesh Sharma",
+     "phone": "9876543210",
+     "email": "rakesh@gmail.com",
+     "avatarUrl": null
+    },
+    "route": {
+     "id": "cmua7ihdz000w2luvopqiq91y",
+     "name": "Howrah Station - Esplanade",
+     "routeNumber": "S12",
+     "distanceKm": 11.2
+    },
+    "stopages": [
+     {
+      "id": "cmua7ihe9002075dfxnzi1qvt",
+      "busId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+      "sequence": 1,
+      "stop": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "arrivalTime": "07:30",
+      "departureTime": "07:30",
+      "distanceKm": 0.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:30 AM",
+      "departureTime12h": "07:30 AM"
+     },
+     {
+      "id": "cmua7ihe90021beal9ib64q7h",
+      "busId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "stopId": "cmua7ihdx000f1c86jmk4qop5",
+      "sequence": 2,
+      "stop": {
+       "id": "cmua7ihdx000f1c86jmk4qop5",
+       "name": "Howrah Bridge",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.5851,
+       "longitude": 88.3468,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "arrivalTime": "07:40",
+      "departureTime": "07:42",
+      "distanceKm": 2.5,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:40 AM",
+      "departureTime12h": "07:42 AM"
+     },
+     "...3 more"
+    ],
+    "documents": [
+     {
+      "id": "cmua7ihe8001y6zyhtac0fp8s",
+      "docType": "RC_BOOK",
+      "fileUrl": "/uploads/documents/sample-rc.pdf",
+      "originalName": "rc-book.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.616Z"
+     },
+     {
+      "id": "cmua7ihe8001zc6vpfd73g8pp",
+      "docType": "ROUTE_PERMIT",
+      "fileUrl": "/uploads/documents/sample-permit.pdf",
+      "originalName": "permit.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.616Z"
+     }
+    ]
+   },
+   "ride": null,
+   "localCar": null
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 2,
+  "total": 11,
+  "totalPages": 6
+ }
+}

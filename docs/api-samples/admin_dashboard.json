@@ -1,0 +1,304 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "cards": {
+   "totalBuses": {
+    "value": 8,
+    "trend": 0.0
+   },
+   "pendingApprovals": {
+    "value": 2
+   },
+   "totalRoutes": {
+    "value": 7,
+    "trend": 0.0
+   },
+   "totalUsers": {
+    "value": 14,
+    "trend": 0.0
+   }
+  },
+  "busStatusOverview": {
+   "total": 8,
+   "breakdown": [
+    {
+     "status": "APPROVED",
+     "count": 6,
+     "percentage": 75.0
+    },
+    {
+     "status": "PENDING",
+     "count": 1,
+     "percentage": 12.5
+    },
+    "...1 more"
+   ]
+  },
+  "busesAdded": {
+   "value": 0,
+   "trend": 0.0
+  },
+  "bookingsOverview": {
+   "value": 0,
+   "trend": 0.0
+  },
+  "charts": [
+   {
+    "date": "2026-10-10",
+    "buses": 0,
+    "bookings": 0,
+    "revenue": 0.0
+   },
+   {
+    "date": "2026-10-11",
+    "buses": 0,
+    "bookings": 0,
+    "revenue": 0.0
+   },
+   "...6 more"
+  ],
+  "recentActivities": [
+   {
+    "id": "cmua7jzv1000ps495edzgsczq",
+    "action": "SETTINGS_UPDATED",
+    "message": "Platform settings updated",
+    "entityType": "SETTING",
+    "entityId": "global",
+    "createdAt": "2026-09-20T19:27:12.206000",
+    "actor": {
+     "id": "cmua7ig2h00015xwt9nft5jh8",
+     "name": "Admin User"
+    }
+   },
+   {
+    "id": "cmua7jw7g000njenm8cq45ptw",
+    "action": "BUS_APPROVED",
+    "message": "Bus WB 99 ZZ 0001 approved",
+    "entityType": "BUS",
+    "entityId": "cmua7jo19000f3yhtwsc18vaw",
+    "createdAt": "2026-09-20T19:27:07.468000",
+    "actor": {
+     "id": "cmua7ig2h00015xwt9nft5jh8",
+     "name": "Admin User"
+    }
+   },
+   "...4 more"
+  ],
+  "pendingRequests": [
+   {
+    "id": "cmua7ihec002jezht2be5zpjq",
+    "busNumber": "WB 20 9876",
+    "busName": "S24 Belur Link",
+    "ownerId": "cmua7ig2h00069vaw2wu2otum",
+    "routeId": "cmua7ihe4001nsww0bwpkglyf",
+    "type": "NON_AC",
+    "category": "NORMAL",
+    "operator": "Private",
+    "totalSeats": 45,
+    "fare": 22.0,
+    "contactNumber": "03324567894",
+    "contactStart": "06:00",
+    "contactEnd": "22:00",
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "UNDER_REVIEW",
+    "rejectionReason": null,
+    "ratingAvg": 0.0,
+    "ratingCount": 0,
+    "imageUrl": null,
+    "submittedAt": "2026-09-20T19:26:01.620000",
+    "reviewedAt": null,
+    "reviewedById": null,
+    "createdAt": "2026-09-20T19:26:01.620000",
+    "updatedAt": "2026-09-20T19:26:01.620000",
+    "owner": {
+     "id": "cmua7ig2h00069vaw2wu2otum",
+     "name": "Rohit Mondal",
+     "phone": "7000811032",
+     "email": "rohit@gmail.com",
+     "avatarUrl": null
+    },
+    "route": {
+     "id": "cmua7ihe4001nsww0bwpkglyf",
+     "name": "Belur - Esplanade",
+     "routeNumber": "S24",
+     "distanceKm": 11.4
+    },
+    "stopages": [
+     {
+      "id": "cmua7ihee002t0p29o3908ifx",
+      "busId": "cmua7ihec002jezht2be5zpjq",
+      "stopId": "cmua7ihdx000net7x1i8nnvdk",
+      "sequence": 1,
+      "stop": {
+       "id": "cmua7ihdx000net7x1i8nnvdk",
+       "name": "Belur",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.6345,
+       "longitude": 88.3536,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605000",
+       "updatedAt": "2026-09-20T19:26:01.605000"
+      },
+      "arrivalTime": "06:30",
+      "departureTime": "06:30",
+      "distanceKm": 0.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "06:30 AM",
+      "departureTime12h": "06:30 AM"
+     },
+     {
+      "id": "cmua7ihee002u5q1e06l68dq1",
+      "busId": "cmua7ihec002jezht2be5zpjq",
+      "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+      "sequence": 2,
+      "stop": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station",
+       "area": "Howrah",
+       "city": "Kolkata",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605000",
+       "updatedAt": "2026-09-20T19:26:01.605000"
+      },
+      "arrivalTime": "07:10",
+      "departureTime": "07:15",
+      "distanceKm": 6.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:10 AM",
+      "departureTime12h": "07:15 AM"
+     },
+     "...2 more"
+    ],
+    "documents": [
+     {
+      "id": "cmua7ihee002rbawhsgpzisuf",
+      "docType": "RC_BOOK",
+      "fileUrl": "/uploads/documents/sample-rc.pdf",
+      "originalName": "rc-book.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.622000"
+     },
+     {
+      "id": "cmua7ihee002s4ekwwpdzy8zo",
+      "docType": "ROUTE_PERMIT",
+      "fileUrl": "/uploads/documents/sample-permit.pdf",
+      "originalName": "permit.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.622000"
+     }
+    ]
+   },
+   {
+    "id": "cmua7ihea002d588oboolxc95",
+    "busNumber": "WB 19 4321",
+    "busName": "B19 Behala Rider",
+    "ownerId": "cmua7ig2h0005cfxuwboi328e",
+    "routeId": "cmua7ihe3001dfv3vb56s7ep9",
+    "type": "NON_AC",
+    "category": "EXPRESS",
+    "operator": "Private",
+    "totalSeats": 45,
+    "fare": 30.0,
+    "contactNumber": "03324567893",
+    "contactStart": "06:00",
+    "contactEnd": "22:00",
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "PENDING",
+    "rejectionReason": null,
+    "ratingAvg": 0.0,
+    "ratingCount": 0,
+    "imageUrl": null,
+    "submittedAt": "2026-09-20T19:26:01.618000",
+    "reviewedAt": null,
+    "reviewedById": null,
+    "createdAt": "2026-09-20T19:26:01.618000",
+    "updatedAt": "2026-09-20T19:26:01.618000",
+    "owner": {
+     "id": "cmua7ig2h0005cfxuwboi328e",
+     "name": "Milan Mondal",
+     "phone": "9900112233",
+     "email": "milan@gmail.com",
+     "avatarUrl": null
+    },
+    "route": {
+     "id": "cmua7ihe3001dfv3vb56s7ep9",
+     "name": "Behala - Esplanade",
+     "routeNumber": "B19",
+     "distanceKm": 25.4
+    },
+    "stopages": [
+     {
+      "id": "cmua7ihed002m9ek273eqpe19",
+      "busId": "cmua7ihea002d588oboolxc95",
+      "stopId": "cmua7ihdx000rdffusdfm42ol",
+      "sequence": 1,
+      "stop": {
+       "id": "cmua7ihdx000rdffusdfm42ol",
+       "name": "Behala",
+       "area": "South Kolkata",
+       "city": "Kolkata",
+       "latitude": 22.4989,
+       "longitude": 88.3167,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605000",
+       "updatedAt": "2026-09-20T19:26:01.605000"
+      },
+      "arrivalTime": "06:50",
+      "departureTime": "06:50",
+      "distanceKm": 0.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "06:50 AM",
+      "departureTime12h": "06:50 AM"
+     },
+     {
+      "id": "cmua7ihed002nhu4i5f12gwf8",
+      "busId": "cmua7ihea002d588oboolxc95",
+      "stopId": "cmua7ihdx000srriikhff9s5c",
+      "sequence": 2,
+      "stop": {
+       "id": "cmua7ihdx000srriikhff9s5c",
+       "name": "Tollygunge",
+       "area": "South Kolkata",
+       "city": "Kolkata",
+       "latitude": 22.4996,
+       "longitude": 88.3464,
+       "status": "ACTIVE",
+       "createdAt": "2026-09-20T19:26:01.605000",
+       "updatedAt": "2026-09-20T19:26:01.605000"
+      },
+      "arrivalTime": "07:20",
+      "departureTime": "07:22",
+      "distanceKm": 8.0,
+      "isStart": false,
+      "isEnd": false,
+      "arrivalTime12h": "07:20 AM",
+      "departureTime12h": "07:22 AM"
+     },
+     "...2 more"
+    ],
+    "documents": [
+     {
+      "id": "cmua7ihed002ksdruuu0tgqod",
+      "docType": "RC_BOOK",
+      "fileUrl": "/uploads/documents/sample-rc.pdf",
+      "originalName": "rc-book.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.621000"
+     },
+     {
+      "id": "cmua7ihed002lxdlyxn5m2qw2",
+      "docType": "ROUTE_PERMIT",
+      "fileUrl": "/uploads/documents/sample-permit.pdf",
+      "originalName": "permit.pdf",
+      "uploadedAt": "2026-09-20T19:26:01.621000"
+     }
+    ]
+   }
+  ],
+  "topRoutes": []
+ }
+}

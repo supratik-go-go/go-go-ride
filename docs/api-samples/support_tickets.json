@@ -1,0 +1,34 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7ihf7003qxhra1fhuizqr",
+   "ticketRef": "TKT100001",
+   "userId": "cmua7ig2h0008af67g99rwmsv",
+   "name": "Ritaban Guchait",
+   "phone": "9123456789",
+   "email": null,
+   "category": "BUS",
+   "subject": "S12 timing seems wrong",
+   "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+   "status": "OPEN",
+   "priority": "NORMAL",
+   "response": null,
+   "createdAt": "2026-09-20T19:26:01.651Z",
+   "user": {
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "name": "Ritaban Guchait",
+    "phone": "9123456789",
+    "email": null,
+    "avatarUrl": null
+   }
+  }
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 20,
+  "total": 1,
+  "totalPages": 1
+ }
+}

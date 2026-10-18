@@ -1,0 +1,15 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "id": "global",
+  "platformName": "GO-GO Ride",
+  "platformEmail": "support@gogoride.com",
+  "contactNumber": "+91 98300 00000",
+  "address": "123, Transport Office Road, Kolkata, West Bengal - 700001",
+  "timezone": "Asia/Kolkata",
+  "currency": "INR",
+  "dateFormat": "DD MMM YYYY",
+  "timeFormat": "12h"
+ }
+}

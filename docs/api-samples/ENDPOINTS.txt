@@ -1,0 +1,93 @@
+GET    /api/health 
+GET    /api/stats 
+GET    /api/settings 
+POST   /api/auth/register 
+POST   /api/auth/login 
+POST   /api/auth/otp/request 
+POST   /api/auth/otp/verify 
+POST   /api/auth/refresh 
+POST   /api/auth/logout 
+GET    /api/auth/me 
+POST   /api/auth/change-password 
+GET    /api/users/me 
+PATCH  /api/users/me 
+POST   /api/users/me/avatar 
+GET    /api/users/me/login-activity ?page,limit,search,sort,order
+GET    /api/users/me/favorites 
+POST   /api/users/me/favorites 
+DELETE /api/users/me/favorites 
+GET    /api/users/me/recent-searches ?limit
+DELETE /api/users/me/recent-searches 
+DELETE /api/users/me/recent-searches/{search_id} 
+GET    /api/buses/search ?from,to,fromStopId,toStopId,q,searchType,date,time,type,category,maxFare,sort,includeNotRunning
+GET    /api/buses ?status,type,category,routeId,ownerId,page,limit,search,sort,order
+POST   /api/buses 
+GET    /api/buses/mine/list ?page,limit,search,sort,order
+GET    /api/buses/{bus_id} ?date
+PATCH  /api/buses/{bus_id} 
+DELETE /api/buses/{bus_id} 
+POST   /api/buses/{bus_id}/documents 
+POST   /api/buses/{bus_id}/exceptions 
+DELETE /api/buses/{bus_id}/exceptions/{exception_id} 
+GET    /api/buses/{bus_id}/reviews ?page,limit,search,sort,order
+POST   /api/buses/{bus_id}/reviews 
+GET    /api/routes ?status,page,limit,search,sort,order
+POST   /api/routes 
+GET    /api/routes/popular ?limit
+GET    /api/routes/{route_id} 
+PATCH  /api/routes/{route_id} 
+DELETE /api/routes/{route_id} 
+GET    /api/stops ?city,status,page,limit,search,sort,order
+POST   /api/stops 
+GET    /api/stops/nearby ?lat,lng,radiusKm,limit
+GET    /api/stops/{stop_id} 
+PATCH  /api/stops/{stop_id} 
+DELETE /api/stops/{stop_id} 
+GET    /api/alarms ?status,page,limit,search,sort,order
+POST   /api/alarms 
+PATCH  /api/alarms/{alarm_id} 
+DELETE /api/alarms/{alarm_id} 
+GET    /api/local-cars ?area,verified,minRating,page,limit,search,sort,order
+POST   /api/local-cars 
+GET    /api/local-cars/mine/list 
+GET    /api/local-cars/{car_id} 
+PATCH  /api/local-cars/{car_id} 
+DELETE /api/local-cars/{car_id} 
+POST   /api/local-cars/{car_id}/photo 
+PATCH  /api/local-cars/{car_id}/verify 
+POST   /api/local-cars/{car_id}/reviews 
+GET    /api/rides/status 
+POST   /api/rides/notify-me 
+GET    /api/rides ?fromStopId,toStopId,date,vehicleType,status,page,limit,search,sort,order
+POST   /api/rides 
+GET    /api/rides/{ride_id} 
+PATCH  /api/rides/{ride_id} 
+DELETE /api/rides/{ride_id} 
+GET    /api/bookings ?status,type,from,to,userId,page,limit,search,sort,order
+POST   /api/bookings 
+GET    /api/bookings/{booking_id} 
+PATCH  /api/bookings/{booking_id}/cancel 
+PATCH  /api/bookings/{booking_id}/status 
+GET    /api/notifications ?type,unreadOnly,page,limit,search,sort,order
+GET    /api/notifications/unread-count 
+PATCH  /api/notifications/read-all 
+PATCH  /api/notifications/{notification_id}/read 
+DELETE /api/notifications/{notification_id} 
+POST   /api/notifications/broadcast 
+POST   /api/support/tickets 
+GET    /api/support/tickets ?status,category,priority,page,limit,search,sort,order
+GET    /api/support/tickets/{ticket_id} 
+PATCH  /api/support/tickets/{ticket_id} 
+GET    /api/admin/dashboard ?from,to
+GET    /api/admin/activities ?page,limit,search,sort,order
+GET    /api/admin/bus-requests ?status,page,limit,search,sort,order
+PATCH  /api/admin/buses/{bus_id}/status 
+GET    /api/admin/users ?role,status,page,limit,search,sort,order
+POST   /api/admin/users 
+GET    /api/admin/users/{user_id} 
+PATCH  /api/admin/users/{user_id} 
+DELETE /api/admin/users/{user_id} 
+GET    /api/admin/reports ?from,to
+GET    /api/admin/reports/export ?from,to
+GET    /api/admin/settings 
+PATCH  /api/admin/settings 

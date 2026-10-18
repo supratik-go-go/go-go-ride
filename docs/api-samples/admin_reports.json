@@ -1,0 +1,33 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "range": {
+   "from": "2026-10-10",
+   "to": "2026-10-17"
+  },
+  "totalRevenue": 0,
+  "totalTrips": 0,
+  "totalBookings": 0,
+  "avgOccupancy": 0.0,
+  "totalDistanceKm": 0,
+  "paymentSplit": [],
+  "statusCounts": {},
+  "series": [
+   {
+    "date": "2026-10-10",
+    "buses": 0,
+    "bookings": 0,
+    "revenue": 0.0
+   },
+   {
+    "date": "2026-10-11",
+    "buses": 0,
+    "bookings": 0,
+    "revenue": 0.0
+   },
+   "...6 more"
+  ],
+  "topRoutes": []
+ }
+}

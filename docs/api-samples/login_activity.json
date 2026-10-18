@@ -1,0 +1,29 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmvcbsv570001kb06e9pv2dcm",
+   "device": "Python-urllib/3.11",
+   "ipAddress": "127.0.0.1",
+   "location": null,
+   "status": "SUCCESS",
+   "createdAt": "2026-10-17T11:41:19.147Z"
+  },
+  {
+   "id": "cmua7m5ir0001ufggtpkv6dbf",
+   "device": "curl/8.19.0",
+   "ipAddress": "127.0.0.1",
+   "location": null,
+   "status": "SUCCESS",
+   "createdAt": "2026-09-20T19:28:52.851Z"
+  },
+  "...2 more"
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 20,
+  "total": 4,
+  "totalPages": 1
+ }
+}

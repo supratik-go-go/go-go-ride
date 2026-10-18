@@ -1,0 +1,25 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7ihdz000w2luvopqiq91y",
+   "name": "Howrah Station - Esplanade",
+   "routeNumber": "S12",
+   "from": "Howrah Station",
+   "to": "Esplanade",
+   "distanceKm": 11.2,
+   "totalBuses": 1
+  },
+  {
+   "id": "cmua7ihe0000x66883855bsvi",
+   "name": "Salt Lake - Howrah (AC)",
+   "routeNumber": "AC21",
+   "from": "Salt Lake Sector V",
+   "to": "Howrah Station",
+   "distanceKm": 15.3,
+   "totalBuses": 1
+  },
+  "...4 more"
+ ]
+}

@@ -1,0 +1,47 @@
+# ---------------------------------------------------------------
+# GO-GO Ride - what never goes to GitHub
+# ---------------------------------------------------------------
+
+# Secrets and machine-specific settings
+.env
+.env.local
+.env.*.local
+local.properties
+*.keystore
+*.jks
+
+# Live data: user accounts, bookings, uploaded documents and photos
+backend-python/gogoride.db
+backend-python/*.db-journal
+backend-python/uploads/
+
+# Dependencies and build output
+node_modules/
+dist/
+.build-check/
+__pycache__/
+*.pyc
+.venv/
+*.log
+
+# Android build output and generated files
+go-go-ride apk/android/.gradle/
+go-go-ride apk/android/build/
+go-go-ride apk/android/app/build/
+go-go-ride apk/android/capacitor-cordova-android-plugins/build/
+go-go-ride apk/android/app/src/main/assets/public/
+*.apk
+*.aab
+
+# Large local tools and generated packages
+android-studio-*/
+android-studio-*.exe
+deploy-hostinger/build/
+deploy-hostinger/gogoride-deploy.zip
+
+# Editor / assistant state
+.claude/
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

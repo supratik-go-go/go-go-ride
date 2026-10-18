@@ -1,0 +1,11 @@
+{
+ "success": true,
+ "message": "0 buses found",
+ "data": {
+  "date": "2026-10-17",
+  "from": null,
+  "to": null,
+  "total": 0,
+  "buses": []
+ }
+}

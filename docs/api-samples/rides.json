@@ -1,0 +1,11 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [],
+ "meta": {
+  "page": 1,
+  "limit": 2,
+  "total": 0,
+  "totalPages": 1
+ }
+}

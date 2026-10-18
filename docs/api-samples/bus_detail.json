@@ -1,0 +1,155 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "id": "cmua7jo19000f3yhtwsc18vaw",
+  "busNumber": "WB 99 ZZ 0001",
+  "busName": "Test Travels",
+  "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+  "routeId": null,
+  "type": "AC",
+  "category": "SUPER_FAST",
+  "operator": "Shree Travels",
+  "totalSeats": 45,
+  "fare": 35.0,
+  "contactNumber": "03312345678",
+  "contactStart": "06:00",
+  "contactEnd": "22:00",
+  "serviceDays": "MON,TUE,WED,THU,FRI",
+  "status": "APPROVED",
+  "rejectionReason": null,
+  "ratingAvg": 0.0,
+  "ratingCount": 0,
+  "imageUrl": null,
+  "submittedAt": "2026-09-20T19:26:56.877Z",
+  "reviewedAt": "2026-09-20T19:27:07.468Z",
+  "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+  "createdAt": "2026-09-20T19:26:56.877Z",
+  "updatedAt": "2026-09-20T19:27:08.816Z",
+  "owner": {
+   "id": "cmua7ig2h00030d5ia9e9j3el",
+   "name": "Rakesh Sharma",
+   "phone": "9876543210",
+   "email": "rakesh@gmail.com",
+   "avatarUrl": null
+  },
+  "route": null,
+  "stopages": [
+   {
+    "id": "cmua7jpfn000h5e09m8m3e8gs",
+    "busId": null,
+    "stopId": null,
+    "sequence": 1,
+    "stop": {
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
+     "name": "Howrah Station",
+     "area": "Howrah",
+     "city": "Kolkata",
+     "latitude": 22.5839,
+     "longitude": 88.3425,
+     "status": "ACTIVE",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "arrivalTime": "06:30",
+    "departureTime": "06:40",
+    "distanceKm": 0.0,
+    "isStart": true,
+    "isEnd": false,
+    "arrivalTime12h": "06:30 AM",
+    "departureTime12h": "06:40 AM"
+   },
+   {
+    "id": "cmua7jpfn000ionxk96jopo6z",
+    "busId": null,
+    "stopId": null,
+    "sequence": 2,
+    "stop": {
+     "id": "cmua7ihdx000o0q7ahgfi5wha",
+     "name": "Dankuni",
+     "area": "Hooghly",
+     "city": "Kolkata",
+     "latitude": 22.6787,
+     "longitude": 88.2933,
+     "status": "ACTIVE",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "arrivalTime": "07:00",
+    "departureTime": "07:05",
+    "distanceKm": 12.0,
+    "isStart": false,
+    "isEnd": false,
+    "arrivalTime12h": "07:00 AM",
+    "departureTime12h": "07:05 AM"
+   },
+   "...1 more"
+  ],
+  "documents": [],
+  "timetable": [
+   {
+    "id": "cmua7jpfn000h5e09m8m3e8gs",
+    "busId": null,
+    "stopId": null,
+    "sequence": 1,
+    "stop": {
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
+     "name": "Howrah Station",
+     "area": "Howrah",
+     "city": "Kolkata",
+     "latitude": 22.5839,
+     "longitude": 88.3425,
+     "status": "ACTIVE",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "arrivalTime": "06:30",
+    "departureTime": "06:40",
+    "distanceKm": 0.0,
+    "isStart": true,
+    "isEnd": false,
+    "arrivalTime12h": "06:30 AM",
+    "departureTime12h": "06:40 AM"
+   },
+   {
+    "id": "cmua7jpfn000ionxk96jopo6z",
+    "busId": null,
+    "stopId": null,
+    "sequence": 2,
+    "stop": {
+     "id": "cmua7ihdx000o0q7ahgfi5wha",
+     "name": "Dankuni",
+     "area": "Hooghly",
+     "city": "Kolkata",
+     "latitude": 22.6787,
+     "longitude": 88.2933,
+     "status": "ACTIVE",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "arrivalTime": "07:00",
+    "departureTime": "07:05",
+    "distanceKm": 12.0,
+    "isStart": false,
+    "isEnd": false,
+    "arrivalTime12h": "07:00 AM",
+    "departureTime12h": "07:05 AM"
+   },
+   "...1 more"
+  ],
+  "journey": {
+   "departureTime": "06:40",
+   "arrivalTime": "07:25",
+   "durationMinutes": 45,
+   "durationLabel": "45m",
+   "totalDistanceKm": 28.0
+  },
+  "availability": {
+   "date": "2026-10-17",
+   "isRunning": false,
+   "reason": "This bus does not operate on this day of the week"
+  },
+  "exceptions": [],
+  "reviews": []
+ }
+}

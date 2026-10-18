@@ -1,0 +1,11 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "feature": "RUNNING_CAR",
+  "status": "LIVE",
+  "activeRides": 1,
+  "waitlistCount": 3,
+  "tagline": "Book shared rides on your route. Affordable, faster and smarter."
+ }
+}

@@ -1,0 +1,43 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmua7jzv1000ps495edzgsczq",
+   "action": "SETTINGS_UPDATED",
+   "entityType": "SETTING",
+   "entityId": "global",
+   "message": "Platform settings updated",
+   "createdAt": "2026-09-20T19:27:12.206Z",
+   "actor": {
+    "id": "cmua7ig2h00015xwt9nft5jh8",
+    "name": "Admin User",
+    "phone": "9876500001",
+    "email": "admin@gogoride.com",
+    "avatarUrl": null
+   }
+  },
+  {
+   "id": "cmua7jw7g000njenm8cq45ptw",
+   "action": "BUS_APPROVED",
+   "entityType": "BUS",
+   "entityId": "cmua7jo19000f3yhtwsc18vaw",
+   "message": "Bus WB 99 ZZ 0001 approved",
+   "createdAt": "2026-09-20T19:27:07.468Z",
+   "actor": {
+    "id": "cmua7ig2h00015xwt9nft5jh8",
+    "name": "Admin User",
+    "phone": "9876500001",
+    "email": "admin@gogoride.com",
+    "avatarUrl": null
+   }
+  },
+  "...1 more"
+ ],
+ "meta": {
+  "page": 1,
+  "limit": 3,
+  "total": 6,
+  "totalPages": 2
+ }
+}

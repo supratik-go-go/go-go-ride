@@ -1,0 +1,22 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": [
+  {
+   "id": "cmvcbtuq90007o00oqakcf67s",
+   "searchType": "ROUTE",
+   "fromText": "Howrah",
+   "toText": "Esplanade",
+   "query": null,
+   "searchedAt": "2026-10-17T11:42:05.265Z"
+  },
+  {
+   "id": "cmua7jg2q0009qmqjfwa523hw",
+   "searchType": "ROUTE",
+   "fromText": "Howrah Station",
+   "toText": "Esplanade",
+   "query": null,
+   "searchedAt": "2026-09-20T19:26:46.562Z"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "success": true,
+ "message": "Verification code sent",
+ "data": {
+  "phone": "9123456789",
+  "expiresInSeconds": 300,
+  "devCode": "696827"
+ }
+}

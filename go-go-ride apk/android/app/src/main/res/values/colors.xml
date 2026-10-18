@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GO-GO Ride brand colours (navy + orange) -->
+    <color name="colorPrimary">#0B2A7A</color>
+    <color name="colorPrimaryDark">#061540</color>
+    <color name="colorAccent">#FF5A1F</color>
+</resources>

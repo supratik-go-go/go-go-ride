@@ -1,0 +1,14 @@
+{
+ "success": true,
+ "message": "Success",
+ "data": {
+  "id": "cmua7ihdx000vr98ach94lvu8",
+  "name": "Airport",
+  "area": "Dumdum",
+  "city": "Kolkata",
+  "latitude": 22.6547,
+  "longitude": 88.4467,
+  "status": "ACTIVE",
+  "buses": []
+ }
+}
