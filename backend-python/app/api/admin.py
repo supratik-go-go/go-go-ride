@@ -308,10 +308,16 @@ def update_user(user_id: str, body: AdminUserUpdateBody, db: DbSession, admin: A
         raise ApiError.forbidden("Only a super admin can assign admin roles")
     if user_id == admin.id and body.status and body.status.value != "ACTIVE":
         raise ApiError.bad_request("You cannot deactivate your own account")
+    if user_id == admin.id and body.role and body.role.value != admin.role:
+        raise ApiError.bad_request("You cannot change your own role")
 
     user = db.get(User, user_id)
     if user is None:
         raise ApiError.not_found("User not found")
+    # Admin accounts (including super admins) can only be edited, blocked or
+    # demoted by a super admin - otherwise any admin could lock out the owner.
+    if user.role in {"ADMIN", "SUPER_ADMIN"} and user.id != admin.id and admin.role != "SUPER_ADMIN":
+        raise ApiError.forbidden("Only a super admin can change another admin's account")
 
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(user, field, value.value if hasattr(value, "value") else value)

@@ -18,6 +18,7 @@ from app.schemas.common import Envelope, PageEnvelope
 from app.schemas.requests import BookingCreateBody, BookingStatusBody, CancelBody
 from app.schemas.responses import BookingOut
 from app.services.common import notify
+from app.services.privacy import dump, public_bus, public_ride
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
@@ -28,6 +29,17 @@ BOOKING_LOADERS = (
     selectinload(Booking.ride).selectinload(Ride.toStop),
     selectinload(Booking.localCar),
 )
+
+
+def _view(booking: Booking, user) -> Booking | dict:
+    """Admins see everything; passengers don't get the bus owner's or driver's personal details."""
+    if is_admin(user):
+        return booking
+    data = dump(BookingOut, booking)
+    data["bus"] = public_bus(data.get("bus"))
+    if data.get("ride"):
+        data["ride"] = public_ride(data["ride"])
+    return data
 
 
 @router.get(
@@ -71,7 +83,7 @@ def list_bookings(
             .limit(page.limit)
         ).unique()
     )
-    return {"data": items, "meta": meta(total, page)}
+    return {"data": [_view(b, user) for b in items], "meta": meta(total, page)}
 
 
 @router.get("/{booking_id}", response_model=Envelope[BookingOut], summary="Booking details")
@@ -83,7 +95,7 @@ def get_booking(booking_id: str, db: DbSession, user: CurrentUser):
         raise ApiError.not_found("Booking not found")
     if booking.userId != user.id and not is_admin(user):
         raise ApiError.forbidden()
-    return {"data": booking}
+    return {"data": _view(booking, user)}
 
 
 @router.post(
@@ -162,7 +174,7 @@ def create_booking(body: BookingCreateBody, db: DbSession, user: CurrentUser):
     db.commit()
     db.refresh(booking)
 
-    return {"message": "Booking confirmed", "data": booking}
+    return {"message": "Booking confirmed", "data": _view(booking, user)}
 
 
 @router.patch(
@@ -194,7 +206,7 @@ def cancel_booking(booking_id: str, body: CancelBody, db: DbSession, user: Curre
 
     db.commit()
     db.refresh(booking)
-    return {"message": "Booking cancelled", "data": booking}
+    return {"message": "Booking cancelled", "data": _view(booking, user)}
 
 
 @router.patch(

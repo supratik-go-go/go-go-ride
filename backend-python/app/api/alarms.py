@@ -15,6 +15,7 @@ from app.schemas.common import Empty, Envelope, PageEnvelope
 from app.schemas.requests import AlarmCreateBody, AlarmUpdateBody
 from app.schemas.responses import AlarmOut
 from app.services.buses import BUS_LOADERS
+from app.services.privacy import dump, public_bus
 
 router = APIRouter(prefix="/alarms", tags=["Alarms"])
 
@@ -23,6 +24,13 @@ ALARM_LOADERS = (
     selectinload(Alarm.boardingStop),
     selectinload(Alarm.arrivalStop),
 )
+
+
+def _view(alarm: Alarm) -> dict:
+    """The passenger's alarm, without the bus owner's personal contact details."""
+    data = dump(AlarmOut, alarm)
+    data["bus"] = public_bus(data.get("bus"))
+    return data
 
 
 @router.get("", response_model=PageEnvelope[AlarmOut], summary="My Alarms")
@@ -42,7 +50,7 @@ def list_alarms(db: DbSession, user: CurrentUser, page: PageDep, status: AlarmSt
             .limit(page.limit)
         ).unique()
     )
-    return {"data": alarms, "meta": meta(total, page)}
+    return {"data": [_view(a) for a in alarms], "meta": meta(total, page)}
 
 
 @router.post(
@@ -109,7 +117,7 @@ def create_alarm(body: AlarmCreateBody, db: DbSession, user: CurrentUser):
 
     return {
         "message": "Alarm saved. We will remind you before your bus arrives.",
-        "data": alarm,
+        "data": _view(alarm),
     }
 
 
@@ -125,7 +133,7 @@ def update_alarm(alarm_id: str, body: AlarmUpdateBody, db: DbSession, user: Curr
         setattr(alarm, field, value)
     db.commit()
     db.refresh(alarm)
-    return {"message": "Alarm updated", "data": alarm}
+    return {"message": "Alarm updated", "data": _view(alarm)}
 
 
 @router.delete("/{alarm_id}", response_model=Envelope[Empty], summary="Delete an alarm")

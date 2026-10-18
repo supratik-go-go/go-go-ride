@@ -31,6 +31,7 @@ from app.schemas.responses import (
 )
 from app.services import buses as bus_service
 from app.services.common import log_activity, notify
+from app.services.privacy import dump, public_bus, public_review
 
 router = APIRouter(prefix="/buses", tags=["Buses"])
 
@@ -135,6 +136,9 @@ def list_buses(
     items = list(
         db.scalars(stmt.order_by(Bus.createdAt.desc()).offset(page.skip).limit(page.limit)).unique()
     )
+    if not is_admin(user):
+        # Owners' personal contact details and ownership documents are not public.
+        items = [public_bus(dump(BusOut, bus)) for bus in items]
     return {"data": items, "meta": meta(total, page)}
 
 
@@ -160,8 +164,14 @@ def my_buses(
 
 
 @router.get("/{bus_id}", response_model=Envelope[BusDetails], summary="Bus details")
-def get_bus(bus_id: str, db: DbSession, date: str | None = None):
-    return {"data": bus_service.bus_details(db, bus_id, date)}
+def get_bus(bus_id: str, db: DbSession, user: OptionalUser, date: str | None = None):
+    data = bus_service.bus_details(db, bus_id, date)
+    if is_admin(user) or (user is not None and user.id == data["ownerId"]):
+        return {"data": data}
+    # Everyone else: approved buses only, without the owner's personal details.
+    if data["status"] != "APPROVED":
+        raise ApiError.not_found("Bus not found")
+    return {"data": public_bus(dump(BusDetails, data))}
 
 
 @router.post(
@@ -369,7 +379,7 @@ def list_reviews(
             .limit(page.limit)
         )
     )
-    return {"data": items, "meta": meta(total, page)}
+    return {"data": [public_review(dump(ReviewOut, r)) for r in items], "meta": meta(total, page)}
 
 
 @router.post(

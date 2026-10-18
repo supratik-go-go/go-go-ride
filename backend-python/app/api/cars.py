@@ -32,6 +32,7 @@ from app.schemas.responses import (
     RideOut,
     RideStatus as RideStatusOut,
 )
+from app.services.privacy import dump, public_review, public_ride
 
 cars_router = APIRouter(prefix="/local-cars", tags=["Local cars"])
 rides_router = APIRouter(prefix="/rides", tags=["Running Car"])
@@ -47,7 +48,8 @@ RIDE_LOADERS = (
 def with_reviews(car: LocalCar, reviews: list) -> dict:
     """LocalCarOut derives availabilityLabel itself; this only attaches reviews."""
     payload = LocalCarOut.model_validate(car).model_dump(by_alias=True)
-    payload["reviews"] = reviews
+    # Reviews are public: reviewer names only, not their phone/email.
+    payload["reviews"] = [public_review(dump(ReviewOut, r)) for r in reviews]
     return payload
 
 
@@ -300,7 +302,7 @@ def list_rides(
             .limit(page.limit)
         ).unique()
     )
-    return {"data": rides, "meta": meta(total, page)}
+    return {"data": [public_ride(dump(RideOut, r)) for r in rides], "meta": meta(total, page)}
 
 
 @rides_router.get("/{ride_id}", response_model=Envelope[RideOut], summary="Ride details")
@@ -308,7 +310,7 @@ def get_ride(ride_id: str, db: DbSession):
     ride = db.scalar(select(Ride).where(Ride.id == ride_id).options(*RIDE_LOADERS))
     if ride is None:
         raise ApiError.not_found("Ride not found")
-    return {"data": ride}
+    return {"data": public_ride(dump(RideOut, ride))}
 
 
 @rides_router.post("", response_model=Envelope[RideOut], status_code=201, summary="Publish a ride")
