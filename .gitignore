@@ -31,6 +31,7 @@ go-go-ride apk/android/app/build/
 go-go-ride apk/android/capacitor-cordova-android-plugins/build/
 go-go-ride apk/android/app/src/main/assets/public/
 *.apk
+!backend-node/public/downloads/GO-GO-Ride.apk
 *.aab
 
 # Large local tools and generated packages
@@ -53,8 +54,8 @@ backend-node/seed/uploads/
 deploy-hostinger-cloud/production-secrets.txt
 deploy-hostinger-cloud/gogoride-api.zip
 deploy-hostinger-cloud/build/
-backend-node/public/downloads/*.apk
-backend-node/public/downloads/app-info.json
+# (the release APK + app-info.json in backend-node/public/downloads ARE committed:
+#  Hostinger auto-deploys from GitHub and the download page serves them)
 
 # Android release signing key (private - back up separately)
 go-go-ride apk/android/keystore.properties

@@ -22,6 +22,10 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 - [ ] Change the demo admin passwords (9876500001, 9876500002 — `Admin@123`) before sharing the app widely
 - [ ] Block/delete the demo passenger, owner and driver accounts when real users join
 
+## Auto-deploy setup — owner (once)
+
+- [ ] hPanel → Websites → Web Apps → go-goride.com → connect GitHub (account **supratik0000**, repo **go-go-ride**, branch **main**, root directory **backend-node**, Express, Node 24.x, entry file `server.js`)
+
 ## Decisions — owner
 
 - [ ] Google Play Store? If yes: create a developer account at play.google.com/console (US$25, identity check takes days)
@@ -48,19 +52,19 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 
 ## How to ship an update
 
+Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node`) on every push.
+
 **Backend change** (`backend-node/`):
 1. Make the change and test locally.
-2. `push-to-github.bat` → describe the change (saves it to both GitHub accounts).
-3. `deploy-hostinger-cloud\make-api-package.bat` → creates `gogoride-api.zip`.
-4. hPanel → Websites → Web Apps → go-goride.com → **Settings & Redeploy** → upload the zip → Deploy.
-   Live data in `~/gogoride-data` is never touched.
-5. Check https://go-goride.com/api/health.
+2. `push-to-github.bat` → describe the change. Hostinger rebuilds and restarts the API by itself (1–3 minutes).
+3. Check https://go-goride.com/api/health. Live data in `~/gogoride-data` is never touched.
 
 **App change** (`go-go-ride apk/`):
-1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apk\android\app\build.gradle` — phones only accept an update with a higher versionCode.
-2. `"go-go-ride apk\build-apk.bat" https://go-goride.com/api` (signed with the release key).
-3. `push-to-github.bat`.
-4. `make-api-package.bat` + redeploy (steps 3–4 above) so the download page offers the new APK.
+1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apkndroidppuild.gradle` — phones only accept an update with a higher versionCode.
+2. `"go-go-ride apkuild-apk.bat" https://go-goride.com/api` — builds the signed APK and puts it on the download page.
+3. `push-to-github.bat` → the new APK goes live on go-goride.com automatically.
+
+Manual fallback (if auto-deploy is ever off): `deploy-hostinger-cloud\make-api-package.bat`, then hPanel → the app → Settings & Redeploy → upload `gogoride-api.zip`.
 
 ## Done
 
@@ -71,3 +75,4 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 - [x] Deployed to https://go-goride.com with app download page (2026-10-18)
 - [x] Signed release APK v1.0
 - [x] Code on two GitHub accounts
+- [x] Repo ready for Hostinger auto-deploy (APK + download page committed)

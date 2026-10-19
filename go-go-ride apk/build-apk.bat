@@ -105,6 +105,13 @@ if not "%GRADLE_ERR%"=="0" goto :fail
 copy /y "%APK_OUT%" "GO-GO-Ride.apk" >nul
 if errorlevel 1 goto :fail
 
+rem Live builds also go onto the go-goride.com download page (backend-node\public\downloads).
+rem Push with push-to-github.bat and Hostinger deploys the new version automatically.
+if /i "%GRADLE_TASK%"=="assembleRelease" (
+  copy /y "GO-GO-Ride.apk" "%~dp0..\backend-node\public\downloads\GO-GO-Ride.apk" >nul
+  call node "%~dp0..\backend-node\scripts\app-info.mjs" "%~dp0android\app\build.gradle" "%~dp0GO-GO-Ride.apk" "%~dp0..\backend-node\public\downloads\app-info.json"
+  echo  [ok]    Download page updated - run push-to-github.bat to publish.
+)
 echo.
 echo  ===============================================
 echo   Done!  %~dp0GO-GO-Ride.apk
