@@ -60,3 +60,7 @@ deploy-hostinger-cloud/build/
 # Android release signing key (private - back up separately)
 go-go-ride apk/android/keystore.properties
 go-go-ride apk/android/keystore/
+
+# Hostinger data backups (users, bookings) - never push
+gogoride-data*.zip
+backups/
