@@ -8,6 +8,7 @@ shared "Running Car" rides, local car drivers, bus-owner listings with admin ver
 | [`backend-python/`](backend-python) | FastAPI REST API (93 endpoints), SQLite, JWT auth, alarm scheduler — used by both the website and the app |
 | [`go-go-ride website code/`](go-go-ride%20website%20code) | The website: public site, passenger web app, bus-owner area, admin panel (React + Vite) |
 | [`go-go-ride apk/`](go-go-ride%20apk) | The Android app (same screens packaged with Capacitor + phone alarms, back button, app icon) |
+| [`TASKS.md`](TASKS.md) | To-do list, backlog and the step-by-step update checklist |
 | [`deploy-hostinger/`](deploy-hostinger) | One-click packaging + install scripts to put the website and API on a Hostinger VPS (HTTPS included) |
 | [`FRONTEND_API_GUIDE.md`](FRONTEND_API_GUIDE.md) | API integration guide |
 | [`docs/design/`](docs/design) | Design mockups the UI follows |
