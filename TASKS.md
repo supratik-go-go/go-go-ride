@@ -60,8 +60,8 @@ Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node
 3. Check https://go-goride.com/api/health. Live data in `~/gogoride-data` is never touched.
 
 **App change** (`go-go-ride apk/`):
-1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apkndroidppuild.gradle` — phones only accept an update with a higher versionCode.
-2. `"go-go-ride apkuild-apk.bat" https://go-goride.com/api` — builds the signed APK and puts it on the download page.
+1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apk\android\app\build.gradle` — phones only accept an update with a higher versionCode.
+2. `"go-go-ride apk\build-apk.bat" https://go-goride.com/api` — builds the signed APK and puts it on the download page.
 3. `push-to-github.bat` → the new APK goes live on go-goride.com automatically.
 
 Manual fallback (if auto-deploy is ever off): `deploy-hostinger-cloud\make-api-package.bat`, then hPanel → the app → Settings & Redeploy → upload `gogoride-api.zip`.
