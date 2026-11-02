@@ -6,6 +6,7 @@ import { insert, scalar } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok } from '../http.js'
 import { processDueAlarms } from '../scheduler.js'
+import { latestNews } from '../services/news.js'
 import { loadSettings, settingsOut } from '../serialize.js'
 
 const router = Router()
@@ -13,6 +14,11 @@ const startedAt = Date.now()
 
 router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', uptime: Math.round((Date.now() - startedAt) / 10) / 100, timestamp: new Date().toISOString() })
+})
+
+/** Headlines for the Daily News tab. */
+router.get('/news', async (req, res) => {
+  ok(res, await latestNews())
 })
 
 /** Homepage counters: buses, routes, stops, users. */

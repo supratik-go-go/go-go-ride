@@ -22,7 +22,8 @@ import { Logo } from '../ui/Misc'
 const ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutGrid, end: true },
   { to: '/admin/buses', label: 'Bus Management', icon: Bus },
-  { to: '/admin/bus-requests', label: 'Bus Owner Requests', icon: UserCheck, badgeKey: 'pending' },
+  { to: '/admin/bus-requests', label: 'Bus Requests', icon: UserCheck, badgeKey: 'pending' },
+  { to: '/admin/route-requests', label: 'Route Requests', icon: Route, badgeKey: 'routes' },
   { to: '/admin/routes', label: 'Route Management', icon: Route },
   { to: '/admin/stops', label: 'Bus Stops', icon: MapPin },
   { to: '/admin/tracking', label: 'Live Tracking', icon: Navigation },

@@ -50,7 +50,7 @@ export default function RouteDetails() {
     return (
       <div className="px-page px-wide">
         <PageHeader title="Route Details" />
-        <ErrorState error={q.error} title={q.error.status === 404 ? 'Route not found' : undefined} onRetry={q.error.status === 404 ? undefined : () => q.reload()} />
+        <ErrorState error={q.error} title={q.error.status === 404 ? 'Service Coming Soon..' : undefined} onRetry={q.error.status === 404 ? undefined : () => q.reload()} />
         <div className="center">
           <Button to="/routes" variant="outline">
             All routes

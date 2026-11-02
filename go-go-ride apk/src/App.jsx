@@ -16,6 +16,10 @@ const NotFound = p(() => import('./pages/public/NotFound'))
 
 // auth
 const Login = p(() => import('./pages/auth/Login'))
+const DailyNews = p(() => import('./pages/passenger/DailyNews'))
+const Game = p(() => import('./pages/passenger/Game'))
+const AddRouteInfo = p(() => import('./pages/passenger/AddRouteInfo'))
+const RouteRequests = p(() => import('./pages/admin/RouteRequests'))
 const Register = p(() => import('./pages/auth/Register'))
 const AdminLogin = p(() => import('./pages/auth/AdminLogin'))
 
@@ -106,10 +110,13 @@ export default function App() {
             <Route path="running-car" element={<RunningCar />} />
             <Route path="local-cars" element={<LocalCars />} />
             <Route path="local-cars/:id" element={<LocalCarDetails />} />
+            <Route path="game" element={<Game />} />
+            <Route path="news" element={<DailyNews />} />
             <Route path="server" element={<ServerSettings />} />
 
             <Route element={<RequireAuth />}>
               <Route path="bus/:id/alarm" element={<SetAlarm />} />
+              <Route path="add-route" element={<AddRouteInfo />} />
               <Route path="profile" element={<Profile />} />
               <Route path="profile/edit" element={<EditProfile />} />
               <Route path="bookings" element={<Bookings />} />
@@ -135,6 +142,7 @@ export default function App() {
               <Route path="buses/new" element={<BusForm admin />} />
               <Route path="buses/:id/edit" element={<BusForm admin />} />
               <Route path="bus-requests" element={<BusRequests />} />
+              <Route path="route-requests" element={<RouteRequests />} />
               <Route path="routes" element={<AdminRoutes />} />
               <Route path="stops" element={<AdminStops />} />
               <Route path="tracking" element={<AdminTracking />} />

@@ -11,6 +11,7 @@ import {
   Info,
   LayoutDashboard,
   LogOut,
+  Route,
   Search,
   Settings,
   ShieldCheck,
@@ -112,6 +113,22 @@ export default function Profile() {
           About Us
         </MenuRow>
       </nav>
+
+      {!isAdmin && (
+        <>
+          <h2 className="acc-section-title">Contribute</h2>
+          <nav className="card acc-menu" aria-label="Contribute">
+            {role !== 'BUS_OWNER' && (
+              <MenuRow to="/owner/buses" icon={BusFront} hint="Buses you sent and their status">
+                My Bus Information
+              </MenuRow>
+            )}
+            <MenuRow to="/add-route" icon={Route} hint="Send a route and track its review">
+              Route Information
+            </MenuRow>
+          </nav>
+        </>
+      )}
 
       {(role === 'BUS_OWNER' || role === 'DRIVER' || isAdmin) && (
         <>

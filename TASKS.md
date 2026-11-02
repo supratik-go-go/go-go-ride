@@ -76,3 +76,5 @@ Manual fallback (if auto-deploy is ever off): `deploy-hostinger-cloud\make-api-p
 - [x] Signed release APK v1.0
 - [x] Code on two GitHub accounts
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
+- [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
+- [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests

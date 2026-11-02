@@ -16,7 +16,7 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react'
-import { StopInput } from '../../components/navigation/SearchBar'
+import { AddViaButton, StopInput, ViaInput } from '../../components/navigation/SearchBar'
 import { Button, EmptyState, ErrorState, IconButton, Modal, PageHeader, Skeleton, Spinner } from '../../components/ui'
 import { BusResultCard, DateStrip, openPicker, safeDate } from '../../components/passenger'
 import { busService } from '../../services'
@@ -54,6 +54,8 @@ export default function SearchResults() {
   const to = params.get('to') || ''
   const fromId = params.get('fromId') || ''
   const toId = params.get('toId') || ''
+  const via = params.get('via') || ''
+  const viaId = params.get('viaId') || ''
   const time = params.get('time') || ''
   const type = params.get('type') || ''
   const category = params.get('category') || ''
@@ -72,12 +74,14 @@ export default function SearchResults() {
       else if (from) p.from = from
       if (toId) p.toStopId = toId
       else if (to) p.to = to
+      if (viaId) p.viaStopId = viaId
+      else if (via) p.via = via
     } else {
       p.searchType = searchType
       p.q = q
     }
     return p
-  }, [date, sort, time, type, category, maxFare, searchType, fromId, from, toId, to, q])
+  }, [date, sort, time, type, category, maxFare, searchType, fromId, from, toId, to, viaId, via, q])
 
   const apiKey = JSON.stringify(apiParams)
   const res = useAsync(() => busService.search(apiParams), [apiKey])
@@ -152,6 +156,7 @@ export default function SearchResults() {
       <section className="px-results-head">
         <div className="px-results-title">
           <h1>{title}</h1>
+          {searchType === 'ROUTE' && via && <p className="px-results-via">via {via}</p>}
           <p className="text-muted">{dateLine(date)}</p>
           <button type="button" className="link-btn px-modify-btn" onClick={() => setModifyOpen((o) => !o)} aria-expanded={modifyOpen}>
             {modifyOpen ? <X size={14} /> : <Pencil size={14} />} {modifyOpen ? 'Close' : 'Modify search'}
@@ -167,7 +172,7 @@ export default function SearchResults() {
 
       {modifyOpen && (
         <ModifySearch
-          initial={{ searchType, from: from ? { id: fromId || null, name: from } : null, to: to ? { id: toId || null, name: to } : null, q }}
+          initial={{ searchType, from: from ? { id: fromId || null, name: from } : null, to: to ? { id: toId || null, name: to } : null, via: via ? { id: viaId || null, name: via } : null, q }}
           onCancel={() => setModifyOpen(false)}
           onSubmit={(patch) => {
             update(patch, { push: true })
@@ -237,8 +242,8 @@ export default function SearchResults() {
         res.error.status === 404 ? (
           <EmptyState
             icon={<MapPinOff size={26} />}
-            title="We couldn't find that stop"
-            message={`${res.error.message}. Check the spelling or pick a stop from the suggestions.`}
+            title="Service Coming Soon.."
+            message="We are adding this stop to GO-GO Ride. Check the spelling or pick a stop from the suggestions."
             action={
               <Button icon={<Pencil size={16} />} onClick={() => setModifyOpen(true)}>
                 Modify search
@@ -287,8 +292,8 @@ function NoResults({ hasFilters, onClear, onModify, onNextDay }) {
     <div className="card px-card-pad px-noresults">
       <EmptyState
         icon={<BusFront size={26} />}
-        title="No buses found"
-        message="We couldn't find a bus for this search on the selected date."
+        title="Service Coming Soon.."
+        message="We are adding buses for this route. Please try another date or check back soon."
         action={
           <div className="row wrap" style={{ justifyContent: 'center' }}>
             {hasFilters && (
@@ -333,6 +338,8 @@ function ModifySearch({ initial, onSubmit, onCancel }) {
   const [mode, setMode] = useState(initial.searchType)
   const [from, setFrom] = useState(initial.from)
   const [to, setTo] = useState(initial.to)
+  const [via, setVia] = useState(initial.via)
+  const [viaOpen, setViaOpen] = useState(Boolean(initial.via))
   const [q, setQ] = useState(initial.q)
   const [error, setError] = useState('')
   const qRef = useRef(null)
@@ -348,13 +355,23 @@ function ModifySearch({ initial, onSubmit, onCancel }) {
         setError('Enter both a starting point and a destination.')
         return
       }
-      onSubmit({ searchType: 'ROUTE', from: from.name.trim(), to: to.name.trim(), fromId: from.id || null, toId: to.id || null, q: null })
+      const viaName = viaOpen ? via?.name?.trim() : ''
+      onSubmit({
+        searchType: 'ROUTE',
+        from: from.name.trim(),
+        to: to.name.trim(),
+        fromId: from.id || null,
+        toId: to.id || null,
+        via: viaName || null,
+        viaId: (viaName && via.id) || null,
+        q: null,
+      })
     } else {
       if (!q.trim()) {
         setError(mode === 'BUS_NUMBER' ? 'Enter a bus number.' : 'Enter a bus name.')
         return
       }
-      onSubmit({ searchType: mode, q: q.trim(), from: null, to: null, fromId: null, toId: null })
+      onSubmit({ searchType: mode, q: q.trim(), from: null, to: null, fromId: null, toId: null, via: null, viaId: null })
     }
   }
 
@@ -391,6 +408,7 @@ function ModifySearch({ initial, onSubmit, onCancel }) {
             icon={<MapPin size={22} className="px-pin-from" fill="currentColor" stroke="#fff" strokeWidth={1.6} />}
           />
           <div className="search-bar-sep px-search-sep">
+            {!viaOpen && <AddViaButton onClick={() => setViaOpen(true)} />}
             <button
               type="button"
               className="swap-btn"
@@ -403,6 +421,16 @@ function ModifySearch({ initial, onSubmit, onCancel }) {
               <ArrowUpDown size={18} />
             </button>
           </div>
+          {viaOpen && (
+            <ViaInput
+              value={via}
+              onChange={setVia}
+              onRemove={() => {
+                setVia(null)
+                setViaOpen(false)
+              }}
+            />
+          )}
           <StopInput
             label="To"
             value={to}

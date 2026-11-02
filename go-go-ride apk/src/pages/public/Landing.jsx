@@ -306,14 +306,20 @@ function MobileSplash() {
 
       <div className="pub-splash-sheet">
         <Button to="/home" size="lg" block className="pub-splash-cta">
-          {isAuthenticated ? 'Continue' : 'Get Started'}
+          {isAuthenticated ? 'Continue' : 'Guest Login'}
         </Button>
         {isAuthenticated ? (
           <span className="pub-splash-signed">Signed in as {user?.name}</span>
         ) : (
-          <Link to="/login" className="pub-splash-login">
-            Login / Register
-          </Link>
+          <div className="pub-splash-links">
+            <Link to="/login" className="pub-splash-login">
+              Login
+            </Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/register" className="pub-splash-login">
+              Create Account
+            </Link>
+          </div>
         )}
         <nav className="pub-modes" aria-label="Travel modes">
           {MODES.map(({ to, label, icon: Icon, tone }) => (

@@ -1,6 +1,6 @@
 // Search, details, owner submission and verification documents (port of app/api/buses.py).
 import { Router } from 'express'
-import { isAdmin, optionalUser, requireOwner, requireUser } from '../auth.js'
+import { isAdmin, optionalUser, requireUser } from '../auth.js'
 import { all, byId, get, insert, run, scalar, tx } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok, okPage } from '../http.js'
@@ -26,10 +26,13 @@ import {
 } from '../services/pydantic.js'
 import { publicBus, publicReview } from '../services/privacy.js'
 import { dateOnly } from '../time.js'
+import { getSettingsRow } from './platform.js'
 import { singleFile, saveUpload } from '../uploads.js'
 import { ENUMS } from '../validate.js'
 
 const router = Router()
+
+const MAX_PENDING_PER_CONTRIBUTOR = 10
 
 // ---------------------------------------------------------------- request bodies (schemas/requests.py)
 
@@ -99,8 +102,10 @@ router.get('/buses/search', optionalUser, (req, res) => {
   const query = req.query
   const from = q(d, query, 'from', str())
   const to = q(d, query, 'to', str())
+  const via = q(d, query, 'via', str())
   const fromStopId = q(d, query, 'fromStopId', str())
   const toStopId = q(d, query, 'toStopId', str())
+  const viaStopId = q(d, query, 'viaStopId', str())
   const text = q(d, query, 'q', str())
   const searchType = q(d, query, 'searchType', enumOf(ENUMS.searchType), { fallback: 'ROUTE' })
   const date = q(d, query, 'date', str())
@@ -115,8 +120,10 @@ router.get('/buses/search', optionalUser, (req, res) => {
   const result = busService.searchBuses({
     fromText: from,
     toText: to,
+    viaText: via,
     fromStopId,
     toStopId,
+    viaStopId,
     q: text,
     searchType,
     date,
@@ -221,15 +228,23 @@ router.get('/buses/:busId', optionalUser, (req, res) => {
 
 // ---------------------------------------------------------------- owner submission
 
-router.post('/buses', requireOwner, (req, res) => {
-  const b = parseBody(req, BusCreateBody)
+// Anyone signed in can send bus information. A passenger has no booking line of their own,
+// so the platform's number is used, and any new stops stay hidden until the bus is approved.
+router.post('/buses', requireUser, (req, res) => {
   const user = req.user
+  const contributor = user.role !== 'BUS_OWNER' && !isAdmin(user)
+  if (contributor && !req.body?.contactNumber) req.body = { ...req.body, contactNumber: getSettingsRow().contactNumber }
+  const b = parseBody(req, BusCreateBody)
+  if (contributor) {
+    const waiting = Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE "ownerId" = ? AND status = ?', user.id, 'PENDING') || 0)
+    if (waiting >= MAX_PENDING_PER_CONTRIBUTOR) throw ApiError.badRequest('You have too many buses waiting for review. Please wait for them to be checked.')
+  }
   if (get('SELECT id FROM "Bus" WHERE "busNumber" = ?', b.busNumber)) {
     throw ApiError.conflict('This bus number is already registered')
   }
 
   const busId = tx(() => {
-    const stopIds = b.stopages.map((s) => busService.resolveStopId(s))
+    const stopIds = b.stopages.map((s) => busService.resolveStopId(s, contributor ? 'INACTIVE' : 'ACTIVE'))
     const now = Date.now()
     const bus = insert('Bus', {
       id: newId(),
@@ -295,7 +310,7 @@ router.patch('/buses/:busId', requireUser, (req, res) => {
   }
 
   tx(() => {
-    if (b.stopages !== null) busService.replaceStopages(bus.id, b.stopages)
+    if (b.stopages !== null) busService.replaceStopages(bus.id, b.stopages, admin || req.user.role === 'BUS_OWNER' ? 'ACTIVE' : 'INACTIVE')
     if (Object.keys(patch).length) {
       // update() skips undefined; null must be written, so build the statement here.
       const keys = Object.keys(patch)

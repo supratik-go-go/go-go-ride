@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowUpDown, Crosshair, MapPin, Search } from 'lucide-react'
+import { ArrowUpDown, Crosshair, MapPin, Plus, Search, X } from 'lucide-react'
 import { stopService } from '../../services/networkService'
 import { locationService } from '../../services/locationService'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -126,6 +126,37 @@ export function StopInput({ value, onChange, placeholder = 'Enter stop', label, 
         </ul>
       )}
     </div>
+  )
+}
+
+/** Small button beside the swap button that opens the optional via stop. */
+export function AddViaButton({ onClick }) {
+  return (
+    <button type="button" className="px-via-add" onClick={onClick}>
+      <Plus size={13} strokeWidth={3} /> Via
+    </button>
+  )
+}
+
+/** Optional stop the bus must pass through, shown between From and To. */
+export function ViaInput({ value, onChange, onRemove }) {
+  return (
+    <>
+      <div className="px-via-row">
+        <StopInput
+          label="Via"
+          value={value}
+          onChange={onChange}
+          placeholder="Enter via stop"
+          autoFocus
+          icon={<MapPin size={22} className="px-pin-via" fill="currentColor" stroke="#fff" strokeWidth={1.6} />}
+        />
+        <button type="button" className="icon-btn px-via-remove" onClick={onRemove} aria-label="Remove via stop">
+          <X size={18} />
+        </button>
+      </div>
+      <div className="search-bar-sep px-search-sep" />
+    </>
   )
 }
 

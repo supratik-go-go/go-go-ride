@@ -11,6 +11,11 @@ export const stopService = {
   remove: (id) => http.del(`/stops/${id}`),
 }
 
+export const contributionService = {
+  submitRoute: (body) => http.post('/route-submissions', body),
+  myRoutes: (params) => http.page('/route-submissions/mine', params),
+}
+
 export const routeService = {
   list: (params) => http.page('/routes', params),
   popular: (limit = 6) => http.get('/routes/popular', { limit }),

@@ -8,6 +8,8 @@ export const adminService = {
   busRequests: (params) => http.page('/admin/bus-requests', params),
   /** Rejection requires a reason. */
   setBusStatus: (id, status, reason) => http.patch(`/admin/buses/${id}/status`, { status, reason }),
+  routeRequests: (params) => http.page('/admin/route-requests', params),
+  reviewRouteRequest: (id, body) => http.patch(`/admin/route-requests/${id}`, body),
   users: (params) => http.page('/admin/users', params),
   user: (id) => http.get(`/admin/users/${id}`),
   /** SUPER_ADMIN only */

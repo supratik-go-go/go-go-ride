@@ -46,7 +46,7 @@ import {
   optionsFrom,
   useToast,
 } from '../../components/ui'
-import { OwnerGate, OwnerOnlyBanner, VerificationSteps } from '../../components/owner/OwnerParts'
+import { OwnerOnlyBanner, VerificationSteps } from '../../components/owner/OwnerParts'
 import {
   ChoiceChips,
   DOC_TILES,
@@ -163,18 +163,10 @@ function UploadStatus({ item }) {
 export default function BusForm({ admin = false }) {
   const { isOwner } = useAuth()
   const { id } = useParams()
-  if (!admin && !isOwner) {
-    return (
-      <div className="own-page">
-        <PageHeader title={id ? 'Edit Bus' : 'Add Bus'} />
-        <OwnerGate />
-      </div>
-    )
-  }
-  return <BusFormScreen admin={admin} id={id} />
+  return <BusFormScreen admin={admin} id={id} contributor={!admin && !isOwner} />
 }
 
-function BusFormScreen({ admin, id }) {
+function BusFormScreen({ admin, id, contributor }) {
   const editing = Boolean(id)
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -298,8 +290,10 @@ function BusFormScreen({ admin, id }) {
     }
     const contact = form.contactNumber.trim()
     const digits = contact.replace(/\D/g, '')
-    if (!contact) e.contactNumber = 'Enter a number passengers can call for bookings'
-    else if (!/^[+\d\s-]+$/.test(contact) || digits.length < 6 || contact.length > 20) e.contactNumber = 'Enter a valid mobile or landline number'
+    if (!contributor) {
+      if (!contact) e.contactNumber = 'Enter a number passengers can call for bookings'
+      else if (!/^[+\d\s-]+$/.test(contact) || digits.length < 6 || contact.length > 20) e.contactNumber = 'Enter a valid mobile or landline number'
+    }
     if (!form.contactStart) e.contactStart = 'Required'
     if (!form.contactEnd) e.contactEnd = 'Required'
     if (form.contactStart && form.contactEnd && form.contactEnd <= form.contactStart) e.contactEnd = 'Must be after the start time'
@@ -333,7 +327,7 @@ function BusFormScreen({ admin, id }) {
     })
 
     if (Object.values(fileErrors).some(Boolean)) e.documents = 'Fix or remove the highlighted file'
-    else if (!editing && !admin && !Object.values(files).some(Boolean)) {
+    else if (!editing && !admin && !contributor && !Object.values(files).some(Boolean)) {
       e.documents = 'Upload at least one ownership document so we can verify your bus'
     }
     return e
@@ -481,7 +475,7 @@ function BusFormScreen({ admin, id }) {
   }
 
   // ---------------------------------------------------------------- render
-  const title = editing ? 'Edit Bus' : admin ? 'Add New Bus' : 'Add Bus'
+  const title = editing ? 'Edit Bus' : admin ? 'Add New Bus' : contributor ? 'Add Bus Information' : 'Add Bus'
   const header = admin ? (
     <SectionHeader
       title={title}
@@ -551,7 +545,9 @@ function BusFormScreen({ admin, id }) {
           <strong>{created.busNumber}</strong> is now <StatusBadge value={created.status || 'PENDING'} group="busStatus" />.{' '}
           {admin
             ? 'Approve it from Bus Requests to make it visible to passengers.'
-            : "Our team will verify your documents. You'll get a notification as soon as your bus is approved and live."}
+            : contributor
+              ? "Thank you! Our team will check this information. You'll get a notification once the bus is approved and live."
+              : "Our team will verify your documents. You'll get a notification as soon as your bus is approved and live."}
         </p>
         <VerificationSteps status={created.status || 'PENDING'} />
 
@@ -605,7 +601,7 @@ function BusFormScreen({ admin, id }) {
 
   return wrap(
     <>
-      {!admin && !editing && <OwnerOnlyBanner />}
+      {!admin && !editing && !contributor && <OwnerOnlyBanner />}
 
       {editing && bus && (
         <div className={cx('own-status-card card', bus.status === 'REJECTED' && 'rejected')}>
@@ -731,6 +727,7 @@ function BusFormScreen({ admin, id }) {
         </Section>
 
         {/* ---------------- owner + booking contact */}
+        {!contributor && (
         <Section title="Bus Owner Information">
           {admin && !editing && (
             <div className="alert alert-info">
@@ -780,8 +777,10 @@ function BusFormScreen({ admin, id }) {
             </p>
           )}
         </Section>
+        )}
 
         {/* ---------------- documents */}
+        {!contributor && (
         <Section title="Ownership Proof" subtitle="Upload any one of the following documents">
           {existingDocs.length > 0 && (
             <ul className="own-doc-list compact">
@@ -811,6 +810,7 @@ function BusFormScreen({ admin, id }) {
             <Lock size={13} /> Your documents are secure and will only be used for verification purposes. JPG, PNG, WEBP or PDF, up to 5 MB each.
           </p>
         </Section>
+        )}
 
         {/* ---------------- route */}
         <Section title="Bus Route & Stopages">
@@ -859,7 +859,9 @@ function BusFormScreen({ admin, id }) {
             <div className="text-sm">
               {admin
                 ? 'New buses start as Pending. Approve them from Bus Requests to list them for passengers.'
-                : 'After you submit the details, our team will verify your documents and approve your bus. You will be notified once your bus is live.'}
+                : contributor
+                  ? 'After you submit, our team will check the information. You will be notified once the bus is live.'
+                  : 'After you submit the details, our team will verify your documents and approve your bus. You will be notified once your bus is live.'}
             </div>
           </div>
         </div>

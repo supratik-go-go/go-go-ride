@@ -18,7 +18,7 @@ import {
   Route,
   Search,
 } from 'lucide-react'
-import { StopInput } from '../../components/navigation/SearchBar'
+import { AddViaButton, StopInput, ViaInput } from '../../components/navigation/SearchBar'
 import { Avatar, Badge, Button, EmptyState, Logo, Skeleton, Spinner, useToast } from '../../components/ui'
 import { LocalCarCard, NotifyMeModal, firstName, openPicker } from '../../components/passenger'
 import { localCarService, locationService, rideService, routeService, stopService } from '../../services'
@@ -47,6 +47,8 @@ export default function Home() {
   const [mode, setMode] = useState('ROUTE')
   const [from, setFrom] = useState(null)
   const [to, setTo] = useState(null)
+  const [via, setVia] = useState(null)
+  const [viaOpen, setViaOpen] = useState(false)
   const [q, setQ] = useState('')
   const [date, setDate] = useState(todayISO())
   const [time, setTime] = useState('')
@@ -119,6 +121,10 @@ export default function Home() {
       params.set('to', to.name.trim())
       if (from.id) params.set('fromId', from.id)
       if (to.id) params.set('toId', to.id)
+      if (viaOpen && via?.name?.trim()) {
+        params.set('via', via.name.trim())
+        if (via.id) params.set('viaId', via.id)
+      }
     } else {
       const text = q.trim()
       if (!text) {
@@ -184,10 +190,21 @@ export default function Home() {
                   </span>
                 )}
                 <div className="search-bar-sep px-search-sep">
+                  {!viaOpen && <AddViaButton onClick={() => setViaOpen(true)} />}
                   <button type="button" className="swap-btn" onClick={swap} aria-label="Swap from and to">
                     <ArrowUpDown size={18} />
                   </button>
                 </div>
+                {viaOpen && (
+                  <ViaInput
+                    value={via}
+                    onChange={setVia}
+                    onRemove={() => {
+                      setVia(null)
+                      setViaOpen(false)
+                    }}
+                  />
+                )}
                 <StopInput
                   label="To"
                   value={to}
@@ -308,6 +325,23 @@ export default function Home() {
 
         <div className="px-home-col">
           {/* ---------------- running car ---------------- */}
+          <nav className="px-contrib-links" aria-label="Add information" style={{ order: 3 }}>
+            <Link to="/owner/buses/new" className="card px-contrib-link">
+              <span className="icon-tile sm">
+                <BusFront size={20} />
+              </span>
+              <span className="grow">Add Bus Information</span>
+              <ArrowRight size={18} />
+            </Link>
+            <Link to="/add-route" className="card px-contrib-link">
+              <span className="icon-tile sm">
+                <Route size={20} />
+              </span>
+              <span className="grow">Add Route Information</span>
+              <ArrowRight size={18} />
+            </Link>
+          </nav>
+
           <section className="px-rc" aria-labelledby="px-rc-title" style={{ order: 3 }}>
             <div className="px-rc-text">
               <div className="row px-rc-head" style={{ '--gap': '12px' }}>

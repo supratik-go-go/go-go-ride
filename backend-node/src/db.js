@@ -8,6 +8,24 @@ import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { config, ROOT } from './config.js'
 
+// Added after launch, so it is created on start for databases that already exist.
+const ROUTE_SUBMISSION_TABLE = `
+CREATE TABLE IF NOT EXISTS "RouteSubmission" (
+  id VARCHAR NOT NULL PRIMARY KEY,
+  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
+  name VARCHAR NOT NULL,
+  "routeNumber" VARCHAR,
+  notes VARCHAR,
+  stops TEXT NOT NULL,
+  status VARCHAR NOT NULL,
+  "rejectionReason" VARCHAR,
+  "routeId" VARCHAR REFERENCES "Route" (id) ON DELETE SET NULL,
+  "reviewedById" VARCHAR REFERENCES "User" (id) ON DELETE SET NULL,
+  "reviewedAt" BIGINT,
+  "createdAt" BIGINT NOT NULL,
+  "updatedAt" BIGINT NOT NULL
+)`
+
 function openDatabase() {
   const file = config.databasePath
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -25,6 +43,7 @@ function openDatabase() {
   const db = new DatabaseSync(file)
   db.exec('PRAGMA foreign_keys = ON')
   db.exec('PRAGMA busy_timeout = 5000')
+  db.exec(ROUTE_SUBMISSION_TABLE)
   return db
 }
 

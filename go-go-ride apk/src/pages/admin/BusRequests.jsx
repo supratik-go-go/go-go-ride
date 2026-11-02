@@ -30,7 +30,7 @@ export default function BusRequests() {
   const columns = [
     {
       key: 'owner',
-      header: 'Owner Details',
+      header: 'Submitted By',
       render: (b) => (
         <div className="adm-cell">
           <span className="adm-cell-main">{b.owner?.name || '-'}</span>
@@ -107,7 +107,7 @@ export default function BusRequests() {
 
   return (
     <div className="adm-page">
-      <SectionHeader title="Bus Owner Requests" subtitle="Review documents and stopages, then approve or reject new and edited buses." />
+      <SectionHeader title="Bus Requests" subtitle="Review documents and stopages, then approve or reject new and edited buses." />
 
       <section className="adm-card adm-table-card">
         <AdminTabs items={tabItems} value={tab} onChange={(v) => list.setFilter('status', v)} ariaLabel="Request status" />

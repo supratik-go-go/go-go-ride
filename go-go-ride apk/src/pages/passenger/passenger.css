@@ -81,10 +81,32 @@
 .px-search-stops { display: flex; flex-direction: column; position: relative; }
 .px-search-stops .stop-input-label { margin-left: 30px; }
 .px-search-stops .stop-input-field { font-size: var(--fs-md); }
-.px-search-sep { margin: 12px 52px 12px 30px; }
+.px-search-sep { margin: 20px 52px 12px 30px; }
 .px-search-sep .swap-btn { right: -52px; top: 6px; transform: none; width: 42px; height: 42px; }
 .px-search-sep .swap-btn:hover { transform: rotate(180deg); }
 .px-search-stops > .stop-input:last-child { margin-right: 52px; }
+.px-via-add {
+  position: absolute;
+  right: -57px;
+  top: -20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  padding: 0 9px 0 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--primary-50);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.px-via-row { position: relative; margin-right: 52px; }
+.px-via-row .stop-input-field { padding-right: 34px; }
+.px-via-remove { position: absolute; right: 0; bottom: -4px; width: 32px; height: 32px; color: var(--muted); }
+.px-pin-via { color: var(--muted); flex-shrink: 0; }
+.px-results-via { margin: 2px 0 0; color: var(--primary); font-size: var(--fs-sm); font-weight: 600; }
 .px-pin-from { color: var(--primary); flex-shrink: 0; }
 .px-pin-to { color: var(--accent); flex-shrink: 0; }
 .px-locating { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 0 30px; font-size: var(--fs-xs); color: var(--primary-600); }
@@ -1192,3 +1214,50 @@
 .px-avail-now.on { background: var(--success-50); color: var(--success); }
 .px-avail-now.off { background: #eef0f5; color: var(--muted); }
 .px-reviewed { display: flex; align-items: center; gap: 10px; }
+
+/* ---------------- daily news ---------------- */
+.px-news-list { display: flex; flex-direction: column; gap: 12px; }
+.px-news-item { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; color: inherit; }
+.px-news-item h2 { margin: 0; font-size: var(--fs-md); font-weight: 600; line-height: 1.35; color: var(--text); }
+.px-news-item p { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; color: var(--muted); font-size: var(--fs-xs); }
+.px-news-note { margin: 14px 0 0; color: var(--muted); font-size: var(--fs-xs); text-align: center; }
+
+/* ---------------- game ---------------- */
+.px-game-tabs { margin-bottom: 14px; }
+.px-game { display: flex; flex-direction: column; gap: 14px; }
+.px-game-status { margin: 0; text-align: center; font-weight: 600; color: var(--primary); }
+.px-memory-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.px-memory-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--primary);
+  color: var(--primary);
+}
+.px-memory-card.shown { background: var(--primary-50); border-color: var(--border); }
+.px-ttt-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 300px; margin: 0 auto; }
+.px-ttt-cell {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 34px;
+  font-weight: 700;
+}
+.px-ttt-cell.o { color: var(--accent); }
+.px-ttt-cell.win { background: var(--primary-50); }
+
+/* ---------------- add bus / route information ---------------- */
+.px-contrib-links { display: flex; flex-direction: column; gap: 10px; }
+.px-contrib-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: var(--primary); font-weight: 600; }
+.px-contrib-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 18px; }
+.px-contrib-form .stop-input-label { margin-left: 30px; }
+.px-contrib-stop { margin-right: 0; }
+.px-contrib-add { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; margin-left: 30px; }
+.px-contrib-sent { margin-bottom: 14px; }
+.px-contrib-item { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; }
+.px-contrib-item p { margin: 0; }

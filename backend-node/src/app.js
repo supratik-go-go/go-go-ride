@@ -16,6 +16,7 @@ import cars from './routes/cars.js'
 import bookings from './routes/bookings.js'
 import messaging from './routes/messaging.js'
 import admin from './routes/admin.js'
+import contributions from './routes/contributions.js'
 
 export const app = express()
 
@@ -77,7 +78,7 @@ app.get(config.apiPrefix, (req, res) =>
   res.json({ name: 'GO-GO Ride API', tagline: 'Smart local transport for West Bengal', version: '1.0.0' }),
 )
 
-for (const router of [platform, auth, profile, buses, network, alarms, cars, bookings, messaging, admin]) {
+for (const router of [platform, auth, profile, buses, network, alarms, cars, bookings, messaging, admin, contributions]) {
   app.use(config.apiPrefix, router)
 }
 

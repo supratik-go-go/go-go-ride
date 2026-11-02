@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { CarFront, CarTaxiFront, House, UserRound } from 'lucide-react'
+import { CarTaxiFront, Gamepad2, House, Newspaper, UserRound } from 'lucide-react'
 
 // Tabs from the passenger app designs (deck pages 4-7).
 const TABS = [
   { to: '/home', label: 'Home', icon: House, match: ['/home', '/search', '/bus', '/routes', '/stops', '/track'] },
-  { to: '/running-car', label: 'Running Car', icon: CarFront, match: ['/running-car'] },
   { to: '/local-cars', label: 'Local Cars', icon: CarTaxiFront, match: ['/local-cars'] },
+  { to: '/game', label: 'Game', icon: Gamepad2, match: ['/game'] },
+  { to: '/news', label: 'Daily News', icon: Newspaper, match: ['/news'] },
   {
     to: '/profile',
     label: 'Profile',

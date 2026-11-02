@@ -383,6 +383,8 @@
 .pub-splash-cta { max-width: 360px; font-size: 1.15rem; min-height: 56px; border-radius: 14px; box-shadow: 0 10px 24px rgba(11, 42, 122, 0.3); }
 .pub-splash-login { color: var(--accent); font-weight: 600; font-size: var(--fs-md); padding: 4px 12px; }
 .pub-splash-login:hover { color: var(--accent-600); }
+.pub-splash-links { display: flex; align-items: center; color: var(--accent); font-weight: 600; font-size: var(--fs-md); }
+.pub-splash-links .pub-splash-login { padding: 4px 8px; }
 .pub-splash-signed { color: var(--muted); font-size: var(--fs-sm); }
 .pub-modes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 380px; margin-top: 4px; }
 .pub-mode { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 600; }

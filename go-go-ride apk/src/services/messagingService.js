@@ -21,3 +21,7 @@ export const supportService = {
   /** admin: { status?, priority?, response? } */
   update: (id, body) => http.patch(`/support/tickets/${id}`, body),
 }
+
+export const newsService = {
+  latest: () => http.get('/news'),
+}

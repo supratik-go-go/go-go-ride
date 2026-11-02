@@ -132,6 +132,7 @@ export function AuthLayout() {
 export function AdminLayout() {
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(0)
+  const [routeRequests, setRouteRequests] = useState(0)
   const [query, setQuery] = useState('')
   const unread = useUnreadCount()
   const { isAdmin } = useAuth()
@@ -140,11 +141,16 @@ export function AdminLayout() {
 
   useEffect(() => {
     if (!isAdmin) return undefined
-    const load = () =>
+    const load = () => {
       adminService
         .busRequests({ limit: 1 })
         .then((r) => setPending(r.meta?.total ?? 0))
         .catch(() => {})
+      adminService
+        .routeRequests({ limit: 1, status: 'PENDING' })
+        .then((r) => setRouteRequests(r.meta?.total ?? 0))
+        .catch(() => {})
+    }
     load()
     // Approve / reject actions announce themselves so the badge updates in place.
     window.addEventListener('gogo:bus-requests-changed', load)
@@ -159,7 +165,7 @@ export function AdminLayout() {
 
   return (
     <div className="layout-admin">
-      <Sidebar open={open} onClose={() => setOpen(false)} badges={{ pending }} />
+      <Sidebar open={open} onClose={() => setOpen(false)} badges={{ pending, routes: routeRequests }} />
       <div className="admin-shell">
         <header className="admin-topbar">
           <button type="button" className="icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">

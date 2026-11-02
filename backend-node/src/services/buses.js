@@ -61,6 +61,16 @@ export function findLeg(stopages, fromStopId, toStopId) {
   }
 }
 
+/** True when the via stop lies between the passenger's boarding and alighting stops. */
+function passesThrough(stopages, viaStopId, fromStopId, toStopId) {
+  const sequenceOf = (id) => stopages.find((s) => s.stopId === id)?.sequence
+  const via = sequenceOf(viaStopId)
+  if (via === undefined) return false
+  const from = fromStopId ? sequenceOf(fromStopId) : -Infinity
+  const to = toStopId ? sequenceOf(toStopId) : Infinity
+  return from < via && via < to
+}
+
 // ---------------------------------------------------------------- stops
 
 export function resolveStopIdByName(name) {
@@ -70,7 +80,7 @@ export function resolveStopIdByName(name) {
 }
 
 /** Find an existing stop by name, or create it - owners type new stopages. */
-export function resolveStopId({ stopId, stopName }) {
+export function resolveStopId({ stopId, stopName }, status = 'ACTIVE') {
   if (stopId) {
     const stop = byId('BusStop', stopId)
     if (!stop) throw ApiError.badRequest(`Bus stop ${stopId} does not exist`)
@@ -87,7 +97,7 @@ export function resolveStopId({ stopId, stopName }) {
     city: 'Kolkata',
     latitude: null,
     longitude: null,
-    status: 'ACTIVE',
+    status,
     createdAt: now,
     updatedAt: now,
   })
@@ -110,8 +120,10 @@ const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 export function searchBuses({
   fromText = null,
   toText = null,
+  viaText = null,
   fromStopId = null,
   toStopId = null,
+  viaStopId = null,
   q = null,
   searchType = 'ROUTE',
   date = null,
@@ -128,10 +140,12 @@ export function searchBuses({
 
   const fromId = fromStopId || resolveStopIdByName(fromText)
   const toId = toStopId || resolveStopIdByName(toText)
+  const viaId = searchType === 'ROUTE' ? viaStopId || resolveStopIdByName(viaText) : null
 
   if (searchType === 'ROUTE') {
     if ((fromText || fromStopId) && !fromId) throw ApiError.notFound(`No bus stop found matching "${fromText}"`)
     if ((toText || toStopId) && !toId) throw ApiError.notFound(`No bus stop found matching "${toText}"`)
+    if ((viaText || viaStopId) && !viaId) throw ApiError.notFound(`No bus stop found matching "${viaText}"`)
   }
 
   const where = ['"Bus".status = ?']
@@ -179,6 +193,7 @@ export function searchBuses({
     const stopages = loadStopages(bus.id)
     const leg = findLeg(stopages, fromId, toId)
     if (!leg && searchType === 'ROUTE' && fromId && toId) continue
+    if (viaId && !passesThrough(stopages, viaId, fromId, toId)) continue
 
     const scheduled = runsOnDay(bus.serviceDays, travelDate)
     const exception = excepted.get(bus.id)
@@ -311,8 +326,8 @@ export function insertStopages(busId, stopages, stopIds) {
 }
 
 /** Rewrites a bus timetable in order. */
-export function replaceStopages(busId, stopages) {
-  const stopIds = stopages.map((s) => resolveStopId(s))
+export function replaceStopages(busId, stopages, stopStatus = 'ACTIVE') {
+  const stopIds = stopages.map((s) => resolveStopId(s, stopStatus))
   run('DELETE FROM "BusStopage" WHERE "busId" = ?', busId)
   insertStopages(busId, stopages, stopIds)
 }

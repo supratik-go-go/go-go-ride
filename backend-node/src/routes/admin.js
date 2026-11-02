@@ -238,6 +238,16 @@ router.patch('/admin/buses/:busId/status', requireAdmin, (req, res) => {
       reviewedById: admin.id,
       updatedAt: now,
     })
+    if (status === 'APPROVED') {
+      // Stops typed by a contributor go public with the bus they came with.
+      run(
+        'UPDATE "BusStop" SET status = ?, "updatedAt" = ? WHERE status = ? AND id IN (SELECT "stopId" FROM "BusStopage" WHERE "busId" = ?)',
+        'ACTIVE',
+        now,
+        'INACTIVE',
+        bus.id,
+      )
+    }
     logActivity({ actorId: admin.id, action: `BUS_${status}`, entityType: 'BUS', entityId: bus.id, message: activity })
     notify({ userId: bus.ownerId, title, message, type: 'USER' })
   })

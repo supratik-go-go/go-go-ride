@@ -30,7 +30,7 @@ import {
   StatusBadge,
   useToast,
 } from '../../components/ui'
-import { OwnerGate, VerificationSteps } from '../../components/owner/OwnerParts'
+import { VerificationSteps } from '../../components/owner/OwnerParts'
 import { DocumentsModal, ExceptionsModal } from '../../components/owner/BusModals'
 import { formatServiceDays } from '../../components/owner/ownerUtils'
 import { busBadge, formatDate } from '../../utils/format'
@@ -82,18 +82,10 @@ function ListSkeleton() {
 
 export default function MyBuses() {
   const { isOwner, isAdmin } = useAuth()
-  if (!isOwner) {
-    return (
-      <div className="own-page">
-        <PageHeader title="My Buses" />
-        <OwnerGate />
-      </div>
-    )
-  }
-  return <MyBusesList isAdmin={isAdmin} />
+  return <MyBusesList isAdmin={isAdmin} contributor={!isOwner} />
 }
 
-function MyBusesList({ isAdmin }) {
+function MyBusesList({ isAdmin, contributor }) {
   const toast = useToast()
   const list = usePagedQuery(busService.mine, { limit: 20 })
   const [datesFor, setDatesFor] = useState(null)
@@ -127,7 +119,7 @@ function MyBusesList({ isAdmin }) {
 
   return (
     <div className="own-page">
-      <PageHeader title="My Buses" subtitle="Buses you've listed on GO-GO Ride" />
+      <PageHeader title={contributor ? 'My Bus Information' : 'My Buses'} subtitle={contributor ? "Buses you've sent to GO-GO Ride" : "Buses you've listed on GO-GO Ride"} />
 
       <div className="own-summary card">
         <div className="own-summary-stats">
@@ -149,7 +141,7 @@ function MyBusesList({ isAdmin }) {
           </div>
         </div>
         <Button icon={<Plus size={18} />} to="/owner/buses/new" className="own-summary-add">
-          Add Bus
+          {contributor ? 'Add Bus Information' : 'Add Bus'}
         </Button>
         {partial && <p className="text-xs text-muted own-summary-note">Counts are for this page.</p>}
       </div>
@@ -177,7 +169,7 @@ function MyBusesList({ isAdmin }) {
         <div className="card">
           <EmptyState
             icon={<BusFront size={26} />}
-            title="No buses listed yet"
+            title={contributor ? 'Nothing sent yet' : 'No buses listed yet'}
             message="Add your bus with its route and timings. Our team verifies it before passengers can see it."
             action={
               <Button icon={<Plus size={18} />} to="/owner/buses/new">

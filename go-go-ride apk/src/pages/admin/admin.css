@@ -125,3 +125,4 @@
 @media (max-width: 560px) {
   .adm-profile-body { grid-template-columns: minmax(0, 1fr); }
 }
+.adm-route-stops { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
