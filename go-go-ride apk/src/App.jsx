@@ -20,6 +20,7 @@ const Login = p(() => import('./pages/auth/Login'))
 const DailyNews = p(() => import('./pages/passenger/DailyNews'))
 const Game = p(() => import('./pages/passenger/Game'))
 const OnlineRoom = p(() => import('./pages/passenger/OnlineRoom'))
+const PingBallGame = p(() => import('./pages/passenger/PingBallGame'))
 const AddRouteInfo = p(() => import('./pages/passenger/AddRouteInfo'))
 const RouteRequests = p(() => import('./pages/admin/RouteRequests'))
 const Register = p(() => import('./pages/auth/Register'))
@@ -121,6 +122,7 @@ export default function App() {
               <Route path="bus/:id/alarm" element={<SetAlarm />} />
               <Route path="add-route" element={<AddRouteInfo />} />
               <Route path="game/room/:id" element={<OnlineRoom />} />
+              <Route path="game/pingball" element={<PingBallGame />} />
               <Route path="profile" element={<Profile />} />
               <Route path="profile/edit" element={<EditProfile />} />
               <Route path="bookings" element={<Bookings />} />

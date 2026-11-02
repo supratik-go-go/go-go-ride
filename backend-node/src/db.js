@@ -58,6 +58,15 @@ CREATE TABLE IF NOT EXISTS "GameScore" (
   "updatedAt" BIGINT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS "ix_GameScore_points" ON "GameScore" (points DESC);
+CREATE TABLE IF NOT EXISTS "ArcadeRun" (
+  id VARCHAR NOT NULL PRIMARY KEY,
+  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
+  game VARCHAR NOT NULL,
+  score INTEGER NOT NULL,
+  points INTEGER NOT NULL,
+  "createdAt" BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "ix_ArcadeRun_userId_game_createdAt" ON "ArcadeRun" ("userId", game, "createdAt");
 `
 
 function openDatabase() {

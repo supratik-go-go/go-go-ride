@@ -8,20 +8,26 @@
 .game-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .game-join { display: flex; gap: 8px; }
 .game-join input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 2px; }
-.game-soon { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; font-weight: 600; color: var(--text); }
 
 .game-room { display: flex; flex-direction: column; gap: 12px; }
 .game-players { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .game-player { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px; border: 2px solid transparent; border-radius: 12px; font-weight: 600; }
 .game-player span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .game-player.turn { border-color: var(--accent); background: var(--accent-50); }
+.game-seats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.game-seat { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 4px 2px; border: 2px solid transparent; border-radius: 12px; font-size: var(--fs-xs); font-weight: 600; }
+.game-seat span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-seat small { font-weight: 400; color: var(--muted); }
+.game-seat.turn { border-color: var(--accent); background: var(--accent-50); }
 .game-clock { flex-shrink: 0; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
 .game-clock.low { color: var(--danger); }
-.game-status { margin: 0; text-align: center; font-weight: 600; color: var(--primary); }
+.game-status { margin: 0; text-align: center; font-weight: 600; color: var(--primary); overflow-wrap: anywhere; }
+.game-note { margin: 0; text-align: center; font-size: var(--fs-xs); color: var(--muted); }
 .game-code { padding: 14px; border: 1px dashed var(--border); border-radius: 12px; text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 6px; color: var(--primary); }
 .game-result { display: flex; flex-direction: column; gap: 10px; padding: 16px; text-align: center; }
 .game-result h2 { margin: 0; font-size: var(--fs-lg); color: var(--primary); }
-.game-result p { margin: 0; color: var(--text-2); }
+.game-result p { margin: 0; color: var(--text-2); overflow-wrap: anywhere; }
+.game-result .game-joined { font-weight: 700; color: var(--primary); }
 .game-spinner { margin: 8px auto; color: var(--primary); }
 
 .game-chess { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); width: 100%; max-width: 460px; margin: 0 auto; overflow: hidden; border-radius: 10px; }

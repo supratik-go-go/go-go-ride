@@ -6,6 +6,7 @@ import { meta, ok } from '../http.js'
 import { newId } from '../ids.js'
 import { isAdmin, requireUser, verifyPassword } from '../auth.js'
 import { loginActivityOut, recentSearchOut, userOut } from '../serialize.js'
+import { leaveActiveRooms } from '../services/games.js'
 import { removeUpload, singleFile, saveUpload } from '../uploads.js'
 import { ENUMS } from '../validate.js'
 import { pyBody, pyEnum, pyOpt, pyStr, QueryReader, z } from '../pyvalidate.js'
@@ -31,7 +32,7 @@ function refreshRatings(reviewed) {
 }
 
 /** Personal rows that go with the account. Bookings and tickets stay, without a name attached. */
-const PERSONAL_TABLES = ['Alarm', 'Favorite', 'GameScore', 'LoginActivity', 'Notification', 'RecentSearch', 'RefreshToken', 'Review', 'RideWaitlist']
+const PERSONAL_TABLES = ['Alarm', 'ArcadeRun', 'Favorite', 'GameScore', 'LoginActivity', 'Notification', 'RecentSearch', 'RefreshToken', 'Review', 'RideWaitlist']
 
 // Required by the App Store and Google Play. The row itself stays because old bookings point at it,
 // so the person is erased from it and the same number can register again.
@@ -48,6 +49,7 @@ router.delete('/users/me', requireUser, (req, res) => {
   }
   const rated = all('SELECT DISTINCT "busId", "localCarId" FROM "Review" WHERE "userId" = ?', user.id)
   tx(() => {
+    leaveActiveRooms(user.id)
     for (const table of PERSONAL_TABLES) run(`DELETE FROM "${table}" WHERE "userId" = ?`, user.id)
     run('DELETE FROM "OtpCode" WHERE phone = ?', user.phone)
     run('DELETE FROM "RideWaitlist" WHERE phone = ?', user.phone)

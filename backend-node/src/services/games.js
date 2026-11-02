@@ -4,10 +4,14 @@
 import crypto from 'node:crypto'
 import { all, byId, get, insert, like, run, scalar, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
+import { callbreak } from '../games/callbreak.js'
+import { carrom } from '../games/carrom.js'
 import { chess } from '../games/chess.js'
+import { ludo } from '../games/ludo.js'
+import { twentynine } from '../games/twentynine.js'
 import { newId } from '../ids.js'
 
-export const GAMES = { chess }
+export const GAMES = { chess, ludo, callbreak, twentynine, carrom }
 
 const TURN_MS = 60 * 1000
 const WAITING_MS = 10 * 60 * 1000
@@ -18,9 +22,9 @@ const DAY_MS = 24 * 60 * 60 * 1000
 const CODE_LETTERS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
 const engineFor = (game) => {
-  const engine = GAMES[game]
-  if (!engine) throw ApiError.notFound('Game not found')
-  return engine
+  // The name comes from the URL, and every object answers to 'constructor'.
+  if (!Object.hasOwn(GAMES, game)) throw ApiError.notFound('Game not found')
+  return GAMES[game]
 }
 
 const playersOf = (roomId) => all('SELECT * FROM "GamePlayer" WHERE "roomId" = ? ORDER BY seat', roomId)
@@ -57,7 +61,10 @@ function createRoom(game, user, { isPublic }) {
 function seatPlayer(room, user) {
   const engine = engineFor(room.game)
   const seated = playersOf(room.id)
-  insert('GamePlayer', { id: newId(), roomId: room.id, userId: user.id, seat: seated.length, pointsEarned: 0 })
+  const taken = seated.map((p) => p.seat)
+  // Someone may have left a half-full table, so the next seat is not always the last one.
+  const seat = Array.from({ length: engine.seats }, (_, s) => s).find((s) => !taken.includes(s))
+  insert('GamePlayer', { id: newId(), roomId: room.id, userId: user.id, seat, pointsEarned: 0 })
   if (seated.length + 1 < engine.seats) return bump(room, {})
   return bump(room, { status: 'PLAYING', state: JSON.stringify(engine.start()), turnDeadline: Date.now() + TURN_MS })
 }
@@ -93,31 +100,42 @@ function gamesTogetherToday(a, b) {
 
 function finish(room, outcome) {
   const players = playersOf(room.id)
-  const scored = players.every((p) => players.every((q) => p.id === q.id || gamesTogetherToday(p.userId, q.userId) < MAX_SCORED_GAMES_PER_PAIR_PER_DAY))
+  // Judged per player: two friends at their limit must not cost the strangers at their table.
+  const canScore = (p) => players.every((q) => p.id === q.id || gamesTogetherToday(p.userId, q.userId) < MAX_SCORED_GAMES_PER_PAIR_PER_DAY)
   for (const player of players) {
+    const scored = canScore(player)
+    const quit = player.seat === outcome.forfeited
     const won = outcome.winners.includes(player.seat)
-    const type = outcome.winners.length === 0 ? 'draw' : won ? 'win' : 'loss'
+    const type = quit ? 'loss' : outcome.winners.length === 0 ? 'draw' : won ? 'win' : 'loss'
     // Someone who quit or ran out of time earns nothing.
-    const points = !scored || player.seat === outcome.forfeited ? 0 : POINTS[type]
+    const points = !scored || quit ? 0 : POINTS[type]
     if (scored) addScore(player.userId, points, type)
     update('GamePlayer', player.id, { pointsEarned: points })
   }
   return bump(room, { status: 'FINISHED', turnDeadline: null, result: JSON.stringify(outcome) })
 }
 
-/** The other seats win when a player leaves or misses a turn. */
-function forfeit(room, seat, reason) {
-  const winners = playersOf(room.id).map((p) => p.seat).filter((s) => s !== seat)
-  return finish(room, { winners, reason, forfeited: seat })
+/**
+ * A player left or missed a turn. Team games name the winners; otherwise the rival wins, but at a
+ * bigger table nobody beat the others, so they share a draw rather than each taking a full win.
+ */
+function forfeit(room, seat, what, who) {
+  const engine = engineFor(room.game)
+  const players = playersOf(room.id)
+  const winners = engine.forfeitWinners?.(seat) ?? (engine.seats > 2 ? [] : players.map((p) => p.seat).filter((s) => s !== seat))
+  // The seat can be empty: a super admin's delete cascades to the player row.
+  const name = who ?? firstName(byId('User', players.find((p) => p.seat === seat)?.userId)?.name)
+  return finish(room, { winners, reason: `${name} ${what}`, forfeited: seat })
 }
 
 /** Bring a room up to date: expire an unjoined room, or end a game whose turn timed out. */
 function settle(room) {
   const now = Date.now()
-  if (room.status === 'WAITING' && now - room.createdAt > WAITING_MS) return tx(() => bump(room, { status: 'CANCELLED' }))
+  // Counted from the last join: a four-seat table takes longer to fill than a two-seat one.
+  if (room.status === 'WAITING' && now - room.updatedAt > WAITING_MS) return tx(() => bump(room, { status: 'CANCELLED' }))
   if (room.status === 'PLAYING' && now > room.turnDeadline) {
     const turn = GAMES[room.game].turn(JSON.parse(room.state))
-    return tx(() => forfeit(room, turn, 'Ran out of time'))
+    return tx(() => forfeit(room, turn, 'ran out of time'))
   }
   return room
 }
@@ -180,13 +198,16 @@ export function createPrivateRoom(game, user) {
 }
 
 export function joinByCode(rawCode, user) {
-  const code = String(rawCode || '').trim().toUpperCase()
+  const code = typeof rawCode === 'string' ? rawCode.trim().toUpperCase() : ''
   return tx(() => {
     const found = get(`SELECT * FROM "GameRoom" WHERE code = ? AND status IN ('WAITING', 'PLAYING')`, code)
     if (!found) throw ApiError.notFound('No game found with that code')
     if (playersOf(found.id).some((p) => p.userId === user.id)) return found
     const room = settle(found)
     if (room.status !== 'WAITING') throw ApiError.badRequest('That game has already started')
+    const mine = activeRoom(room.game, user.id)
+    if (mine?.status === 'PLAYING') throw ApiError.badRequest('Finish your current game first')
+    if (mine) withdraw(mine, user.id)
     return seatPlayer(room, user)
   })
 }
@@ -214,14 +235,43 @@ export function playMove(id, user, input) {
   })
 }
 
+/** Stand up from a table that has not started. Anyone else stays seated. */
+function withdraw(room, userId) {
+  if (playersOf(room.id).length === 1) return bump(room, { status: 'CANCELLED' })
+  run('DELETE FROM "GamePlayer" WHERE "roomId" = ? AND "userId" = ?', room.id, userId)
+  return bump(room, {})
+}
+
+/** Null when the player left before the start, as they then have no room to be shown. */
 export function leaveRoom(id, user) {
   return tx(() => {
     const room = settle(roomFor(id, user.id))
-    if (room.status === 'WAITING') return bump(room, { status: 'CANCELLED' })
+    if (room.status === 'WAITING') {
+      withdraw(room, user.id)
+      return null
+    }
     if (room.status !== 'PLAYING') return room
     const seat = playersOf(room.id).find((p) => p.userId === user.id).seat
-    return forfeit(room, seat, 'Player left the game')
+    return forfeit(room, seat, 'left the game')
   })
+}
+
+/**
+ * Call inside the deletion's transaction, before the score rows go: an account left seated would
+ * keep a table open for strangers and bring its score row back when the game ended.
+ * The stored result outlives the account, so it carries no name.
+ */
+export function leaveActiveRooms(userId) {
+  const rooms = all(
+    `SELECT r.* FROM "GameRoom" r JOIN "GamePlayer" p ON p."roomId" = r.id
+     WHERE p."userId" = ? AND r.status IN ('WAITING', 'PLAYING')`,
+    userId,
+  )
+  for (const row of rooms) {
+    const room = settle(row)
+    if (room.status === 'WAITING') withdraw(room, userId)
+    if (room.status === 'PLAYING') forfeit(room, playersOf(room.id).find((p) => p.userId === userId).seat, 'left the game', 'A player')
+  }
 }
 
 export function leaderboard(userId, search) {

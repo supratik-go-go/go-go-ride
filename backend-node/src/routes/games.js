@@ -3,6 +3,7 @@ import { Router } from 'express'
 import { optionalUser, requireUser } from '../auth.js'
 import { ok } from '../http.js'
 import * as games from '../services/games.js'
+import * as pingball from '../services/pingball.js'
 
 const router = Router()
 
@@ -10,6 +11,15 @@ const roomReply = (res, room, userId, status = 200) => ok(res, games.roomOut(roo
 
 router.get('/games/leaderboard', optionalUser, (req, res) => {
   ok(res, games.leaderboard(req.user?.id ?? null))
+})
+
+router.get('/games/pingball/best', requireUser, (req, res) => {
+  ok(res, { best: pingball.bestScore(req.user.id) })
+})
+
+// The raw value goes through: converting it here would let the string '12' count as a score.
+router.post('/games/pingball/score', requireUser, (req, res) => {
+  ok(res, pingball.recordScore(req.user, req.body?.score))
 })
 
 router.post('/games/rooms/join', requireUser, (req, res) => {
@@ -28,7 +38,9 @@ router.post('/games/rooms/:id/move', requireUser, (req, res) => {
 })
 
 router.post('/games/rooms/:id/leave', requireUser, (req, res) => {
-  roomReply(res, games.leaveRoom(req.params.id, req.user), req.user.id)
+  const room = games.leaveRoom(req.params.id, req.user)
+  if (!room) return ok(res, { left: true })
+  roomReply(res, room, req.user.id)
 })
 
 router.post('/games/:game/quick', requireUser, (req, res) => {

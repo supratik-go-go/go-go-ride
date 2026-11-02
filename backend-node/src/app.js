@@ -40,7 +40,7 @@ app.use(
 app.use(express.json({ limit: '1mb' }))
 
 // Rate limits (enforced in production): sign-in endpoints 20 per 15 min per IP,
-// everything else 300 per minute.
+// Ping Ball scores 30 per minute because each one adds a row, everything else 300 per minute.
 const limited = (windowMs, limit) =>
   rateLimit({
     windowMs,
@@ -52,6 +52,7 @@ const limited = (windowMs, limit) =>
       res.status(429).json({ success: false, message: 'Too many requests, please slow down', code: 'TOO_MANY_REQUESTS' }),
   })
 app.use(['/api/auth/login', '/api/auth/register', '/api/auth/otp'], limited(15 * 60 * 1000, 20))
+app.use('/api/games/pingball/score', limited(60 * 1000, 30))
 app.use('/api', limited(60 * 1000, 300))
 
 // Uploaded documents / photos.

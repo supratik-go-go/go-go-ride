@@ -4,7 +4,7 @@ import { gameService } from '../../services'
 import { useAsync } from '../../hooks/useAsync'
 import './games.css'
 
-/** Most points across all online games. */
+/** Most points across all online games and Ping Ball. */
 export function Leaderboard() {
   const board = useAsync(() => gameService.leaderboard(), [])
   const rows = board.data?.rows ?? []
@@ -12,7 +12,7 @@ export function Leaderboard() {
 
   if (board.loading) return <Skeleton height={240} radius={14} />
   if (board.error) return <ErrorState error={board.error} onRetry={board.reload} />
-  if (!rows.length) return <EmptyState icon={<Trophy size={26} />} title="No scores yet" message="Win an online game to be the first on the board." />
+  if (!rows.length) return <EmptyState icon={<Trophy size={26} />} title="No scores yet" message="Play a game to be the first on the board." />
 
   return (
     <div className="game-list">
@@ -37,7 +37,9 @@ export function Leaderboard() {
           </div>
         ))}
       </div>
-      <p className="px-news-note">Win 10 points · Draw 3 · Loss 1. Leaving a game earns nothing.</p>
+      <p className="px-news-note">
+        Win 10 points · Draw 3 · Loss 1. Leaving a game earns nothing, and if someone leaves Call Break the others get 3. The same people earn points from 5 games together a day. Ping Ball pays 1 point for every 10 balls returned, up to 5 a run, on 5 runs a day.
+      </p>
     </div>
   )
 }

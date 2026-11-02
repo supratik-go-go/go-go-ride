@@ -22,13 +22,14 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 - [ ] Change the demo admin passwords (9876500001, 9876500002 — `Admin@123`) before sharing the app widely
 - [ ] Block/delete the demo passenger, owner and driver accounts when real users join
 
-## Auto-deploy setup — owner (once)
+## Hostinger setup — owner
 
-The current app was created by zip upload, and hPanel can't switch it to GitHub, so it has to be recreated.
-- [ ] Back up `gogoride-data` from File Manager (Access all files of Cloud Startup Hosting)
-- [ ] Delete the go-goride.com website, keeping the domain
-- [ ] Create website → Node.js web app → Import Git repository, signed in as **supratik0000** (repo **go-go-ride**, branch **main**, root directory **backend-node**, Express, Node 24.x, npm, entry file `server.js`, India data centre)
-- [ ] Add the 5 environment variables from `deploy-hostinger-cloud\production-secrets.txt`
+Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root directory **backend-node**. Every push goes live, so only push finished work.
+
+**Never delete the website in hPanel.** Deleting it also deletes `gogoride-data`, the live database. Back it up first if there is ever a reason to.
+
+- [ ] Change `CRON_KEY` in hPanel → Environment variables (the old value appeared in a screenshot). Low risk.
+- [ ] Delete the leftover `gogoride-data-empty` folder in File Manager
 
 ## Decisions — owner
 
@@ -41,8 +42,8 @@ The current app was created by zip upload, and hPanel can't switch it to GitHub,
 - [ ] Fix whatever the phone test finds
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
 - [ ] Connect the SMS provider for OTP login (after the decision above)
-- [ ] More online games, in this order: Ludo, Call Break, 29, Carrom. Add each one to `backend-node/src/games/` (turn based; Hostinger has no live connections)
-- [ ] Ping Ball: score game for the leaderboard, because it needs instant play that this hosting can't do
+- [ ] Computer players for empty seats, so Call Break and 29 can start without 4 people online
+- [ ] Hold the app's first release of a new game until phones have updated: an old app opening a new game's friend code will fail
 - [ ] Check the server alarm scheduler: Hostinger stops idle apps, so background timers can miss their time. Phone reminders are not affected
 - [ ] When the app moves to Google Play: send the update popup to the Play listing instead of the APK download
 - [ ] Running Car shows "Live" when only past rides exist — count future rides only
@@ -60,7 +61,7 @@ The current app was created by zip upload, and hPanel can't switch it to GitHub,
 
 ## How to ship an update
 
-Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node`) on every push.
+Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node`) on every push. After each deploy, check https://go-goride.com/api/stats still shows your users.
 
 **Backend change** (`backend-node/`):
 1. Make the change and test locally.
@@ -97,5 +98,7 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.4: online Ludo, Call Break, 29 and Carrom; Ping Ball score game
+- [x] Hostinger auto-deploy from GitHub (2026-11-03)
 - [x] App v1.3: online chess with other users, friend codes, points leaderboard
 - [x] App v1.2: iOS project prepared (not built yet), Delete account in Settings, privacy policy at https://go-goride.com/privacy, update popup, rollback.bat, Daily News in English and Bengali (national, international, West Bengal)

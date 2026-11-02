@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Crown, Search, Users } from 'lucide-react'
-import { Badge, Button, useToast } from '../ui'
+import { Club, Crown, Dices, Play, Search, Spade, Target, Users, Volleyball } from 'lucide-react'
+import { Button, useToast } from '../ui'
 import { useAuth } from '../../context/AuthContext'
 import { gameService } from '../../services'
 import './games.css'
 
-const COMING_SOON = ['Ludo', 'Call Break', '29', 'Carrom', 'Ping Ball']
+const ONLINE_GAMES = [
+  { id: 'chess', name: 'Chess', players: '2 players', Icon: Crown },
+  { id: 'ludo', name: 'Ludo', players: '2 players', Icon: Dices },
+  { id: 'callbreak', name: 'Call Break', players: '4 players', Icon: Spade },
+  { id: 'twentynine', name: '29', players: '4 players in 2 teams', Icon: Club },
+  { id: 'carrom', name: 'Carrom', players: '2 players', Icon: Target },
+]
 
 /** Pick a game, then find a stranger or play a friend with a code. */
 export function OnlineLobby() {
@@ -39,26 +45,6 @@ export function OnlineLobby() {
 
   return (
     <div className="game-list">
-      <section className="card game-card">
-        <div className="game-card-head">
-          <span className="icon-tile">
-            <Crown size={20} />
-          </span>
-          <div>
-            <h2>Chess</h2>
-            <p>2 players · 60 seconds a move</p>
-          </div>
-        </div>
-        <div className="game-card-actions">
-          <Button icon={<Search size={17} />} onClick={() => enter('quick', () => gameService.quickMatch('chess'))} loading={busy === 'quick'}>
-            Find player
-          </Button>
-          <Button variant="outline" icon={<Users size={17} />} onClick={() => enter('friend', () => gameService.privateRoom('chess'))} loading={busy === 'friend'}>
-            Play a friend
-          </Button>
-        </div>
-      </section>
-
       <form className="card game-card" onSubmit={join} aria-label="Join with a code">
         <div className="game-join">
           <input className="input" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Friend's code" maxLength={6} autoComplete="off" aria-label="Friend's code" />
@@ -68,14 +54,42 @@ export function OnlineLobby() {
         </div>
       </form>
 
-      {COMING_SOON.map((name) => (
-        <div className="card game-soon" key={name}>
-          {name}
-          <Badge tone="neutral" square>
-            Coming Soon
-          </Badge>
-        </div>
+      {ONLINE_GAMES.map(({ id, name, players, Icon }) => (
+        <section className="card game-card" key={id}>
+          <div className="game-card-head">
+            <span className="icon-tile">
+              <Icon size={20} />
+            </span>
+            <div>
+              <h2>{name}</h2>
+              <p>{players} · 60 seconds a turn</p>
+            </div>
+          </div>
+          <div className="game-card-actions">
+            <Button icon={<Search size={17} />} onClick={() => enter(`${id}-quick`, () => gameService.quickMatch(id))} loading={busy === `${id}-quick`} disabled={Boolean(busy)}>
+              Find player
+            </Button>
+            <Button variant="outline" icon={<Users size={17} />} onClick={() => enter(`${id}-friend`, () => gameService.privateRoom(id))} loading={busy === `${id}-friend`} disabled={Boolean(busy)}>
+              Play a friend
+            </Button>
+          </div>
+        </section>
       ))}
+
+      <section className="card game-card">
+        <div className="game-card-head">
+          <span className="icon-tile">
+            <Volleyball size={20} />
+          </span>
+          <div>
+            <h2>Ping Ball</h2>
+            <p>1 player · Up to 5 points a run</p>
+          </div>
+        </div>
+        <Button icon={<Play size={17} />} to="/game/pingball" block>
+          Play
+        </Button>
+      </section>
     </div>
   )
 }

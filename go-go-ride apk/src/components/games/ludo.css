@@ -1,0 +1,51 @@
+/* Online ludo. Seat 0 uses --primary and seat 1 --accent. Classes are prefixed `game-ludo-`. */
+
+.game-ludo { --game-ludo-seat: var(--primary); display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 460px; margin: 0 auto; }
+.game-ludo .p0 { --game-ludo-seat: var(--primary); }
+.game-ludo .p1 { --game-ludo-seat: var(--accent); }
+
+.game-ludo-board { position: relative; display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); grid-template-rows: repeat(15, minmax(0, 1fr)); width: 100%; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+
+.game-ludo-cell { position: relative; display: flex; align-items: center; justify-content: center; border: 0.5px solid var(--border); background: var(--surface); }
+.game-ludo-cell.p0, .game-ludo-cell.p1 { background: var(--game-ludo-seat); }
+.game-ludo-cell.idle { background: var(--border); }
+.game-ludo-cell.safe::after { content: '\2605\FE0E'; font-size: 13px; line-height: 1; color: var(--muted); }
+.game-ludo-cell.safe.p0::after, .game-ludo-cell.safe.p1::after { color: var(--surface); }
+
+.game-ludo-yard { position: relative; background: var(--game-ludo-seat); }
+.game-ludo-yard.near { grid-area: 10 / 1 / 16 / 7; }
+.game-ludo-yard.far { grid-area: 1 / 10 / 7 / 16; }
+.game-ludo-yard::after { content: ''; position: absolute; inset: 16.66%; border-radius: 12px; background: var(--surface); }
+
+/* The two blocks nobody plays from in a two-player game. */
+.game-ludo-board::before, .game-ludo-board::after { content: ''; background: var(--border); }
+.game-ludo-board::before { grid-area: 1 / 1 / 7 / 7; }
+.game-ludo-board::after { grid-area: 10 / 10 / 16 / 16; }
+
+.game-ludo-centre { grid-area: 7 / 7 / 10 / 10; background: conic-gradient(from 45deg, var(--border) 0 25%, var(--primary) 25% 50%, var(--border) 50% 75%, var(--accent) 75%); }
+.game-ludo-centre.turned { transform: rotate(180deg); }
+
+.game-ludo-token { position: absolute; width: calc(100% / 15); aspect-ratio: 1; padding: 0; border: 0; background: none; transition: top 0.3s ease, left 0.3s ease; pointer-events: none; }
+.game-ludo-token::before { content: ''; position: absolute; inset: 8%; box-sizing: border-box; border: 2px solid var(--surface); border-radius: 50%; background: var(--game-ludo-seat); box-shadow: 0 0 0 1px var(--text), 0 1px 2px rgba(0, 0, 0, 0.4); }
+.game-ludo-token.small { transform: scale(0.72); }
+.game-ludo-token.legal { z-index: 2; pointer-events: auto; }
+.game-ludo-token.legal::before { animation: game-ludo-pulse 0.9s ease-in-out infinite alternate; }
+/* A 15th of a phone screen is too small to tap reliably. */
+.game-ludo-token.legal::after { content: ''; position: absolute; inset: -40%; }
+
+@keyframes game-ludo-pulse {
+  from { box-shadow: 0 0 0 1px var(--text); }
+  to { box-shadow: 0 0 0 4px var(--text); }
+}
+
+.game-ludo-bar { display: flex; align-items: center; gap: 12px; }
+.game-ludo-die { display: grid; flex-shrink: 0; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 3px; width: 60px; height: 60px; padding: 9px; border: 2px solid var(--border); border-radius: 12px; background: var(--surface); }
+.game-ludo-die.live { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
+.game-ludo-die .pip { border-radius: 50%; background: var(--text); }
+
+.game-ludo-info { display: flex; flex: 1; flex-direction: column; gap: 6px; min-width: 0; }
+.game-ludo-note { margin: 0; font-weight: 600; color: var(--text); }
+.game-ludo-hint { margin: 0; font-size: var(--fs-xs); font-weight: 600; color: var(--accent); }
+.game-ludo-scores { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.game-ludo-score { display: inline-flex; align-items: center; gap: 5px; min-width: 0; font-size: var(--fs-xs); color: var(--muted); overflow-wrap: anywhere; }
+.game-ludo-score::before { content: ''; flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--game-ludo-seat); }

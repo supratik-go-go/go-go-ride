@@ -1,0 +1,43 @@
+/* The 29 card table. Classes are prefixed `game-twentynine-`. */
+
+.game-twentynine { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 460px; margin: 0 auto; color: var(--text); }
+.game-twentynine-red { color: var(--danger); }
+.game-twentynine-black { color: var(--text); }
+
+.game-twentynine-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; color: var(--muted); }
+.game-twentynine-bar b { color: var(--primary); }
+.game-twentynine-bar small { color: var(--accent); font-weight: 600; }
+.game-twentynine-note { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+
+.game-twentynine-table { position: relative; height: 250px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.game-twentynine-seat { position: absolute; display: flex; flex-direction: column; align-items: center; max-width: 84px; padding: 3px 6px; border: 2px solid transparent; border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.2; }
+.game-twentynine-seat small { font-weight: 500; color: var(--muted); }
+.game-twentynine-seat.turn { border-color: var(--accent); }
+.game-twentynine-seat.bottom { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.game-twentynine-seat.top { top: 4px; left: 50%; transform: translateX(-50%); }
+.game-twentynine-seat.left { top: 50%; left: 4px; transform: translateY(-50%); }
+.game-twentynine-seat.right { top: 50%; right: 4px; transform: translateY(-50%); }
+.game-twentynine-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.game-twentynine-played { position: absolute; }
+.game-twentynine-played.bottom { bottom: 50px; left: 50%; transform: translateX(-50%); }
+.game-twentynine-played.top { top: 50px; left: 50%; transform: translateX(-50%); }
+.game-twentynine-played.left { top: 50%; left: calc(50% - 74px); transform: translateY(-50%); }
+.game-twentynine-played.right { top: 50%; right: calc(50% - 74px); transform: translateY(-50%); }
+
+.game-twentynine-face { display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; height: 100%; font-size: 20px; line-height: 1; }
+.game-twentynine-face b { font-weight: 700; }
+.game-twentynine-face.small { width: 44px; height: 58px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); box-shadow: 0 1px 3px rgba(15, 27, 61, 0.18); font-size: 17px; }
+.game-twentynine-face.faded { opacity: 0.45; }
+
+.game-twentynine-panel { display: flex; flex-direction: column; gap: 8px; }
+.game-twentynine-bids { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.game-twentynine-suits { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.game-twentynine-suits .game-twentynine-choice { min-height: 56px; font-size: 28px; }
+.game-twentynine-choice { min-height: 44px; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 16px; font-weight: 700; color: var(--primary); }
+.game-twentynine-choice:disabled { opacity: 0.5; }
+.game-twentynine-choice.wide { width: 100%; }
+
+.game-twentynine-hand { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.game-twentynine-card { height: 56px; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.game-twentynine-card.legal { border-color: var(--accent); }

@@ -1,0 +1,41 @@
+/* Call Break table. Sized for 360-400px phones; classes are prefixed `game-callbreak-`. */
+
+.game-callbreak { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 460px; margin: 0 auto; }
+.game-callbreak-round { margin: 0; text-align: center; font-size: var(--fs-xs); font-weight: 600; color: var(--muted); }
+.game-callbreak-status { margin: 0; text-align: center; font-weight: 600; color: var(--primary); }
+
+.game-callbreak-table { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 8px 6px; border: 1px solid var(--border); border-radius: 14px; background: var(--primary-50); }
+.game-callbreak-seat { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.game-callbreak-seat.top { grid-column: 2; grid-row: 1; }
+.game-callbreak-seat.left { grid-column: 1; grid-row: 2; }
+.game-callbreak-seat.right { grid-column: 3; grid-row: 2; }
+.game-callbreak-seat.bottom { grid-column: 2; grid-row: 3; }
+
+.game-callbreak-tag { width: 100%; padding: 3px 6px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); }
+.game-callbreak-tag.turn { border-color: var(--accent); }
+.game-callbreak-tag small { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.game-callbreak-name { display: flex; justify-content: space-between; gap: 4px; font-size: 12px; }
+.game-callbreak-name b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-callbreak-name em { flex-shrink: 0; font-style: normal; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
+
+.game-callbreak-card { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 40px; height: 54px; padding: 0; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text); font-size: 15px; line-height: 1; }
+.game-callbreak-card b { font-weight: 700; }
+.game-callbreak-card i { font-style: normal; font-size: 18px; }
+.game-callbreak-card.red, .game-callbreak-mini.red { color: var(--danger); }
+.game-callbreak-slot { display: block; width: 40px; height: 54px; border: 1px dashed var(--border); border-radius: 7px; }
+
+.game-callbreak-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.game-callbreak-note strong { color: var(--primary); }
+.game-callbreak-mini { display: inline-flex; align-items: center; gap: 1px; color: var(--text); }
+.game-callbreak-mini b { font-weight: 700; }
+.game-callbreak-mini i { font-style: normal; }
+
+.game-callbreak-bids { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.game-callbreak-bids button { min-height: 44px; border: 1px solid var(--primary); border-radius: 10px; background: var(--surface); font-size: 17px; font-weight: 700; color: var(--primary); }
+.game-callbreak-bids button:active { background: var(--primary); color: var(--surface); }
+.game-callbreak-bids button:disabled { opacity: 0.5; }
+
+.game-callbreak-hand { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; min-height: 58px; }
+.game-callbreak-hand .game-callbreak-card { width: 100%; height: 58px; }
+.game-callbreak-hand .game-callbreak-card.live { border: 2px solid var(--accent); }
+.game-callbreak-hand .game-callbreak-card.dim { opacity: 0.4; }

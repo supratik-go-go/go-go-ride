@@ -9,4 +9,6 @@ export const gameService = {
   room: (id, version) => http.get(`/games/rooms/${id}`, version ? { version } : undefined),
   move: (id, input) => http.post(`/games/rooms/${id}/move`, input),
   leave: (id) => http.post(`/games/rooms/${id}/leave`),
+  pingballBest: () => http.get('/games/pingball/best'),
+  pingballScore: (score) => http.post('/games/pingball/score', { score }),
 }

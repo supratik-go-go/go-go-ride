@@ -7,6 +7,7 @@ import { newId } from '../ids.js'
 import { hashPassword, requireAdmin, requireSuperAdmin } from '../auth.js'
 import { activityLogOut, busById, busOut, settingsOut, userOut } from '../serialize.js'
 import { logActivity, notify } from '../services/common.js'
+import { leaveActiveRooms } from '../services/games.js'
 import { dailySeries, dashboardStats, pyFloatStr, reportSummary, resolveRange, topRoutes } from '../services/reports.js'
 import { isoZ } from '../time.js'
 import { ADMIN_ROLES, ENUMS } from '../validate.js'
@@ -418,6 +419,7 @@ router.delete('/admin/users/:userId', requireSuperAdmin, (req, res) => {
 
   tx(() => {
     if (get('SELECT id FROM "Booking" WHERE "userId" = ? LIMIT 1', user.id)) throw dbError()
+    leaveActiveRooms(user.id)
     run('UPDATE "LocalCar" SET "ownerId" = NULL, "updatedAt" = ? WHERE "ownerId" = ?', Date.now(), user.id)
     run('DELETE FROM "Bus" WHERE "ownerId" = ?', user.id)
     run('DELETE FROM "Alarm" WHERE "userId" = ?', user.id)

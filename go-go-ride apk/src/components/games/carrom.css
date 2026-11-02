@@ -1,0 +1,35 @@
+/* Carrom board and shot controls. Classes are prefixed `game-carrom-`. */
+
+.game-carrom { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 460px; margin: 0 auto; }
+
+.game-carrom-tallies { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); }
+.game-carrom-tally { display: flex; align-items: center; gap: 6px; min-width: 0; font-weight: 600; }
+.game-carrom-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-carrom-chip { flex-shrink: 0; width: 14px; height: 14px; border: 1px solid var(--border); border-radius: 50%; }
+.game-carrom-chip.white { background: #f6efe0; }
+.game-carrom-chip.black { background: #2c2420; }
+.game-carrom-shots { flex-shrink: 0; margin-left: auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.game-carrom-board { display: block; width: 100%; height: auto; border: 10px solid #6b3f1d; border-radius: 12px; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+.game-carrom-board.aiming { touch-action: none; }
+
+.game-carrom-wood { fill: #e8c88f; }
+.game-carrom-line { fill: none; stroke: #7a4a21; stroke-width: 4; }
+.game-carrom-pocket { fill: #2b1a10; }
+.game-carrom-coin { stroke-width: 2; }
+.game-carrom-coin.white { fill: #f6efe0; stroke: #a98c5c; }
+.game-carrom-coin.black { fill: #2c2420; stroke: #000; }
+.game-carrom-coin.queen { fill: #c8323c; stroke: #7d1a22; }
+.game-carrom-ring { fill: none; stroke: rgba(120, 90, 50, 0.55); stroke-width: 2; }
+.game-carrom-striker { fill: #f2f4ff; stroke: var(--primary); stroke-width: 4; }
+.game-carrom-aim { stroke: var(--primary); stroke-width: 5; stroke-dasharray: 14 10; stroke-linecap: round; }
+
+.game-carrom-note { margin: 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--accent); }
+
+.game-carrom-controls { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.game-carrom-control { display: grid; grid-template-columns: 62px minmax(0, 1fr) 46px; align-items: center; gap: 8px; min-height: 36px; font-size: 13px; color: var(--text); }
+.game-carrom-control input { width: 100%; margin: 0; accent-color: var(--primary); }
+.game-carrom-control b { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+.game-carrom-shoot { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; margin-top: 4px; border: 0; border-radius: 12px; background: var(--primary); color: #fff; font-size: 16px; font-weight: 700; }
+.game-carrom-shoot:disabled { opacity: 0.5; }
