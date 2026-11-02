@@ -1,7 +1,7 @@
 {
-  "version": "1.2",
-  "versionCode": 3,
-  "notes": "Daily News in Bengali and English, delete account option and update alerts.",
+  "version": "1.3",
+  "versionCode": 4,
+  "notes": "New: play chess online with other GO-GO Ride users, and climb the leaderboard.",
   "sizeMB": 5.8,
-  "builtAt": "2026-11-02T21:01:14.257Z"
+  "builtAt": "2026-11-02T21:31:15.084Z"
 }
