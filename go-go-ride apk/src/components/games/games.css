@@ -1,0 +1,45 @@
+/* Online games: lobby, room, chess board and leaderboard. Classes are prefixed `game-`. */
+
+.game-list { display: flex; flex-direction: column; gap: 10px; }
+.game-card { display: flex; flex-direction: column; gap: 12px; padding: 14px; }
+.game-card-head { display: flex; align-items: center; gap: 12px; }
+.game-card-head h2 { margin: 0; font-size: var(--fs-md); font-weight: 700; color: var(--text); }
+.game-card-head p { margin: 0; font-size: var(--fs-xs); color: var(--muted); }
+.game-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.game-join { display: flex; gap: 8px; }
+.game-join input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 2px; }
+.game-soon { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; font-weight: 600; color: var(--text); }
+
+.game-room { display: flex; flex-direction: column; gap: 12px; }
+.game-players { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.game-player { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px; border: 2px solid transparent; border-radius: 12px; font-weight: 600; }
+.game-player span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.game-player.turn { border-color: var(--accent); background: var(--accent-50); }
+.game-clock { flex-shrink: 0; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
+.game-clock.low { color: var(--danger); }
+.game-status { margin: 0; text-align: center; font-weight: 600; color: var(--primary); }
+.game-code { padding: 14px; border: 1px dashed var(--border); border-radius: 12px; text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 6px; color: var(--primary); }
+.game-result { display: flex; flex-direction: column; gap: 10px; padding: 16px; text-align: center; }
+.game-result h2 { margin: 0; font-size: var(--fs-lg); color: var(--primary); }
+.game-result p { margin: 0; color: var(--text-2); }
+.game-spinner { margin: 8px auto; color: var(--primary); }
+
+.game-chess { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); width: 100%; max-width: 460px; margin: 0 auto; overflow: hidden; border-radius: 10px; }
+.game-square { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1; padding: 0; border: 0; font-size: 34px; line-height: 1; }
+.game-square.light { background: #eef1fa; }
+.game-square.dark { background: #8fa3d6; }
+.game-square.last { background: #f6e39b; }
+.game-square.picked { background: #f5c451; }
+.game-square.check { background: #f28b82; }
+.game-square.target::after { content: ''; position: absolute; width: 30%; height: 30%; border-radius: 50%; background: rgba(11, 42, 122, 0.45); }
+.game-square .white { color: #fff; text-shadow: 0 0 2px #000, 0 1px 2px #000; }
+.game-square .black { color: #0f1b3d; }
+
+.game-rank-me { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; background: var(--primary-50); font-weight: 700; color: var(--primary); }
+.game-rank-row { display: grid; grid-template-columns: 32px 34px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.game-rank-row:last-child { border-bottom: 0; }
+.game-rank-row.me { background: var(--primary-50); }
+.game-rank-no { font-weight: 700; color: var(--primary); text-align: center; }
+.game-rank-name { overflow: hidden; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.game-rank-name small { display: block; font-weight: 400; color: var(--muted); }
+.game-rank-points { font-weight: 700; color: var(--accent); }

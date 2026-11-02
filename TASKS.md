@@ -41,6 +41,9 @@ The current app was created by zip upload, and hPanel can't switch it to GitHub,
 - [ ] Fix whatever the phone test finds
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
 - [ ] Connect the SMS provider for OTP login (after the decision above)
+- [ ] More online games, in this order: Ludo, Call Break, 29, Carrom. Add each one to `backend-node/src/games/` (turn based; Hostinger has no live connections)
+- [ ] Ping Ball: score game for the leaderboard, because it needs instant play that this hosting can't do
+- [ ] Check the server alarm scheduler: Hostinger stops idle apps, so background timers can miss their time. Phone reminders are not affected
 - [ ] When the app moves to Google Play: send the update popup to the Play listing instead of the APK download
 - [ ] Running Car shows "Live" when only past rides exist — count future rides only
 - [ ] Owners cannot resubmit a rejected bus — move it back to "Under review" when edited
@@ -94,4 +97,5 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.3: online chess with other users, friend codes, points leaderboard
 - [x] App v1.2: iOS project prepared (not built yet), Delete account in Settings, privacy policy at https://go-goride.com/privacy, update popup, rollback.bat, Daily News in English and Bengali (national, international, West Bengal)

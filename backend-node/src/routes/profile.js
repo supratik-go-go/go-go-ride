@@ -31,7 +31,7 @@ function refreshRatings(reviewed) {
 }
 
 /** Personal rows that go with the account. Bookings and tickets stay, without a name attached. */
-const PERSONAL_TABLES = ['Alarm', 'Favorite', 'LoginActivity', 'Notification', 'RecentSearch', 'RefreshToken', 'Review', 'RideWaitlist']
+const PERSONAL_TABLES = ['Alarm', 'Favorite', 'GameScore', 'LoginActivity', 'Notification', 'RecentSearch', 'RefreshToken', 'Review', 'RideWaitlist']
 
 // Required by the App Store and Google Play. The row itself stays because old bookings point at it,
 // so the person is erased from it and the same number can register again.

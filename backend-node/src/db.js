@@ -8,8 +8,8 @@ import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
 import { config, ROOT } from './config.js'
 
-// Added after launch, so it is created on start for databases that already exist.
-const ROUTE_SUBMISSION_TABLE = `
+// Added after launch, so these are created on start for databases that already exist.
+const ADDED_TABLES = `
 CREATE TABLE IF NOT EXISTS "RouteSubmission" (
   id VARCHAR NOT NULL PRIMARY KEY,
   "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
@@ -24,7 +24,41 @@ CREATE TABLE IF NOT EXISTS "RouteSubmission" (
   "reviewedAt" BIGINT,
   "createdAt" BIGINT NOT NULL,
   "updatedAt" BIGINT NOT NULL
-)`
+);
+CREATE TABLE IF NOT EXISTS "GameRoom" (
+  id VARCHAR NOT NULL PRIMARY KEY,
+  game VARCHAR NOT NULL,
+  code VARCHAR,
+  "isPublic" INTEGER NOT NULL,
+  status VARCHAR NOT NULL,
+  state TEXT NOT NULL,
+  "turnDeadline" BIGINT,
+  version INTEGER NOT NULL,
+  result TEXT,
+  "createdAt" BIGINT NOT NULL,
+  "updatedAt" BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "ix_GameRoom_status" ON "GameRoom" (game, status);
+CREATE TABLE IF NOT EXISTS "GamePlayer" (
+  id VARCHAR NOT NULL PRIMARY KEY,
+  "roomId" VARCHAR NOT NULL REFERENCES "GameRoom" (id) ON DELETE CASCADE,
+  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
+  seat INTEGER NOT NULL,
+  "pointsEarned" INTEGER NOT NULL,
+  UNIQUE ("roomId", seat),
+  UNIQUE ("roomId", "userId")
+);
+CREATE INDEX IF NOT EXISTS "ix_GamePlayer_userId" ON "GamePlayer" ("userId");
+CREATE TABLE IF NOT EXISTS "GameScore" (
+  "userId" VARCHAR NOT NULL PRIMARY KEY REFERENCES "User" (id) ON DELETE CASCADE,
+  points INTEGER NOT NULL,
+  wins INTEGER NOT NULL,
+  draws INTEGER NOT NULL,
+  played INTEGER NOT NULL,
+  "updatedAt" BIGINT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS "ix_GameScore_points" ON "GameScore" (points DESC);
+`
 
 function openDatabase() {
   const file = config.databasePath
@@ -43,7 +77,7 @@ function openDatabase() {
   const db = new DatabaseSync(file)
   db.exec('PRAGMA foreign_keys = ON')
   db.exec('PRAGMA busy_timeout = 5000')
-  db.exec(ROUTE_SUBMISSION_TABLE)
+  db.exec(ADDED_TABLES)
   return db
 }
 

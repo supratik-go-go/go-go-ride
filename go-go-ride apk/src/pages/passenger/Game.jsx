@@ -1,27 +1,49 @@
 import { useEffect, useState } from 'react'
 import { Bike, BusFront, CarFront, CarTaxiFront, MapPin, RotateCcw, Ship, TrainFront, TramFront } from 'lucide-react'
 import { Button, PageHeader } from '../../components/ui'
+import { Leaderboard } from '../../components/games/Leaderboard'
+import { OnlineLobby } from '../../components/games/OnlineLobby'
 import './passenger.css'
 
-const GAMES = [
+const TABS = [
+  { value: 'online', label: 'Online' },
+  { value: 'leaderboard', label: 'Leaderboard' },
+  { value: 'offline', label: 'Offline' },
+]
+
+const OFFLINE_GAMES = [
   { value: 'memory', label: 'Memory Match' },
   { value: 'ttt', label: 'Tic-Tac-Toe' },
 ]
 
 export default function Game() {
+  const [tab, setTab] = useState('online')
   const [game, setGame] = useState('memory')
 
   return (
     <div className="px-page">
-      <PageHeader title="Game" subtitle="Pass the time on your journey" back={false} />
-      <div className="segmented px-game-tabs" role="tablist" aria-label="Choose a game">
-        {GAMES.map(({ value, label }) => (
-          <button key={value} type="button" role="tab" aria-selected={game === value} className={game === value ? 'active' : ''} onClick={() => setGame(value)}>
+      <PageHeader title="Game" subtitle="Play people on GO-GO Ride and earn points" back={false} />
+      <div className="segmented px-game-tabs" role="tablist" aria-label="Game sections">
+        {TABS.map(({ value, label }) => (
+          <button key={value} type="button" role="tab" aria-selected={tab === value} className={tab === value ? 'active' : ''} onClick={() => setTab(value)}>
             {label}
           </button>
         ))}
       </div>
-      <div className="card px-card-pad px-game">{game === 'memory' ? <MemoryMatch /> : <TicTacToe />}</div>
+      {tab === 'online' && <OnlineLobby />}
+      {tab === 'leaderboard' && <Leaderboard />}
+      {tab === 'offline' && (
+        <>
+          <div className="segmented px-game-tabs" role="tablist" aria-label="Choose a game">
+            {OFFLINE_GAMES.map(({ value, label }) => (
+              <button key={value} type="button" role="tab" aria-selected={game === value} className={game === value ? 'active' : ''} onClick={() => setGame(value)}>
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="card px-card-pad px-game">{game === 'memory' ? <MemoryMatch /> : <TicTacToe />}</div>
+        </>
+      )}
     </div>
   )
 }
