@@ -4,6 +4,7 @@ import { AdminLayout, AppLayout, AuthLayout, PublicLayout, ScrollToTop } from '.
 import { GuestOnly, RequireAuth, RequireRole } from './layouts/guards'
 import { LoadingSpinner } from './components/ui/LoadingSpinner'
 import { NativeBridge } from './native/NativeBridge'
+import { UpdatePrompt } from './native/UpdatePrompt'
 
 // Every page is code-split so the first load (and the Android app start) stays small.
 const p = (loader) => lazy(loader)
@@ -79,6 +80,7 @@ export default function App() {
     <>
       <ScrollToTop />
       <NativeBridge />
+      <UpdatePrompt />
       <Suspense fallback={<LoadingSpinner fullPage label="" />}>
         <Routes>
           {/* public website */}

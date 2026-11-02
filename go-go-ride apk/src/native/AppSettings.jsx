@@ -102,7 +102,7 @@ export function ServerCard() {
   )
 }
 
-/** Phone notification + exact-alarm permissions (Android app only). */
+/** Phone notification + exact-alarm permissions (phone apps only). */
 export function PhoneAlarmsCard() {
   const [perm, setPerm] = useState('prompt')
   const [exact, setExact] = useState('unsupported')
@@ -144,7 +144,7 @@ export function PhoneAlarmsCard() {
         )}
         {perm === 'denied' && (
           <p className="text-sm text-2">
-            Notifications are blocked. Open Android Settings → Apps → GO-GO Ride → Notifications and turn them on.
+            Notifications are blocked. Open your phone&apos;s Settings, find GO-GO Ride, and turn Notifications on.
           </p>
         )}
         {ok && exact === 'denied' && (

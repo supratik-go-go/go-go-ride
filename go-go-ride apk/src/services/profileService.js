@@ -2,6 +2,8 @@ import { http } from '../api/client'
 
 export const profileService = {
   get: () => http.get('/users/me'),
+  /** Permanent. `password` is needed when the account has one. */
+  deleteAccount: (password) => http.del('/users/me', { password }),
   /** { name?, email? } */
   update: (body) => http.patch('/users/me', body),
   uploadAvatar(file) {

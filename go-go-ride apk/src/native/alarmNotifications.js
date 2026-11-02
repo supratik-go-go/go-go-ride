@@ -4,13 +4,16 @@
 // due, but that only reaches someone who has the app open. In the Android app
 // we additionally schedule a *local* notification on the phone for the
 // reminder time, so it rings even when the app is closed or offline.
+// The same code runs on iOS; only the notification channel is Android-only.
 //
 // Every function is a no-op in the browser, so callers never need to check.
 
 import { LocalNotifications } from '@capacitor/local-notifications'
-import { isNativeApp } from './platform'
+import { isNativeApp, platform } from './platform'
 
 const CHANNEL_ID = 'bus-alarms'
+// iOS keeps at most 64 pending notifications and silently drops the rest.
+const IOS_PENDING_LIMIT = 60
 let channelReady = false
 
 /** Stable 31-bit int id from an alarm id (Android needs integer ids). */
@@ -48,7 +51,7 @@ async function ensureReady() {
     perm = await LocalNotifications.requestPermissions()
   }
   if (perm.display !== 'granted') return false
-  if (!channelReady) {
+  if (!channelReady && platform() === 'android') {
     await LocalNotifications.createChannel({
       id: CHANNEL_ID,
       name: 'Bus alarms',
@@ -79,7 +82,7 @@ export const alarmNotifications = {
    * reminders" (exact alarms) is allowed for the app. Returns 'granted' | 'denied' | 'unsupported'.
    */
   async exactAlarmSetting() {
-    if (!isNativeApp()) return 'unsupported'
+    if (platform() !== 'android') return 'unsupported'
     try {
       const r = await LocalNotifications.checkExactNotificationSetting()
       return r.exact_alarm === 'granted' ? 'granted' : 'denied'
@@ -134,11 +137,15 @@ export const alarmNotifications = {
     if (!isNativeApp()) return
     const perm = await LocalNotifications.checkPermissions().catch(() => null)
     if (perm?.display !== 'granted') return
-    const wanted = new Set((activeAlarms || []).map((a) => notificationId(a.id)))
+    // Soonest first, so a long alarm list on iOS keeps the ones that ring next.
+    const soonestFirst = [...(activeAlarms || [])].sort((a, b) => (reminderTime(a)?.getTime() ?? 0) - (reminderTime(b)?.getTime() ?? 0))
+    const upcoming = soonestFirst.filter((a) => (reminderTime(a)?.getTime() ?? 0) > Date.now())
+    const alarms = platform() === 'ios' ? upcoming.slice(0, IOS_PENDING_LIMIT) : activeAlarms || []
+    const wanted = new Set(alarms.map((a) => notificationId(a.id)))
     const pending = await LocalNotifications.getPending().catch(() => ({ notifications: [] }))
     const stale = pending.notifications.filter((n) => !wanted.has(n.id)).map((n) => ({ id: n.id }))
     if (stale.length) await LocalNotifications.cancel({ notifications: stale }).catch(() => {})
-    for (const alarm of activeAlarms || []) await this.schedule(alarm).catch(() => {})
+    for (const alarm of alarms) await this.schedule(alarm).catch(() => {})
   },
 
   /** Remove every scheduled reminder (on logout). */

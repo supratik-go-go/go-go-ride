@@ -1,12 +1,12 @@
 // Profile, favourites, recent searches and login history (port of app/api/profile.py).
 import { Router } from 'express'
-import { all, byId, get, insert, placeholders, run, scalar, update } from '../db.js'
+import { all, byId, get, insert, placeholders, run, scalar, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { meta, ok } from '../http.js'
 import { newId } from '../ids.js'
-import { requireUser } from '../auth.js'
+import { isAdmin, requireUser, verifyPassword } from '../auth.js'
 import { loginActivityOut, recentSearchOut, userOut } from '../serialize.js'
-import { singleFile, saveUpload } from '../uploads.js'
+import { removeUpload, singleFile, saveUpload } from '../uploads.js'
 import { ENUMS } from '../validate.js'
 import { pyBody, pyEnum, pyOpt, pyStr, QueryReader, z } from '../pyvalidate.js'
 
@@ -17,6 +17,56 @@ const num = (v) => (v === null || v === undefined ? v : Number(v))
 // ---------------------------------------------------------------- profile
 
 router.get('/users/me', requireUser, (req, res) => ok(res, userOut(req.user)))
+
+const DeleteAccountBody = z.object({ password: pyOpt(pyStr()) })
+
+/** Recalculate the ratings of the buses and cars a deleted person had reviewed. */
+function refreshRatings(reviewed) {
+  for (const r of reviewed) {
+    const [table, column, id] = r.busId ? ['Bus', 'busId', r.busId] : ['LocalCar', 'localCarId', r.localCarId]
+    if (!id) continue
+    const agg = get(`SELECT AVG(rating) AS avg, COUNT(id) AS count FROM "Review" WHERE "${column}" = ?`, id)
+    update(table, id, { ratingAvg: Math.round(Number(agg.avg || 0) * 100) / 100, ratingCount: Number(agg.count || 0) })
+  }
+}
+
+/** Personal rows that go with the account. Bookings and tickets stay, without a name attached. */
+const PERSONAL_TABLES = ['Alarm', 'Favorite', 'LoginActivity', 'Notification', 'RecentSearch', 'RefreshToken', 'Review', 'RideWaitlist']
+
+// Required by the App Store and Google Play. The row itself stays because old bookings point at it,
+// so the person is erased from it and the same number can register again.
+router.delete('/users/me', requireUser, (req, res) => {
+  const { data } = pyBody(req, DeleteAccountBody)
+  const user = req.user
+  if (isAdmin(user)) throw ApiError.badRequest('Admin accounts must be removed by a super admin')
+  if (user.passwordHash && !(data.password && verifyPassword(data.password, user.passwordHash))) {
+    throw ApiError.badRequest('Password is incorrect')
+  }
+  const listed = (table) => Number(scalar(`SELECT COUNT(id) FROM "${table}" WHERE "ownerId" = ?`, user.id) || 0)
+  if ((user.role === 'BUS_OWNER' && listed('Bus')) || listed('LocalCar')) {
+    throw ApiError.badRequest('Remove your bus or car listings first, then delete your account')
+  }
+  const rated = all('SELECT DISTINCT "busId", "localCarId" FROM "Review" WHERE "userId" = ?', user.id)
+  tx(() => {
+    for (const table of PERSONAL_TABLES) run(`DELETE FROM "${table}" WHERE "userId" = ?`, user.id)
+    run('DELETE FROM "OtpCode" WHERE phone = ?', user.phone)
+    run('DELETE FROM "RideWaitlist" WHERE phone = ?', user.phone)
+    run('UPDATE "SupportTicket" SET name = ?, phone = ?, email = NULL WHERE "userId" = ?', 'Deleted user', '', user.id)
+    refreshRatings(rated)
+    update('User', user.id, {
+      name: 'Deleted user',
+      phone: `deleted-${user.id}`,
+      email: null,
+      passwordHash: null,
+      avatarUrl: null,
+      status: 'INACTIVE',
+      phoneVerified: 0,
+      updatedAt: Date.now(),
+    })
+  })
+  removeUpload(user.avatarUrl)
+  ok(res, null, 'Your account has been deleted')
+})
 
 const ProfileBody = z.object({
   name: pyOpt(pyStr({ min: 2, max: 80 })),

@@ -124,11 +124,11 @@ echo      start-gogo-ride.bat phone
 echo   and keep the phone on the same Wi-Fi.
 echo  ===============================================
 echo.
-pause
+if not defined GOGO_NO_PAUSE pause
 exit /b 0
 
 :fail
 echo.
 echo  Build failed - see the messages above.
-pause
+if not defined GOGO_NO_PAUSE pause
 exit /b 1

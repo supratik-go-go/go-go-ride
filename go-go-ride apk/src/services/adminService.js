@@ -28,6 +28,7 @@ export const adminService = {
 }
 
 export const platformService = {
+  appVersion: () => http.get('/app-version'),
   /** -> { buses, routes, stops, users } */
   stats: () => http.get('/stats'),
   settings: () => http.get('/settings'),

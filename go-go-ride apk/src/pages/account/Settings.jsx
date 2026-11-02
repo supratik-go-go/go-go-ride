@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { startTransition, useCallback, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Bell,
   BellOff,
@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Smartphone,
   Terminal,
+  Trash2,
 } from 'lucide-react'
 import { Badge, Button, Card, ErrorState, Input, Modal, Skeleton, useToast } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
@@ -23,9 +24,10 @@ import { formatDateTime, parseTimestamp, timeAgo } from '../../utils/format'
 import { serverFieldErrors } from '../auth/formUtils'
 import { AccountPage, LoadMore } from './accountShared'
 import { PhoneAlarmsCard, ServerCard } from '../../native/AppSettings'
+import { alarmNotifications } from '../../native/alarmNotifications'
 import { isNativeApp } from '../../native/platform'
 
-const APP_VERSION = '1.0.0'
+const APP_VERSION = __APP_VERSION__
 const WEEK_MS = 7 * 86400000
 const isThisWeek = (ts) => Date.now() - parseTimestamp(ts).getTime() < WEEK_MS
 
@@ -345,6 +347,90 @@ function ActivityCard() {
   )
 }
 
+// ------------------------------------------------------------------ delete account
+
+function DeleteAccountCard() {
+  const { setUser } = useAuth()
+  const toast = useToast()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const close = () => {
+    setOpen(false)
+    setPassword('')
+    setError('')
+  }
+
+  const confirm = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await profileService.deleteAccount(password || undefined)
+    } catch (err) {
+      setError(err.message)
+      setBusy(false)
+      return
+    }
+    await alarmNotifications.clearAll().catch(() => {})
+    await authService.logout()
+    // Same transition as the navigation, so the sign-in guard never sees this page signed out.
+    startTransition(() => {
+      setUser(null)
+      navigate('/', { replace: true })
+    })
+    toast.success('Your account has been deleted')
+  }
+
+  return (
+    <Card>
+      <div className="acc-setting-head">
+        <span className="icon-tile danger">
+          <Trash2 size={20} />
+        </span>
+        <div className="grow">
+          <h2>Delete account</h2>
+          <p>Permanently remove your account and personal data</p>
+        </div>
+      </div>
+      <Button variant="outline-danger" onClick={() => setOpen(true)}>
+        Delete my account
+      </Button>
+      <Modal
+        open={open}
+        onClose={close}
+        title="Delete your account?"
+        subtitle="This can't be undone."
+        footer={
+          <>
+            <Button variant="outline" onClick={close} disabled={busy}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={confirm} loading={busy}>
+              Delete permanently
+            </Button>
+          </>
+        }
+      >
+        <div className="stack" style={{ '--gap': '12px' }}>
+          <p className="text-sm text-2">Your profile, alarms, favourites, searches, reviews and notifications will be removed.</p>
+          <Input
+            label="Your password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={error}
+            hint="Leave blank if your account has no password."
+          />
+        </div>
+      </Modal>
+    </Card>
+  )
+}
+
 // ------------------------------------------------------------------ about / legal
 
 const LEGAL = {
@@ -355,22 +441,12 @@ const LEGAL = {
       'Timetables come from bus operators and are reviewed by our team, but traffic and operator changes mean buses can run early or late. Estimated positions are not live GPS.',
       'Local car fares are agreed directly between you and the driver. Shared ride and bus fares shown at booking are calculated by GO-GO Ride.',
       'Please use the service lawfully and do not post false listings or reviews. We may suspend accounts that misuse the platform.',
-      'The full terms of service will be published here before the public launch of the Android app.',
-    ],
-  },
-  privacy: {
-    title: 'Privacy policy',
-    body: [
-      'To run your account GO-GO Ride stores your name, mobile number and, if you add them, your email and profile photo.',
-      'To provide the service it also stores your bookings, alarms, favourites, recent searches and support tickets.',
-      'Sign-in history (device and IP address) is kept so you can spot unfamiliar access on this screen.',
-      'You can clear your search history any time from Recent Searches, and contact support about your account data.',
-      'The full privacy policy will be published here before the public launch of the Android app.',
     ],
   },
 }
 
 export default function Settings() {
+  const { isAdmin } = useAuth()
   const [legal, setLegal] = useState(null)
   const doc = legal ? LEGAL[legal] : null
 
@@ -407,11 +483,12 @@ export default function Settings() {
           <button type="button" onClick={() => setLegal('terms')}>
             <FileText size={18} /> Terms of use <ChevronRight size={18} className="acc-menu-chevron" />
           </button>
-          <button type="button" onClick={() => setLegal('privacy')}>
+          <a href="https://go-goride.com/privacy" target="_blank" rel="noopener noreferrer">
             <ShieldCheck size={18} /> Privacy policy <ChevronRight size={18} className="acc-menu-chevron" />
-          </button>
+          </a>
         </nav>
       </Card>
+      {!isAdmin && <DeleteAccountCard />}
       <p className="acc-version">
         GO-GO Ride v{APP_VERSION} · Made for West Bengal
       </p>
@@ -420,7 +497,6 @@ export default function Settings() {
         open={Boolean(doc)}
         onClose={() => setLegal(null)}
         title={doc?.title}
-        subtitle="Summary - full document coming before launch"
         footer={<Button onClick={() => setLegal(null)}>Got it</Button>}
       >
         <div className="stack" style={{ '--gap': '10px' }}>

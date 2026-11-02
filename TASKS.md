@@ -24,19 +24,24 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 
 ## Auto-deploy setup — owner (once)
 
-- [ ] hPanel → Websites → Web Apps → go-goride.com → connect GitHub (account **supratik0000**, repo **go-go-ride**, branch **main**, root directory **backend-node**, Express, Node 24.x, entry file `server.js`)
+The current app was created by zip upload, and hPanel can't switch it to GitHub, so it has to be recreated.
+- [ ] Back up `gogoride-data` from File Manager (Access all files of Cloud Startup Hosting)
+- [ ] Delete the go-goride.com website, keeping the domain
+- [ ] Create website → Node.js web app → Import Git repository, signed in as **supratik0000** (repo **go-go-ride**, branch **main**, root directory **backend-node**, Express, Node 24.x, npm, entry file `server.js`, India data centre)
+- [ ] Add the 5 environment variables from `deploy-hostinger-cloud\production-secrets.txt`
 
 ## Decisions — owner
 
 - [ ] Google Play Store? If yes: create a developer account at play.google.com/console (US$25, identity check takes days)
+- [ ] iPhone launch: the project is ready, see `go-go-ride apk\IOS.md`. Needs a Mac and an Apple Developer account (US$99 per year)
 - [ ] OTP login by SMS? If yes: account with an SMS provider (e.g. MSG91 / Fast2SMS) + DLT registration, then share the API key
 
 ## Development backlog — Claude
 
 - [ ] Fix whatever the phone test finds
-- [ ] Privacy policy page on go-goride.com (required for Play Store)
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
 - [ ] Connect the SMS provider for OTP login (after the decision above)
+- [ ] When the app moves to Google Play: send the update popup to the Play listing instead of the APK download
 - [ ] Running Car shows "Live" when only past rides exist — count future rides only
 - [ ] Owners cannot resubmit a rejected bus — move it back to "Under review" when edited
 - [ ] Local cars deactivated by an admin disappear from the admin list — show them with a filter
@@ -61,10 +66,21 @@ Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node
 
 **App change** (`go-go-ride apk/`):
 1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apk\android\app\build.gradle` — phones only accept an update with a higher versionCode.
+   Use the same numbers for iPhone in Xcode (General tab) when that version is released.
 2. `"go-go-ride apk\build-apk.bat" https://go-goride.com/api` — builds the signed APK and puts it on the download page.
-3. `push-to-github.bat` → the new APK goes live on go-goride.com automatically.
+3. Put one line for users in `go-go-ride apk\release-notes.txt`. It appears in the update popup.
+4. `push-to-github.bat` → the new APK goes live on go-goride.com, and phones show the update popup next time the app opens.
 
 Manual fallback (if auto-deploy is ever off): `deploy-hostinger-cloud\make-api-package.bat`, then hPanel → the app → Settings & Redeploy → upload `gogoride-api.zip`.
+
+## How to roll back
+
+Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `rollback.bat`, pick a restore point, and type YES.
+
+- **Server:** goes back as soon as the push is deployed.
+- **Phone app:** Android can't install a lower version over a higher one, so the old code is built as a new, higher version. Phones get it through the update popup.
+- **Data:** users, bookings and other live data are never changed.
+- If auto-deploy isn't connected, upload `gogoride-api.zip` afterwards, as in the manual fallback above.
 
 ## Done
 
@@ -78,3 +94,4 @@ Manual fallback (if auto-deploy is ever off): `deploy-hostinger-cloud\make-api-p
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.2: iOS project prepared (not built yet), Delete account in Settings, privacy policy at https://go-goride.com/privacy, update popup, rollback.bat, Daily News in English and Bengali (national, international, West Bengal)

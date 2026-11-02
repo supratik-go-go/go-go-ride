@@ -71,6 +71,9 @@ app.use(
   }),
 )
 
+// Link required by the App Store and Google Play listings.
+app.get('/privacy', (req, res) => res.sendFile('privacy.html', { root: config.publicDir }))
+
 // go-goride.com itself: a one-page "Download the app" site (no other website is hosted).
 app.use(express.static(config.publicDir, { index: 'index.html', maxAge: '1h' }))
 

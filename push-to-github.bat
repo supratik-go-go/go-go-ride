@@ -3,7 +3,7 @@ setlocal EnableExtensions
 title GO-GO Ride - push to GitHub
 cd /d "%~dp0"
 
-rem Saves all changes as a commit and pushes it to BOTH GitHub accounts:
+rem Saves all changes as a commit, saves a restore point for rollback.bat, and pushes to BOTH GitHub accounts:
 rem   https://github.com/supratik0000/go-go-ride
 rem   https://github.com/supratik-go-go/go-go-ride
 rem Usage: push-to-github.bat                 (asks for a short description)
@@ -29,8 +29,9 @@ if errorlevel 1 (
 )
 
 echo.
+node "go-go-ride apk\scripts\tag-release.mjs"
 echo  Pushing... (a GitHub sign-in window may appear the first time)
-git push origin main
+git push origin main --tags
 if errorlevel 1 goto :fail
 
 echo.

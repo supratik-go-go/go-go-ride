@@ -23,6 +23,13 @@ export const singleFile = multer({
   limits: { fileSize: config.maxUploadBytes + 1, files: 1 },
 }).single('file')
 
+/** Delete a stored file by its public URL path. A missing file is not an error. */
+export function removeUpload(url) {
+  if (typeof url !== 'string' || !url.startsWith('/uploads/')) return
+  const file = path.join(config.uploadDir, url.slice('/uploads/'.length))
+  if (file.startsWith(path.resolve(config.uploadDir) + path.sep)) fs.rmSync(file, { force: true })
+}
+
 /** Validate + store an uploaded file; returns its public URL path. */
 export function saveUpload(file, folder = 'misc') {
   if (!file) throw ApiError.badRequest('Validation failed', [{ field: 'file', message: 'Field required' }])

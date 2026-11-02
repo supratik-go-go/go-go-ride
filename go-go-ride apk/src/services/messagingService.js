@@ -23,5 +23,6 @@ export const supportService = {
 }
 
 export const newsService = {
-  latest: () => http.get('/news'),
+  /** { lang: 'en' | 'bn', category: 'national' | 'international' | 'local' } */
+  latest: (params) => http.get('/news', params),
 }

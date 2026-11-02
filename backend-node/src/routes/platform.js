@@ -1,5 +1,7 @@
 // Health, public counters, public platform settings (port of app/api/platform.py),
 // plus the cron backup endpoint for the alarm scheduler.
+import fs from 'node:fs'
+import path from 'node:path'
 import { Router } from 'express'
 import { config } from '../config.js'
 import { insert, scalar } from '../db.js'
@@ -16,9 +18,16 @@ router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', uptime: Math.round((Date.now() - startedAt) / 10) / 100, timestamp: new Date().toISOString() })
 })
 
+/** Newest Android build, for the app's update popup. */
+router.get('/app-version', (req, res) => {
+  const file = path.join(config.downloadDir, 'app-info.json')
+  if (!fs.existsSync(file)) return ok(res, null)
+  ok(res, { ...JSON.parse(fs.readFileSync(file, 'utf8')), url: '/download/GO-GO-Ride.apk' })
+})
+
 /** Headlines for the Daily News tab. */
 router.get('/news', async (req, res) => {
-  ok(res, await latestNews())
+  ok(res, await latestNews(req.query.lang, req.query.category))
 })
 
 /** Homepage counters: buses, routes, stops, users. */
