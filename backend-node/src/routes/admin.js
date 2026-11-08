@@ -12,6 +12,8 @@ import { dailySeries, dashboardStats, pyFloatStr, reportSummary, resolveRange, t
 import { isoZ } from '../time.js'
 import { ADMIN_ROLES, ENUMS } from '../validate.js'
 import { getSettingsRow } from './platform.js'
+import * as busImport from '../services/busImport.js'
+import { singleFile } from '../uploads.js'
 
 const router = Router()
 
@@ -485,6 +487,33 @@ router.patch('/admin/settings', requireAdmin, (req, res) => {
     })
   })
   ok(res, settingsOut(getSettingsRow()), 'Settings saved')
+})
+
+// ---------------------------------------------------------------- bus import from Excel
+
+// Without ?apply=1 nothing is written: the admin sees what each row would do first.
+router.post('/admin/buses/import', requireAdmin, singleFile, async (req, res) => {
+  const file = req.file
+  if (!file?.size) throw ApiError.badRequest('Choose the Excel file to import')
+  if (!/\.xlsx$/i.test(file.originalname || '')) throw ApiError.badRequest('Save the sheet as an Excel .xlsx file and choose that')
+  const plan = busImport.planImport(await busImport.readSheet(file.buffer))
+  const applied = req.query.apply === '1' ? busImport.applyImport(plan, req.user, { publish: req.body?.publish !== 'false' }) : null
+  const count = (action) => plan.filter((p) => p.action === action).length
+  ok(res, {
+    summary: { create: count('create'), update: count('update'), error: count('error') },
+    applied,
+    rows: plan.map((p) => ({
+      row: p.row,
+      busNumber: p.busNumber,
+      busName: p.busName,
+      action: p.action,
+      ac: p.ac,
+      fare: p.fare,
+      days: p.days,
+      stops: p.stops.map((s) => ({ name: s.name, time: s.time, isNew: !s.stopId })),
+      errors: p.errors,
+    })),
+  })
 })
 
 export default router

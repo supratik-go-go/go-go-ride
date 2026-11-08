@@ -21,6 +21,7 @@
     "express-rate-limit": "^8.7.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
+    "read-excel-file": "^9.3.14",
     "zod": "^4.6.7"
   }
 }

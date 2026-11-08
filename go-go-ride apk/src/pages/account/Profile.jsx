@@ -161,7 +161,7 @@ export default function Profile() {
       <button type="button" className="acc-logout" onClick={() => setConfirmOut(true)}>
         <LogOut size={19} /> Logout
       </button>
-      <p className="acc-version">GO-GO Ride · version 1.0.0</p>
+      <p className="acc-version">GO-GO Ride · version {__APP_VERSION__}</p>
 
       <ConfirmDialog
         open={confirmOut}

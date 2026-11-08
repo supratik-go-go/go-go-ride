@@ -209,6 +209,7 @@ export default function Login() {
             <ShieldCheck size={13} /> Admin login
           </Link>
           <ServerLink />
+          <span className="auth-version">GO-GO Ride · version {__APP_VERSION__}</span>
         </>
       }
     >

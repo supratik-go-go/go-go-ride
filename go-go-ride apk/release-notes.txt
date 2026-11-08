@@ -1,1 +1,1 @@
-New: SOS 1 Click Help, Emergency numbers, Live Location, My Bus, dark theme and a new Settings menu.
+New for admins: import many buses at once from an Excel sheet. Also shows the app version on Profile and the login screen.

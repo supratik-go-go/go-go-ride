@@ -100,6 +100,7 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.6: bus import from Excel for admins, app version on Profile and login, Server settings hidden unless the phone really uses a different server
 - [x] App v1.5: new Home tiles (Emergency, SOS, Live Location, My Bus, How to Use), date badge, dark theme, Settings menu, server settings hidden from users
 - [x] App v1.4: online Ludo, Call Break, 29 and Carrom; Ping Ball score game
 - [x] Hostinger auto-deploy from GitHub (2026-11-03)

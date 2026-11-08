@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Bus, Download, Eye, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Bus, Download, Eye, FileSpreadsheet, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button, ConfirmDialog, DataTable, RouteBadge, SectionHeader, Select, StatusBadge, TableToolbar, optionsFrom } from '../../components/ui'
 import { AdminTabs, ApprovalActions, BusDetailsModal, routeLabel, useStatusCounts } from '../../components/admin'
 import { useToast } from '../../context/ToastContext'
@@ -142,6 +142,9 @@ export default function Buses() {
             <>
               <Button variant="outline" size="sm" icon={<Download size={16} />} onClick={exportRows} disabled={!list.rows.length} title="Download the rows on this page as CSV">
                 Export
+              </Button>
+              <Button variant="outline" size="sm" icon={<FileSpreadsheet size={16} />} to="/admin/buses/import">
+                Import Excel
               </Button>
               <Button size="sm" icon={<Plus size={16} />} to="/admin/buses/new">
                 Add New Bus

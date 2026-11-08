@@ -167,7 +167,7 @@ export function PhoneAlarmsCard() {
 }
 
 /** Live builds only need it once the address has been changed, to change it back. */
-export const serverSettingsNeeded = () => !server.buildDefault.startsWith('https://') || server.isOverridden
+export const serverSettingsNeeded = () => !server.buildDefault.startsWith('https://') || server.base !== server.buildDefault
 
 /** Link row used on the login screen. Hidden from ordinary users of the live app. */
 export function ServerLink() {

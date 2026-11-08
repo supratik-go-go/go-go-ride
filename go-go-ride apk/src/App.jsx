@@ -66,6 +66,7 @@ const MyCars = p(() => import('./pages/owner/MyCars'))
 // admin
 const Dashboard = p(() => import('./pages/admin/Dashboard'))
 const AdminBuses = p(() => import('./pages/admin/Buses'))
+const AdminBusImport = p(() => import('./pages/admin/BusImport'))
 const BusRequests = p(() => import('./pages/admin/BusRequests'))
 const AdminRoutes = p(() => import('./pages/admin/RoutesAdmin'))
 const AdminStops = p(() => import('./pages/admin/StopsAdmin'))
@@ -156,6 +157,7 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="buses" element={<AdminBuses />} />
               <Route path="buses/new" element={<BusForm admin />} />
+              <Route path="buses/import" element={<AdminBusImport />} />
               <Route path="buses/:id/edit" element={<BusForm admin />} />
               <Route path="bus-requests" element={<BusRequests />} />
               <Route path="route-requests" element={<RouteRequests />} />

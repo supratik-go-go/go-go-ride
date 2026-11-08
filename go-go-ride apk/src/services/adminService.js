@@ -6,6 +6,13 @@ export const adminService = {
   activities: (params) => http.page('/admin/activities', params),
   /** Defaults to PENDING + UNDER_REVIEW; pass status for other tabs. */
   busRequests: (params) => http.page('/admin/bus-requests', params),
+  /** Excel bus sheet. Without apply it only reports what each row would do. */
+  importBuses(file, { apply = false, publish = true } = {}) {
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('publish', String(publish))
+    return http.post(`/admin/buses/import${apply ? '?apply=1' : ''}`, fd)
+  },
   /** Rejection requires a reason. */
   setBusStatus: (id, status, reason) => http.patch(`/admin/buses/${id}/status`, { status, reason }),
   routeRequests: (params) => http.page('/admin/route-requests', params),
