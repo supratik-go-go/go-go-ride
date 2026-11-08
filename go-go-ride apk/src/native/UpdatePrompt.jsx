@@ -6,6 +6,16 @@ import { platformService } from '../services'
 import { platform } from './platform'
 
 /**
+ * Compares the newest version on the server with the one installed (Android only).
+ * Resolves { latest: { version, versionCode, notes, url }, installed: { version, build }, newer };
+ * throws when the server can't be reached.
+ */
+export async function checkForUpdate() {
+  const [latest, installed] = await Promise.all([platformService.appVersion(), CapApp.getInfo()])
+  return { latest, installed, newer: latest?.versionCode > Number(installed.build) }
+}
+
+/**
  * Popup shown when a newer version is on the server. It checks when the app opens
  * and whenever it comes back to the screen. Android only: the App Store and
  * Google Play deliver their own updates, and they don't allow outside downloads.
@@ -18,8 +28,7 @@ export function UpdatePrompt() {
     if (platform() !== 'android') return undefined
     const check = async () => {
       try {
-        const [latest, installed] = await Promise.all([platformService.appVersion(), CapApp.getInfo()])
-        const newer = latest?.versionCode > Number(installed.build)
+        const { latest, newer } = await checkForUpdate()
         if (newer && latest.versionCode !== dismissed.current) setUpdate(latest)
       } catch {
         /* offline or server busy: the next check will catch it */

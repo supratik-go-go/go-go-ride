@@ -3,7 +3,7 @@ import { CarTaxiFront, Gamepad2, House, Newspaper, UserRound } from 'lucide-reac
 
 // Tabs from the passenger app designs (deck pages 4-7).
 const TABS = [
-  { to: '/home', label: 'Home', icon: House, match: ['/home', '/search', '/bus', '/routes', '/stops', '/track'] },
+  { to: '/home', label: 'Home', icon: House, match: ['/home', '/search', '/bus', '/routes', '/stops', '/track', '/emergency', '/sos', '/my-location', '/my-bus', '/how-to-use'] },
   { to: '/local-cars', label: 'Local Cars', icon: CarTaxiFront, match: ['/local-cars'] },
   { to: '/game', label: 'Game', icon: Gamepad2, match: ['/game'] },
   { to: '/news', label: 'Daily News', icon: Newspaper, match: ['/news'] },

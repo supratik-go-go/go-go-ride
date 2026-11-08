@@ -1,7 +1,7 @@
 {
-  "version": "1.4",
-  "versionCode": 5,
-  "notes": "New games: Ludo, Call Break, 29, Carrom and Ping Ball. Play online and climb the leaderboard.",
+  "version": "1.5",
+  "versionCode": 6,
+  "notes": "New: SOS 1 Click Help, Emergency numbers, Live Location, My Bus, dark theme and a new Settings menu.",
   "sizeMB": 5.9,
-  "builtAt": "2026-11-02T22:55:22.118Z"
+  "builtAt": "2026-11-08T13:59:48.570Z"
 }

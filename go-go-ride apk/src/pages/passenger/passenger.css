@@ -48,7 +48,7 @@
   .px-home-top { display: none; }
 }
 
-.px-hello { margin: 8px 0 16px; }
+.px-hello { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 8px 0 16px; }
 .px-hello h1 { font-size: 1.6rem; color: var(--primary); }
 .px-hello p { color: var(--text-2); margin-top: 2px; }
 @media (min-width: 768px) {
@@ -81,14 +81,13 @@
 .px-search-stops { display: flex; flex-direction: column; position: relative; }
 .px-search-stops .stop-input-label { margin-left: 30px; }
 .px-search-stops .stop-input-field { font-size: var(--fs-md); }
-.px-search-sep { margin: 20px 52px 12px 30px; }
-.px-search-sep .swap-btn { right: -52px; top: 6px; transform: none; width: 42px; height: 42px; }
+.px-search-sep { margin: 20px 0 12px 30px; }
+.px-search-sep .swap-btn { left: -40px; right: auto; top: -20px; transform: none; width: 40px; height: 40px; }
 .px-search-sep .swap-btn:hover { transform: rotate(180deg); }
-.px-search-stops > .stop-input:last-child { margin-right: 52px; }
 .px-via-add {
   position: absolute;
-  right: -57px;
-  top: -20px;
+  right: 0;
+  top: -12px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -102,7 +101,7 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.px-via-row { position: relative; margin-right: 52px; }
+.px-via-row { position: relative; }
 .px-via-row .stop-input-field { padding-right: 34px; }
 .px-via-remove { position: absolute; right: 0; bottom: -4px; width: 32px; height: 32px; color: var(--muted); }
 .px-pin-via { color: var(--muted); flex-shrink: 0; }
@@ -182,6 +181,20 @@
   transition: transform var(--t) var(--ease), box-shadow var(--t), border-color var(--t), color var(--t);
 }
 .px-quick-tile svg { color: var(--primary); }
+.px-quick-emoji { font-size: 24px; line-height: 26px; }
+.px-date-badge {
+  position: relative;
+  flex-shrink: 0;
+  margin-bottom: 2px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
 .px-quick-tile:hover { color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--primary-100); }
 @media (min-width: 480px) {
   .px-quick { gap: 12px; }
@@ -1256,6 +1269,9 @@
 /* ---------------- add bus / route information ---------------- */
 .px-contrib-links { display: flex; flex-direction: column; gap: 10px; }
 .px-contrib-link { display: flex; align-items: center; gap: 12px; padding: 12px 14px; color: var(--primary); font-weight: 600; }
+.px-contrib-text { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.px-contrib-tag { padding: 2px 10px; border-radius: 4px; background: var(--success); color: #fff; }
+.px-contrib-sub { color: var(--muted); font-size: var(--fs-sm); font-weight: 400; }
 .px-contrib-form { display: flex; flex-direction: column; gap: 16px; margin-bottom: 18px; }
 .px-contrib-form .stop-input-label { margin-left: 30px; }
 .px-contrib-stop { margin-right: 0; }

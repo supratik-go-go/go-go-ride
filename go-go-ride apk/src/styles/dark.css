@@ -1,0 +1,293 @@
+/* =====================================================================
+   Dark theme. On when <html data-theme="dark"> (set by src/utils/theme.js
+   and the start-up script in index.html). The admin panel is never dark:
+   main.jsx keeps data-theme="light" on /admin pages.
+
+   1. Tokens: the global.css palette, redefined for a dark page.
+   2. Overrides for colours other stylesheets hard-code for a light page.
+   Every rule starts with [data-theme='dark'], so it outranks the light rule
+   it replaces whatever order the page stylesheets load in.
+   ===================================================================== */
+
+:root[data-theme='dark'] {
+  /* brand: --primary turns light so blue text stays readable; solid blue fills use --primary-fill */
+  --primary: #8eabff;
+  --primary-700: #a6bdff;
+  --primary-600: #9ab4ff;
+  --primary-500: #6f8ff0;
+  --primary-100: #283a66;
+  --primary-50: #1b2747;
+  --primary-fill: #2f56c9;
+
+  --accent-100: #4d2516;
+  --accent-50: #27160f;
+
+  /* status: lighter colours on deep tints */
+  --success-50: #0f2418;
+  --warning: #e0900f;
+  --warning-50: #2b200d;
+  --danger: #fb7185;
+  --danger-50: #36141e;
+  --danger-fill: #e11d48;
+  --info: #6ea8ff;
+  --info-50: #132241;
+  --info-fill: #2563eb;
+
+  /* text and borders on the tinted panels (alerts, notices); the light theme hard-codes these */
+  --success-ink: #7ddc9f;
+  --success-line: #1d4a2f;
+  --warning-ink: #f7c27a;
+  --warning-line: #4f3a14;
+  --danger-ink: #fda4b4;
+  --danger-line: #5a2232;
+  --info-ink: #a9c8ff;
+  --info-line: #24406f;
+  --accent-ink: #ffb38f;
+  --neutral-50: #252e45;
+
+  /* neutrals */
+  --bg: #0b101c;
+  --surface: #161d30;
+  --surface-2: #1d253b;
+  --border: #2a334c;
+  --border-strong: #3b4663;
+  --text: #e8ecf6;
+  --text-2: #c4cbdc;
+  --muted: #9ba5be;
+  --placeholder: #7c87a3;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6);
+  --ring: 0 0 0 3px rgba(111, 143, 240, 0.4);
+
+  color-scheme: dark;
+}
+
+/* ---------------------------------------------------------------- brand blues */
+
+/* Navy panels with white text keep the light theme's blues, so they look the same in both themes. */
+[data-theme='dark'] .avatar-fallback,
+[data-theme='dark'] .acc-hero,
+[data-theme='dark'] .acc-help-hero,
+[data-theme='dark'] .px-bus-badge,
+[data-theme='dark'] .px-alarm-header,
+[data-theme='dark'] .px-route-hero,
+[data-theme='dark'] .px-rc-live,
+[data-theme='dark'] .trk-yourstop.soon,
+[data-theme='dark'] .auth-brand,
+[data-theme='dark'] .pub-banner,
+[data-theme='dark'] .pub-banner-hero,
+[data-theme='dark'] .pub-cta,
+[data-theme='dark'] .own-banner-shield {
+  --primary: #0b2a7a;
+  --primary-600: #1a3fa8;
+  --primary-500: #2f56c9;
+}
+
+/* Solid blue fills behind white text use the brighter fill blue (light --primary would wash the text out). */
+[data-theme='dark'] .route-badge,
+[data-theme='dark'] .page-btn.active,
+[data-theme='dark'] .bottom-nav-item.active,
+[data-theme='dark'] .px-day.active,
+[data-theme='dark'] .px-rc-icon,
+[data-theme='dark'] .px-ribbon,
+[data-theme='dark'] .px-memory-card:not(.shown),
+[data-theme='dark'] .trk-tag.board,
+[data-theme='dark'] .trk-locate-pin,
+[data-theme='dark'] .trk-stop-hero-top .icon-tile,
+[data-theme='dark'] .map-bus,
+[data-theme='dark'] .map-stop,
+[data-theme='dark'] .auth-role.active .icon-tile,
+[data-theme='dark'] .auth-role.active .auth-role-check,
+[data-theme='dark'] .pub-feature:hover .pub-feature-icon,
+[data-theme='dark'] .own-step-num,
+[data-theme='dark'] .own-day.on,
+[data-theme='dark'] .game-ludo-centre,
+[data-theme='dark'] .game-carrom-shoot,
+[data-theme='dark'] .game-pingball-button {
+  --primary: var(--primary-fill);
+}
+
+/* Same for red and blue fills: the lighter text colours are too pale under white icons. */
+[data-theme='dark'] .acc-tl-item.cancelled .acc-tl-dot,
+[data-theme='dark'] .trk-locate-art.denied .trk-locate-pin,
+[data-theme='dark'] .map-bus.trk-danger,
+[data-theme='dark'] .own-step.rejected .own-step-icon {
+  --danger: var(--danger-fill);
+}
+[data-theme='dark'] .map-bus.trk-info { --info: var(--info-fill); }
+
+/* ---------------------------------------------------------------- base components (global.css, ui.css) */
+
+[data-theme='dark'] .btn-primary { --btn-bg: var(--primary-fill); }
+[data-theme='dark'] .btn-danger { --btn-bg: var(--danger-fill); }
+[data-theme='dark'] .btn-white { --btn-fg: #0b2a7a; }
+[data-theme='dark'] .btn-outline-danger { --btn-bd: var(--danger-line); }
+
+[data-theme='dark'] .badge-neutral { background: var(--neutral-50); }
+
+[data-theme='dark'] .alert-info { color: var(--info-ink); border-color: var(--info-line); }
+[data-theme='dark'] .alert-warning { color: var(--warning-ink); border-color: var(--warning-line); }
+[data-theme='dark'] .alert-danger { color: var(--danger-ink); border-color: var(--danger-line); }
+[data-theme='dark'] .alert-success { color: var(--success-ink); border-color: var(--success-line); }
+
+[data-theme='dark'] .icon-tile.violet { background: #262046; color: #b6a4ff; }
+[data-theme='dark'] .segmented button.active { background: var(--primary-100); }
+[data-theme='dark'] .skeleton { background-image: linear-gradient(90deg, #1b2236 25%, #262f48 37%, #1b2236 63%); }
+
+[data-theme='dark'] .modal-backdrop { background: rgba(0, 0, 0, 0.6); }
+[data-theme='dark'] .modal { border: 1px solid var(--border); }
+[data-theme='dark'] .toast {
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Browser autofill paints a light box; keep saved logins readable. */
+[data-theme='dark'] input:-webkit-autofill {
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 1000px var(--surface-2) inset;
+  caret-color: var(--text);
+}
+
+/* The wordmark is navy on transparent and vanishes on a dark page: give it the white plate the footer uses. */
+[data-theme='dark'] img[src*='logo-wordmark'] { background: #fff; border-radius: 12px; padding: 4px 8px; }
+[data-theme='dark'] .auth-brand-logo img { background: none; padding: 0; }
+
+/* Icons with a colour baked in by the JSX. */
+[data-theme='dark'] .px-pin-from,
+[data-theme='dark'] .px-pin-to,
+[data-theme='dark'] .px-pin-via,
+[data-theme='dark'] .px-stop-pin svg { stroke: var(--surface); }
+[data-theme='dark'] svg[stroke='#6d4bd8'] { stroke: #a48bff; }
+
+/* ---------------------------------------------------------------- navigation */
+
+[data-theme='dark'] .navbar { background: rgba(22, 29, 48, 0.92); }
+[data-theme='dark'] .bottom-nav { box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35); }
+
+/* ---------------------------------------------------------------- maps (Leaflet) */
+
+/* OpenStreetMap only draws light tiles, so invert them into a dark map. Markers and lines are not touched. */
+[data-theme='dark'] .map-view,
+[data-theme='dark'] .map-view .leaflet-container,
+[data-theme='dark'] .trk-stage { background: #1a2030; }
+[data-theme='dark'] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
+/* RouteLine's default navy disappears on the dark map. */
+[data-theme='dark'] .leaflet-overlay-pane path[stroke='#0b2a7a'] { stroke: #7f9cff; }
+[data-theme='dark'] .leaflet-container a { color: var(--primary); }
+[data-theme='dark'] .leaflet-bar a { background-color: var(--surface); color: var(--text); border-bottom-color: var(--border); }
+[data-theme='dark'] .leaflet-bar a:hover,
+[data-theme='dark'] .leaflet-bar a:focus { background-color: var(--surface-2); }
+[data-theme='dark'] .leaflet-bar a.leaflet-disabled { background-color: var(--surface-2); color: var(--placeholder); }
+[data-theme='dark'] .leaflet-container .leaflet-control-attribution { background: rgba(22, 29, 48, 0.8); color: var(--muted); }
+[data-theme='dark'] .leaflet-popup-content-wrapper,
+[data-theme='dark'] .leaflet-popup-tip { background: var(--surface); color: var(--text); }
+[data-theme='dark'] .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+[data-theme='dark'] .leaflet-tooltip { background: var(--surface); border-color: var(--border); color: var(--text); }
+[data-theme='dark'] .leaflet-tooltip-top::before { border-top-color: var(--surface); }
+[data-theme='dark'] .leaflet-tooltip-bottom::before { border-bottom-color: var(--surface); }
+[data-theme='dark'] .leaflet-tooltip-left::before { border-left-color: var(--surface); }
+[data-theme='dark'] .leaflet-tooltip-right::before { border-right-color: var(--surface); }
+
+/* ---------------------------------------------------------------- tracking and stops (tracking.css) */
+
+[data-theme='dark'] .trk-disclaimer,
+[data-theme='dark'] .trk-strip { color: var(--warning-ink); border-color: var(--warning-line); }
+[data-theme='dark'] .trk-disclaimer strong { color: #fbd49c; }
+[data-theme='dark'] .trk-map-empty { background: linear-gradient(160deg, var(--primary-50), var(--surface)); }
+[data-theme='dark'] .trk-ctrl:not(.active) { background: rgba(22, 29, 48, 0.94); }
+[data-theme='dark'] .trk-ctrl:not(.active):hover:not(:disabled) { background: var(--surface-2); }
+[data-theme='dark'] .trk-tl-dot { background: var(--surface); }
+[data-theme='dark'] .trk-tl-item.is-passed .trk-tl-rail::before { background: #3b4663; }
+[data-theme='dark'] .trk-tl-item.is-passed .trk-tl-dot { border-color: #56617e; background: #56617e; }
+[data-theme='dark'] .trk-callout.danger { color: var(--danger-ink); border-color: var(--danger-line); }
+[data-theme='dark'] .trk-yourstop.here { color: var(--success-ink); border-color: var(--success-line); }
+[data-theme='dark'] .trk-yourstop.passed .trk-yourstop-icon { background: var(--neutral-50); }
+[data-theme='dark'] .trk-me-card { color: var(--info-ink); border-color: var(--info-line); }
+[data-theme='dark'] .trk-me-title { color: var(--info); }
+[data-theme='dark'] .trk-locate-art.denied { background: radial-gradient(circle at 50% 40%, #4a1a28, var(--danger-50)); }
+
+/* ---------------------------------------------------------------- passenger widgets (passenger-ui.css) */
+
+[data-theme='dark'] .px-result.is-off { background: var(--surface-2); }
+[data-theme='dark'] .px-result.is-off .px-result-icon { background: var(--neutral-50); color: var(--muted); }
+[data-theme='dark'] .px-result.is-off .px-result-badge { color: var(--muted); }
+[data-theme='dark'] .px-pill-danger { border-color: var(--danger-line); }
+[data-theme='dark'] .px-tl-item.is-muted .px-tl-dot { border-color: #3d5089; }
+[data-theme='dark'] .px-car-photo,
+[data-theme='dark'] .px-lcd-photo { background: linear-gradient(160deg, var(--primary-50), var(--primary-100)); }
+
+/* ---------------------------------------------------------------- passenger pages (passenger.css) */
+
+/* home: running car banner */
+[data-theme='dark'] .px-rc { background: linear-gradient(115deg, #141d36 0%, #182448 55%, #1c2a54 100%); }
+
+/* bus details */
+[data-theme='dark'] .px-avail.is-ok { color: var(--success-ink); border-color: var(--success-line); }
+[data-theme='dark'] .px-avail.is-off { color: var(--danger-ink); border-color: var(--danger-line); }
+[data-theme='dark'] .px-bus-actions { background: rgba(22, 29, 48, 0.94); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45); }
+[data-theme='dark'] .px-notice,
+[data-theme='dark'] .px-notice.is-link:hover { color: var(--accent-ink); }
+[data-theme='dark'] .px-notice-icon { background: var(--surface); }
+
+/* set alarm */
+[data-theme='dark'] .px-eta { background: linear-gradient(120deg, var(--primary-50), var(--primary-100)); }
+[data-theme='dark'] .px-eta-icon,
+[data-theme='dark'] .px-remind-opt.active .px-remind-badge { background: var(--primary-100); }
+[data-theme='dark'] .px-remind-opt.active { background: var(--primary-50); }
+[data-theme='dark'] .px-amber-note { background: var(--warning-50); border-color: var(--warning-line); color: var(--warning-ink); }
+
+/* running car and local cars */
+[data-theme='dark'] .px-rc-hero { background: linear-gradient(160deg, #141d36 0%, #1c2a54 100%); }
+[data-theme='dark'] .px-waiting { background: var(--surface-2); }
+[data-theme='dark'] .px-lc-cta { background: linear-gradient(120deg, var(--accent-50), var(--surface)); }
+[data-theme='dark'] .px-avail-now.off { background: var(--neutral-50); }
+
+/* ---------------------------------------------------------------- account and settings (account.css) */
+
+[data-theme='dark'] .acc-reply { border-color: var(--success-line); color: var(--success-ink); }
+[data-theme='dark'] .acc-notif.unread { background: linear-gradient(90deg, var(--primary-50), rgba(27, 39, 71, 0.35)); }
+
+/* ---------------------------------------------------------------- games */
+
+/* Ludo's blue seat matches the fill blue rather than the light text blue. */
+[data-theme='dark'] .game-ludo,
+[data-theme='dark'] .game-ludo .p0 { --game-ludo-seat: var(--primary-fill); }
+
+/* ---------------------------------------------------------------- sign in / register (auth.css) */
+
+[data-theme='dark'] .auth-dev-hint { color: var(--warning-ink); }
+
+/* ---------------------------------------------------------------- welcome screen and public pages (public.css) */
+
+[data-theme='dark'] .pub-splash-tagline { background: rgba(29, 37, 59, 0.85); }
+[data-theme='dark'] .pub-splash-tagline .b { color: #7fb2ff; }
+[data-theme='dark'] .pub-mode.green { color: #3ccf74; }
+
+/* ---------------------------------------------------------------- bus owner and driver pages (owner.css) */
+
+[data-theme='dark'] .own-banner { background: linear-gradient(135deg, #172242 0%, var(--surface) 60%, var(--surface) 100%); }
+[data-theme='dark'] .own-banner-shield { border-color: var(--surface); }
+[data-theme='dark'] .own-banner-pill { background: rgba(111, 143, 240, 0.14); }
+[data-theme='dark'] .own-icon-btn.danger:hover:not(:disabled),
+[data-theme='dark'] .own-status-card.rejected,
+[data-theme='dark'] .own-up-item.failed { border-color: var(--danger-line); }
+[data-theme='dark'] .own-doc-tiles.own-invalid .own-doc-tile:not(.has-file),
+[data-theme='dark'] .own-days.own-invalid .own-day:not(.on) { border-color: var(--danger); }
+[data-theme='dark'] .own-choice-chip.active.green { color: var(--success-ink); }
+[data-theme='dark'] .own-choice-chip.active.blue { color: var(--info-ink); }
+[data-theme='dark'] .own-choice-chip.active.violet { border-color: #8f74ff; background: #262046; color: #c9baff; }
+[data-theme='dark'] .own-choice-chip.violet svg,
+[data-theme='dark'] .own-doc-icon.violet { color: #a48bff; }
+[data-theme='dark'] .own-doc-file { background: var(--surface); border-color: var(--success-line); color: var(--success-ink); }
+[data-theme='dark'] .own-doc-remove:hover { background: var(--danger-50); }
+[data-theme='dark'] .own-notice.orange { color: var(--accent-ink); }
+[data-theme='dark'] .own-notice.orange .own-notice-icon { background: var(--surface); }
+[data-theme='dark'] .own-notice.green { border-color: var(--success-line); color: var(--success-ink); }
+[data-theme='dark'] .own-car-intro { background: linear-gradient(135deg, var(--surface) 40%, var(--accent-50)); }
+[data-theme='dark'] .own-car-photo { background: linear-gradient(135deg, var(--primary-50), var(--primary-100)); }
+[data-theme='dark'] .own-car-verify .badge-success,
+[data-theme='dark'] .own-car-verify .badge-warning { background: var(--surface); }

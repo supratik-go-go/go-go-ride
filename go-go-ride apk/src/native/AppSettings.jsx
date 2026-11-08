@@ -166,8 +166,12 @@ export function PhoneAlarmsCard() {
   )
 }
 
-/** Link row used on the login screen and in Settings. */
+/** Live builds only need it once the address has been changed, to change it back. */
+export const serverSettingsNeeded = () => !server.buildDefault.startsWith('https://') || server.isOverridden
+
+/** Link row used on the login screen. Hidden from ordinary users of the live app. */
 export function ServerLink() {
+  if (!serverSettingsNeeded()) return null
   return (
     <Link to="/server" className="row text-sm" style={{ '--gap': '6px', justifyContent: 'center', color: 'var(--muted)' }}>
       <Server size={15} /> Server settings <ChevronRight size={15} />

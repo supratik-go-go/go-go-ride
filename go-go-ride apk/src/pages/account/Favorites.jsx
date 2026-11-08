@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BusFront, CarTaxiFront, Heart, MapPin, Phone, Route as RouteIcon, Search, Signpost, Star, Waypoints } from 'lucide-react'
 import { Button, Card, EmptyState, ErrorState, RouteBadge, Skeleton, useToast } from '../../components/ui'
+import { updateFavoriteCache } from '../../components/passenger/FavoriteButton'
 import { useAsync } from '../../hooks/useAsync'
 import { profileService } from '../../services'
 import { busBadge, formatCurrency, label } from '../../utils/format'
@@ -101,6 +102,7 @@ export default function Favorites() {
     q.setData((d) => ({ ...d, [group.key]: d[group.key].filter((x) => x.id !== item.id) }))
     try {
       await profileService.removeFavorite(group.type, item.id)
+      updateFavoriteCache(group.type, item.id, false)
       toast.success('Removed from favourites')
     } catch (err) {
       // put it back where it was

@@ -5,15 +5,11 @@ import {
   ArrowUpDown,
   Bell,
   BusFront,
-  CalendarDays,
   CarFront,
   CaseSensitive,
-  ChevronDown,
   ChevronRight,
-  Clock,
   FileText,
   Hash,
-  Headset,
   MapPin,
   Route,
   Search,
@@ -25,7 +21,7 @@ import { localCarService, locationService, rideService, routeService, stopServic
 import { useAuth } from '../../context/AuthContext'
 import { useAsync } from '../../hooks/useAsync'
 import { useUnreadCount } from '../../hooks/useUnreadCount'
-import { formatDate, todayISO, to12h } from '../../utils/format'
+import { formatDate, todayISO } from '../../utils/format'
 import runningCarImg from '../../assets/brand/running-car.jpg'
 import './passenger.css'
 
@@ -35,8 +31,11 @@ const MODES = [
   { value: 'ROUTE', label: 'Route', icon: Route },
 ]
 
-const pad = (n) => String(n).padStart(2, '0')
-const TIME_OPTIONS = Array.from({ length: 20 }, (_, i) => `${pad(i + 4)}:00`)
+/** "2026-11-07" -> "7 Nov 26" */
+function shortDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })
+}
 
 export default function Home() {
   const { user, ready, isAuthenticated } = useAuth()
@@ -51,12 +50,10 @@ export default function Home() {
   const [viaOpen, setViaOpen] = useState(false)
   const [q, setQ] = useState('')
   const [date, setDate] = useState(todayISO())
-  const [time, setTime] = useState('')
   const [locating, setLocating] = useState(false)
   const [notifyOpen, setNotifyOpen] = useState(false)
   const searchRef = useRef(null)
   const qRef = useRef(null)
-  const dateRef = useRef(null)
   const focusQ = useRef(false)
 
   const rides = useAsync(() => rideService.status(), [])
@@ -107,7 +104,6 @@ export default function Home() {
   const submit = (e) => {
     e.preventDefault()
     const params = new URLSearchParams({ searchType: mode, date })
-    if (time) params.set('time', time)
     if (mode === 'ROUTE') {
       if (!from?.name?.trim() || !to?.name?.trim()) {
         toast.warning('Enter both a starting point and a destination.')
@@ -164,10 +160,24 @@ export default function Home() {
       </header>
 
       <section className="px-hello">
-        <h1>
-          Hello{greetingName ? `, ${greetingName}` : ''} <span aria-hidden="true">👋</span>
-        </h1>
-        <p>Where do you want to go today?</p>
+        <div>
+          <h1>
+            Hello{greetingName ? `, ${greetingName}` : ''} <span aria-hidden="true">👋</span>
+          </h1>
+          <p>Where do you want to go today?</p>
+        </div>
+        <label className="px-date-badge">
+          {shortDate(date)}
+          <input
+            type="date"
+            className="px-overlay-input"
+            value={date}
+            min={todayISO()}
+            onChange={(e) => setDate(e.target.value || todayISO())}
+            onClick={(e) => openPicker(e.currentTarget)}
+            aria-label={`Travel date, ${formatDate(date)}. Tap to change.`}
+          />
+        </label>
       </section>
 
       <div className="px-home-grid">
@@ -256,43 +266,6 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="px-when">
-              <label className="px-select-box">
-                <span className="px-select-label">Date</span>
-                <span className="px-select-value">
-                  <CalendarDays size={18} />
-                  <span className="truncate">{formatDate(date)}</span>
-                  <ChevronDown size={18} className="px-select-chev" />
-                </span>
-                <input
-                  ref={dateRef}
-                  type="date"
-                  className="px-overlay-input"
-                  value={date}
-                  min={todayISO()}
-                  onChange={(e) => setDate(e.target.value || todayISO())}
-                  onClick={(e) => openPicker(e.currentTarget)}
-                  aria-label={`Travel date, ${formatDate(date)}`}
-                />
-              </label>
-              <label className="px-select-box">
-                <span className="px-select-label">Time</span>
-                <span className="px-select-value">
-                  <Clock size={18} />
-                  <span className="truncate">{time ? `${to12h(time)} onwards` : 'Any Time'}</span>
-                  <ChevronDown size={18} className="px-select-chev" />
-                </span>
-                <select className="px-overlay-input" value={time} onChange={(e) => setTime(e.target.value)} aria-label="Earliest departure time">
-                  <option value="">Any Time</option>
-                  {TIME_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {to12h(t)} onwards
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
             <Button type="submit" variant="accent" size="lg" block icon={<Search size={22} />} className="px-search-submit">
               Search Buses
             </Button>
@@ -300,25 +273,25 @@ export default function Home() {
 
           {/* ---------------- quick actions ---------------- */}
           <nav className="px-quick" aria-label="Quick actions" style={{ order: 2 }}>
-            <button type="button" className="px-quick-tile" onClick={() => pickMode('BUS_NUMBER', { focus: true })}>
-              <BusFront size={26} />
-              <span>Search by Bus Number</span>
-            </button>
-            <button type="button" className="px-quick-tile" onClick={() => pickMode('BUS_NAME', { focus: true })}>
-              <CaseSensitive size={26} />
-              <span>Search by Bus Name</span>
-            </button>
-            <Link to="/stops" className="px-quick-tile">
+            <Link to="/emergency" className="px-quick-tile">
+              <span className="px-quick-emoji" aria-hidden="true">☎️</span>
+              <span>Emergency Call List</span>
+            </Link>
+            <Link to="/sos" className="px-quick-tile" aria-label="SOS, one click help">
+              <span className="px-quick-emoji" aria-hidden="true">🆘</span>
+              <span>1 Click Help</span>
+            </Link>
+            <Link to="/my-location" className="px-quick-tile">
               <MapPin size={26} />
-              <span>Nearby Bus Stops</span>
+              <span>Live Location Track</span>
             </Link>
-            <Link to="/routes" className="px-quick-tile">
-              <Route size={26} />
-              <span>Route Search</span>
+            <Link to="/my-bus" className="px-quick-tile">
+              <span className="px-quick-emoji" aria-hidden="true">🚍</span>
+              <span>My Bus</span>
             </Link>
-            <Link to="/support" className="px-quick-tile">
-              <Headset size={26} />
-              <span>Help &amp; Support</span>
+            <Link to="/how-to-use" className="px-quick-tile">
+              <span className="px-quick-emoji" aria-hidden="true">🎬</span>
+              <span>Watch How to Use GO-GO Ride</span>
             </Link>
           </nav>
         </div>
@@ -330,14 +303,24 @@ export default function Home() {
               <span className="icon-tile sm">
                 <BusFront size={20} />
               </span>
-              <span className="grow">Add Bus Information</span>
+              <span className="grow px-contrib-text">
+                <span className="px-contrib-tag">+ Add Bus Info...</span>
+                <span className="px-contrib-sub" lang="bn">
+                  আপনিও পারবেন বাসের নাম নথিভুক্ত করতে
+                </span>
+              </span>
               <ArrowRight size={18} />
             </Link>
             <Link to="/add-route" className="card px-contrib-link">
               <span className="icon-tile sm">
                 <Route size={20} />
               </span>
-              <span className="grow">Add Route Information</span>
+              <span className="grow px-contrib-text">
+                <span className="px-contrib-tag">+ Add Route Info...</span>
+                <span className="px-contrib-sub" lang="bn">
+                  আপনিও পারবেন রুটের তথ্য যোগ করতে
+                </span>
+              </span>
               <ArrowRight size={18} />
             </Link>
           </nav>

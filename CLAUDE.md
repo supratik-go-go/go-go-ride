@@ -41,8 +41,10 @@ The signing key (`go-go-ride apk/android/keystore/`, `android/keystore.propertie
 
 ## Current state (2026-11-08)
 
-- Live app: **v1.4** (versionCode 5). Not yet tested on real phones.
-- Features: bus search with a Via stop, alarms, local cars, Add Bus and Add Route Information with admin review, Daily News in English and Bengali, delete account, privacy page at `/privacy`, update popup.
+- Live app: **v1.5** (versionCode 6). Not yet tested on real phones.
+- Features: bus search with a Via stop (the travel date is the orange badge on Home; time filter is on the results page), alarms, local cars, Add Bus and Add Route Information with admin review, Daily News in English and Bengali, delete account, privacy page at `/privacy`, update popup.
+- Home tiles: Emergency Call List `/emergency`, SOS `/sos` (contacts kept on the phone only, opens the SMS app), Live Location `/my-location`, My Bus `/my-bus` (favourite buses), How to Use `/how-to-use` (`VIDEO_URL` in `HowToUse.jsx` is empty until the owner has a video).
+- Settings is a menu with sub-pages under `/settings/*` (`src/pages/account/settings/`). Theme: Light / Dark / Auto in `src/utils/theme.js`; all dark CSS lives in `src/styles/dark.css`; admin pages always stay light. Language: English only, Bengali shown as coming soon. Server settings are hidden from ordinary users of the live app.
 - Online games, turn based and polled every 2.5 seconds: chess, ludo (2 players), callbreak (4), twentynine (4, two teams), carrom (2). Ping Ball is a score game only. Points: win 10, draw 3, loss 1; leaving earns 0; a pair only earns from 5 games together a day.
 - Next: see `TASKS.md`. Pending owner decision: computer players for empty seats in Call Break and 29.
 

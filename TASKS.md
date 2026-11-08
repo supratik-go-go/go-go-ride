@@ -43,6 +43,8 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
 - [ ] Connect the SMS provider for OTP login (after the decision above)
 - [ ] Computer players for empty seats, so Call Break and 29 can start without 4 people online
+- [ ] Bengali language for the whole app (owner to decide how much)
+- [ ] How to Use video: owner to record it, then set `VIDEO_URL` in `go-go-ride apk/src/pages/passenger/HowToUse.jsx`
 - [ ] Hold the app's first release of a new game until phones have updated: an old app opening a new game's friend code will fail
 - [ ] Check the server alarm scheduler: Hostinger stops idle apps, so background timers can miss their time. Phone reminders are not affected
 - [ ] When the app moves to Google Play: send the update popup to the Play listing instead of the APK download
@@ -98,6 +100,7 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.5: new Home tiles (Emergency, SOS, Live Location, My Bus, How to Use), date badge, dark theme, Settings menu, server settings hidden from users
 - [x] App v1.4: online Ludo, Call Break, 29 and Carrom; Ping Ball score game
 - [x] Hostinger auto-deploy from GitHub (2026-11-03)
 - [x] App v1.3: online chess with other users, friend codes, points leaderboard

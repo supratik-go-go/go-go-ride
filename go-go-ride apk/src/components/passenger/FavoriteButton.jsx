@@ -27,6 +27,11 @@ function patchCache(userId, itemType, itemId, on) {
     .catch(() => [])
 }
 
+/** For screens that add or remove favourites themselves, so the hearts elsewhere stay in step. */
+export function updateFavoriteCache(itemType, itemId, on) {
+  patchCache(cache.userId, itemType, itemId, on)
+}
+
 const NOUN = { BUS: 'bus', ROUTE: 'route', STOP: 'stop', LOCAL_CAR: 'driver' }
 
 /**

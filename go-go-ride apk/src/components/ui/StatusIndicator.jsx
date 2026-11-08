@@ -4,7 +4,8 @@ const TONES = {
   running: { color: 'var(--success)', bg: 'var(--success-50)', icon: Navigation, pulse: true },
   waiting: { color: 'var(--warning)', bg: 'var(--warning-50)', icon: Clock },
   stopped: { color: 'var(--danger)', bg: 'var(--danger-50)', icon: AlertCircle },
-  done: { color: 'var(--muted)', bg: '#eef0f5', icon: CheckCircle2 },
+  // --neutral-50 is only defined by the dark theme (styles/dark.css).
+  done: { color: 'var(--muted)', bg: 'var(--neutral-50, #eef0f5)', icon: CheckCircle2 },
   info: { color: 'var(--info)', bg: 'var(--info-50)', icon: Clock },
 }
 

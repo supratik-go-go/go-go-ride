@@ -5,6 +5,7 @@ import { StatusBar, Style } from '@capacitor/status-bar'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { useAuth } from '../context/AuthContext'
 import { alarmService } from '../services/alarmService'
+import { appliedTheme, BAR_COLORS, onThemeChange } from '../utils/theme'
 import { alarmNotifications } from './alarmNotifications'
 import { isNativeApp } from './platform'
 
@@ -15,7 +16,7 @@ const ROOT_SCREENS = new Set(['/', '/home', '/admin'])
 /**
  * Glue between Android and the React app. Renders nothing.
  * - hardware back button: navigate back, exit on root screens
- * - status bar colour, hide the splash screen once React has painted
+ * - status bar colour to match the theme, hide the splash screen once React has painted
  * - signed-in users skip the welcome screen
  * - keep phone alarm reminders in sync with the account; tapping one opens My Alarms
  */
@@ -29,8 +30,13 @@ export function NativeBridge() {
 
   useEffect(() => {
     if (!isNativeApp()) return undefined
-    StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
-    StatusBar.setBackgroundColor({ color: '#0b2a7a' }).catch(() => {})
+    // Both bars are dark (navy in light, near-black in dark), so the icons stay light.
+    const paintStatusBar = (theme) => {
+      StatusBar.setStyle({ style: Style.Dark }).catch(() => {})
+      StatusBar.setBackgroundColor({ color: BAR_COLORS[theme] }).catch(() => {})
+    }
+    paintStatusBar(appliedTheme())
+    const offTheme = onThemeChange(paintStatusBar)
     const back = CapApp.addListener('backButton', ({ canGoBack }) => {
       if (ROOT_SCREENS.has(pathRef.current) || !canGoBack) CapApp.exitApp()
       else window.history.back()
@@ -39,6 +45,7 @@ export function NativeBridge() {
     return () => {
       back.then((h) => h.remove()).catch(() => {})
       offTap()
+      offTheme()
     }
   }, [navigate])
 

@@ -12,6 +12,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <title>GO-GO Ride</title>
+    <script>
+      // Apply the saved theme before the first paint, so a dark choice never flashes light.
+      // Same rules as src/utils/theme.js, which takes over once the app starts.
+      (function () {
+        var choice = 'light'
+        try {
+          choice = localStorage.getItem('gogo.theme') || 'light'
+        } catch (e) {}
+        if (choice === 'auto') choice = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        if (location.pathname.indexOf('/admin') === 0) choice = 'light'
+        document.documentElement.setAttribute('data-theme', choice === 'dark' ? 'dark' : 'light')
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -255,7 +255,7 @@ export default function Alarms() {
           <Info size={17} />
           <span>
             Reminder times are worked out from the bus timetable at your boarding stop. Reminders arrive in your <Link to="/notifications">notifications</Link> - turn on
-            browser alerts in <Link to="/settings">Settings</Link> so you don&apos;t miss them.
+            browser alerts in <Link to="/settings/notifications">Settings</Link> so you don&apos;t miss them.
           </span>
         </div>
       )}

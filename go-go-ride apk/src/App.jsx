@@ -20,6 +20,11 @@ const Login = p(() => import('./pages/auth/Login'))
 const DailyNews = p(() => import('./pages/passenger/DailyNews'))
 const Game = p(() => import('./pages/passenger/Game'))
 const OnlineRoom = p(() => import('./pages/passenger/OnlineRoom'))
+const Emergency = p(() => import('./pages/passenger/Emergency'))
+const Sos = p(() => import('./pages/passenger/Sos'))
+const LiveLocation = p(() => import('./pages/passenger/LiveLocation'))
+const MyBus = p(() => import('./pages/passenger/MyBus'))
+const HowToUse = p(() => import('./pages/passenger/HowToUse'))
 const PingBallGame = p(() => import('./pages/passenger/PingBallGame'))
 const AddRouteInfo = p(() => import('./pages/passenger/AddRouteInfo'))
 const RouteRequests = p(() => import('./pages/admin/RouteRequests'))
@@ -115,12 +120,17 @@ export default function App() {
             <Route path="local-cars" element={<LocalCars />} />
             <Route path="local-cars/:id" element={<LocalCarDetails />} />
             <Route path="game" element={<Game />} />
+            <Route path="emergency" element={<Emergency />} />
+            <Route path="sos" element={<Sos />} />
+            <Route path="my-location" element={<LiveLocation />} />
+            <Route path="how-to-use" element={<HowToUse />} />
             <Route path="news" element={<DailyNews />} />
             <Route path="server" element={<ServerSettings />} />
 
             <Route element={<RequireAuth />}>
               <Route path="bus/:id/alarm" element={<SetAlarm />} />
               <Route path="add-route" element={<AddRouteInfo />} />
+              <Route path="my-bus" element={<MyBus />} />
               <Route path="game/room/:id" element={<OnlineRoom />} />
               <Route path="game/pingball" element={<PingBallGame />} />
               <Route path="profile" element={<Profile />} />
@@ -131,7 +141,7 @@ export default function App() {
               <Route path="favorites" element={<Favorites />} />
               <Route path="recent-searches" element={<RecentSearches />} />
               <Route path="support" element={<Support />} />
-              <Route path="settings" element={<Settings />} />
+              <Route path="settings/*" element={<Settings />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="owner/buses" element={<MyBuses />} />
               <Route path="owner/buses/new" element={<BusForm />} />
