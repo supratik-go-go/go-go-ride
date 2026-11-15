@@ -40,6 +40,9 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 
 ## Development backlog — Claude
 
+- [ ] Merge the request-checking code into one module: `validate.js`, `pyfields.js`, `pyvalidate.js`, `services/pydantic.js` and the copy inside `routes/admin.js` (about 1,000 lines). `node scripts/api-check.mjs` guards every message
+- [ ] Split the largest route files (`admin.js`, `buses.js`, `network.js`, `cars.js`) into routes (addresses) + services (logic) + data (SQL)
+- [ ] Serve the API at `/api/v1` as well as `/api` (installed phones keep using `/api`)
 - [ ] Fix whatever the phone test finds
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
 - [ ] Connect the SMS provider for OTP login (after the decision above)
@@ -54,7 +57,6 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 - [ ] Local cars deactivated by an admin disappear from the admin list — show them with a filter
 - [ ] Broadcast notifications share one "read" flag for all users — make read state per user
 - [ ] Push notifications (Firebase) for bus approvals / booking updates when the app is closed
-- [ ] Keep `go-go-ride website code` and `go-go-ride apk` in sync for shared screens (or retire the website copy)
 
 ## Routine — owner
 
@@ -93,6 +95,7 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 
 ## Done
 
+- [x] App v1.8 + clean-up: crash screen on every screen, server crash logging, 727 automatic server checks (`node scripts/api-check.mjs`), API list in `docs/API.md`, architecture guide in `README.md`, old website copy / Python server / VPS kit removed, dead code removed, `start-gogo-ride.bat` now runs the Node server, `release-app.bat` for one-click releases
 - [x] Website + Android app built from the design PDF (React + Vite + Capacitor)
 - [x] Node.js backend for Hostinger Cloud Startup (688/688 checks identical to the Python backend)
 - [x] Privacy: bus owners' phone/email/documents hidden from the public

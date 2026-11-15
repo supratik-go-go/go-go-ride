@@ -6,26 +6,14 @@ _Last updated 2026-09-20 · living version: <https://claude.ai/code/artifact/94a
 
 One REST API serves all three surfaces — passenger app, public website, admin panel. 93 endpoints, every screen in the deck covered.
 
-The API exists in two implementations that return the same JSON. Build against either; switching is a base-URL change.
-
-| Implementation | Base URL | Interactive docs |
-| --- | --- | --- |
-| Node / Express | `http://localhost:4000/api` | `http://localhost:4000/docs` |
-| Python / FastAPI | `http://localhost:8000/api` | `http://localhost:8000/docs` |
-
-Their OpenAPI specs were diffed: same 93 paths and methods, and no field present in one is missing from the other.
+The API is `backend-node/` (Node.js, Express). Live: `https://go-goride.com/api`; on this PC: `http://localhost:8000/api`.
+The full, current list of addresses is [`docs/API.md`](docs/API.md), generated from the code.
+Parts of this guide were written for the first version of the API; where they disagree, `docs/API.md` and the code win.
 
 ### Run it locally
 
-```bash
-cd backend && npm install && cp .env.example .env && npm run db:reset && npm run dev
-```
-
-```bash
-cd backend-python && python -m venv .venv && .venv/Scripts/pip install -r requirements.txt && .venv/Scripts/python seed.py && .venv/Scripts/uvicorn app.main:app --reload --port 8000
-```
-
-Both seed the same demo data: 18 Kolkata stops, 7 routes, 7 buses, 4 local cars, 40 bookings.
+Double-click `start-gogo-ride.bat`, or `cd backend-node && node server.js`. The first start copies the demo
+database from `backend-node/seed/` (18 Kolkata stops, 7 routes, buses, local vehicles, bookings) into `backend-node/data/`.
 
 ### Seeded logins
 

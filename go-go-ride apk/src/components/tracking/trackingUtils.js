@@ -2,14 +2,14 @@
 // Positions come from trackingService.estimate(), which interpolates along the
 // published timetable - there is no GPS feed, so everything here is "estimated".
 
-import { splitDays, toISODate, formatDateLong, parseISODate } from '../../utils/format'
+import { splitDays, toISODate, formatDateLong } from '../../utils/format'
 
 export const TRACKING_REFRESH_MS = Number(import.meta.env.VITE_TRACKING_REFRESH_MS) || 5000
 
 const DAY_CODES = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 /** Day code ("MON") for a local date. */
-export const dayCode = (date = new Date()) => DAY_CODES[date.getDay()]
+const dayCode = (date = new Date()) => DAY_CODES[date.getDay()]
 
 /** Does the bus's weekly schedule include this date? (ignores declared exceptions) */
 export const runsOnDay = (bus, date = new Date()) => splitDays(bus?.serviceDays).includes(dayCode(date))
@@ -138,4 +138,3 @@ export function secondsAgo(at, now = new Date()) {
   return `${Math.floor(s / 60)} min ago`
 }
 
-export const isSameLocalDay = (iso, d = new Date()) => !iso || toISODate(parseISODate(iso)) === toISODate(d)

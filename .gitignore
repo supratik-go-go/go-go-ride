@@ -10,18 +10,17 @@ local.properties
 *.keystore
 *.jks
 
-# Live data: user accounts, bookings, uploaded documents and photos
-backend-python/gogoride.db
-backend-python/*.db-journal
-backend-python/uploads/
+# Databases anywhere: they hold user accounts and bookings
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
 
 # Dependencies and build output
 node_modules/
 dist/
 .build-check/
-__pycache__/
-*.pyc
-.venv/
 *.log
 
 # Android build output and generated files
@@ -37,8 +36,6 @@ go-go-ride apk/android/app/src/main/assets/public/
 # Large local tools and generated packages
 android-studio-*/
 android-studio-*.exe
-deploy-hostinger/build/
-deploy-hostinger/gogoride-deploy.zip
 
 # Editor / assistant state
 .claude/

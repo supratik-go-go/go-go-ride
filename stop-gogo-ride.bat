@@ -4,11 +4,9 @@ title GO-GO Ride - stop
 echo.
 echo  Stopping GO-GO Ride servers...
 call :kill_port 8000 "API"
-call :kill_port 5173 "Website"
 call :kill_port 5174 "App preview"
 rem Close the console windows the launchers opened (they keep the folders locked).
 taskkill /FI "WINDOWTITLE eq GO-GO Ride API*" /T /F >nul 2>nul
-taskkill /FI "WINDOWTITLE eq GO-GO Ride Web*" /T /F >nul 2>nul
 taskkill /FI "WINDOWTITLE eq GO-GO Ride App preview*" /T /F >nul 2>nul
 echo.
 echo  Done.

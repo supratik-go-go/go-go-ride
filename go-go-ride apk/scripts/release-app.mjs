@@ -86,7 +86,7 @@ async function prepare(ask) {
   fs.writeFileSync(FILES.notes, `${note}\n`)
   // Keeps the project summary right for the next Claude session.
   if (fs.existsSync(FILES.claude)) {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = new Date().toLocaleDateString('en-CA') // this PC's date (India), as YYYY-MM-DD
     const text = read(FILES.claude)
       .replace(/## Current state \(\d{4}-\d{2}-\d{2}\)/, `## Current state (${today})`)
       .replace(/- Live app: \*\*v[^*]+\*\* \(versionCode \d+\)\./, `- Live app: **v${target.name}** (versionCode ${target.code}).`)

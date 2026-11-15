@@ -4,7 +4,7 @@
 // 0/1 booleans) and returns the JSON object the API sends. Nested relations are
 // loaded here with small indexed queries; at this app's scale that is simpler
 // and fast enough (node:sqlite is synchronous and in-process).
-import { all, byId, get, scalar } from './db.js'
+import { all, byId, get } from './db.js'
 import { isoZ, to12h, toHHMM, toMinutes } from './time.js'
 
 const bool = (v) => Boolean(v)
@@ -61,24 +61,6 @@ export const routeStopOut = (rs) => ({
   distanceFromStartKm: num(rs.distanceFromStartKm),
   stop: stopById(rs.stopId),
 })
-
-/** RouteOut: route + fromStop/toStop + ordered stops + totalBuses (all buses on the route, any status). */
-export function routeOut(r, totalBuses) {
-  if (!r) return null
-  const stops = all('SELECT * FROM "RouteStop" WHERE "routeId" = ? ORDER BY sequence', r.id)
-  return {
-    ...routeBrief(r),
-    status: r.status,
-    fromStopId: r.fromStopId ?? null,
-    toStopId: r.toStopId ?? null,
-    createdAt: isoZ(r.createdAt),
-    updatedAt: isoZ(r.updatedAt),
-    fromStop: stopById(r.fromStopId),
-    toStop: stopById(r.toStopId),
-    stops: stops.map(routeStopOut),
-    totalBuses: totalBuses ?? Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE "routeId" = ?', r.id) || 0),
-  }
-}
 
 // ---------------------------------------------------------------- buses
 

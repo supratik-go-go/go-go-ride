@@ -1,0 +1,2365 @@
+{
+ "profile: me (passenger)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": null,
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Ritaban Guchait",
+    "phone": "91********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "profile: me (owner)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": "***@gmail.com",
+    "id": "cmua7ig2h00030d5ia9e9j3el",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Rakesh Sharma",
+    "phone": "98********",
+    "phoneVerified": true,
+    "role": "BUS_OWNER",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "profile: me (admin)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": "***@gogoride.com",
+    "id": "cmua7ig2h00022qtjqg7pglpb",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Operations Admin",
+    "phone": "98********",
+    "phoneVerified": true,
+    "role": "ADMIN",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "profile: me without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "profile: patch without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "profile: patch no body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: patch invalid types": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "email",
+     "message": "Input should be a valid string"
+    },
+    {
+     "field": "avatarUrl",
+     "message": "Input should be a valid string"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: patch name too long": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at most 80 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: patch whitespace name": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at least 2 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: patch array body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Input should be a valid dictionary or object to extract fields from"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: patch email taken by another account": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "An account with this email already exists",
+   "success": false
+  }
+ },
+ "profile: avatar without file": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "file",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: avatar without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "login activity (passenger, first row)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "location": null,
+     "status": "SUCCESS"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 1,
+    "page": 1
+   },
+   "success": true
+  }
+ },
+ "login activity (admin, first row)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "location": null,
+     "status": "SUCCESS"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 1,
+    "page": 1
+   },
+   "success": true
+  }
+ },
+ "login activity: page=0": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "page",
+     "message": "Input should be greater than or equal to 1"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "login activity: bad limit + order": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "limit",
+     "message": "Input should be a valid integer, unable to parse string as an integer"
+    },
+    {
+     "field": "order",
+     "message": "Input should be 'asc' or 'desc'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "login activity without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "favorites (passenger)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "busName": "S12 Howrah Express",
+      "busNumber": "WB 01 AB 1234",
+      "fare": 20,
+      "id": "cmua7ihe6001sx4rgeb0nvsvb",
+      "ratingAvg": 4.6,
+      "route": {
+       "name": "Howrah Station - Esplanade",
+       "routeNumber": "S12"
+      },
+      "type": "NON_AC"
+     }
+    ],
+    "localCars": [],
+    "raw": [
+     {
+      "id": "cmua7ihf2003fui9xayhdb7nk",
+      "itemId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "itemType": "BUS"
+     },
+     {
+      "id": "cmua7ihf2003g799dfo3mlz74",
+      "itemId": "cmua7ihdz000w2luvopqiq91y",
+      "itemType": "ROUTE"
+     }
+    ],
+    "routes": [
+     {
+      "distanceKm": 11.2,
+      "id": "cmua7ihdz000w2luvopqiq91y",
+      "name": "Howrah Station - Esplanade",
+      "routeNumber": "S12"
+     }
+    ],
+    "stops": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "favorites (owner)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [],
+    "localCars": [],
+    "raw": [],
+    "routes": [],
+    "stops": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "favorites (driver)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [],
+    "localCars": [],
+    "raw": [],
+    "routes": [],
+    "stops": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "favorites (admin)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [],
+    "localCars": [],
+    "raw": [],
+    "routes": [],
+    "stops": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "favorites without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "favorite add: empty body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "itemType",
+     "message": "Field required"
+    },
+    {
+     "field": "itemId",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "favorite add: bad type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "itemType",
+     "message": "Input should be 'BUS', 'ROUTE', 'STOP' or 'LOCAL_CAR'"
+    },
+    {
+     "field": "itemId",
+     "message": "Input should be a valid string"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "favorite add: lower-case type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "itemType",
+     "message": "Input should be 'BUS', 'ROUTE', 'STOP' or 'LOCAL_CAR'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "favorite add: nulls": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "itemType",
+     "message": "Input should be 'BUS', 'ROUTE', 'STOP' or 'LOCAL_CAR'"
+    },
+    {
+     "field": "itemId",
+     "message": "Input should be a valid string"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "favorite add without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "favorite remove: no body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "favorite remove: bad type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "itemType",
+     "message": "Input should be 'BUS', 'ROUTE', 'STOP' or 'LOCAL_CAR'"
+    },
+    {
+     "field": "itemId",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "recent searches (passenger)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "fromText": "Howrah Station",
+     "id": "cmua7jg2q0009qmqjfwa523hw",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-09-20T19:26:46.562Z",
+     "toText": "Esplanade"
+    }
+   ],
+   "message": "Success",
+   "success": true
+  }
+ },
+ "recent searches limit=1": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "fromText": "Howrah Station",
+     "id": "cmua7jg2q0009qmqjfwa523hw",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-09-20T19:26:46.562Z",
+     "toText": "Esplanade"
+    }
+   ],
+   "message": "Success",
+   "success": true
+  }
+ },
+ "recent searches limit=50 (owner)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "fromText": null,
+     "id": "cmvcegcio0012jtyxcn1qwpy1",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-10-17T12:55:33.984Z",
+     "toText": null
+    },
+    {
+     "fromText": null,
+     "id": "cmvcegber00118oggoxr12l15",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-10-17T12:55:32.547Z",
+     "toText": null
+    },
+    {
+     "fromText": null,
+     "id": "cmvcefy020010l068aun37t8g",
+     "query": "WB 01",
+     "searchType": "BUS_NUMBER",
+     "searchedAt": "2026-10-17T12:55:15.170Z",
+     "toText": null
+    }
+   ],
+   "message": "Success",
+   "success": true
+  }
+ },
+ "recent searches limit=0": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "limit",
+     "message": "Input should be greater than or equal to 1"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "recent searches limit=51": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "limit",
+     "message": "Input should be less than or equal to 50"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "recent searches limit=abc": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "limit",
+     "message": "Input should be a valid integer, unable to parse string as an integer"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "recent searches limit=1.0": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "fromText": "Howrah Station",
+     "id": "cmua7jg2q0009qmqjfwa523hw",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-09-20T19:26:46.562Z",
+     "toText": "Esplanade"
+    }
+   ],
+   "message": "Success",
+   "success": true
+  }
+ },
+ "recent searches without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "recent searches clear without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "recent search delete without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "notifications (passenger)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:51.141Z",
+     "id": "cmua7jjlx000c3swhxg0ziidh",
+     "isRead": false,
+     "link": "/bookings/cmua7jjlo000bp25u4nrv96zo",
+     "message": "Your booking GGRMSGD456T for 2026-09-21 is confirmed.",
+     "readAt": null,
+     "title": "Booking confirmed",
+     "type": "USER",
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications (owner)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:27:08.817Z",
+     "id": "cmua7jx8x000otvvof7o2vtoa",
+     "isRead": false,
+     "link": null,
+     "message": "WB 99 ZZ 0001 has been verified and is now listed on GO-GO Ride.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003m31n6mx0bi6xp",
+     "isRead": false,
+     "link": null,
+     "message": "WB 01 AB 1234 has been verified and is now listed.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 3,
+    "totalPages": 1,
+    "unread": 3
+   },
+   "success": true
+  }
+ },
+ "notifications (driver)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1,
+    "unread": 1
+   },
+   "success": true
+  }
+ },
+ "notifications (admin)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1,
+    "unread": 1
+   },
+   "success": true
+  }
+ },
+ "notifications (super)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1,
+    "unread": 1
+   },
+   "success": true
+  }
+ },
+ "notifications page 2 limit 1": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 1,
+    "page": 2,
+    "total": 2,
+    "totalPages": 2,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications far page": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 5,
+    "page": 50,
+    "total": 3,
+    "totalPages": 1,
+    "unread": 3
+   },
+   "success": true
+  }
+ },
+ "notifications type=SYSTEM": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications type=USER": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:27:08.817Z",
+     "id": "cmua7jx8x000otvvof7o2vtoa",
+     "isRead": false,
+     "link": null,
+     "message": "WB 99 ZZ 0001 has been verified and is now listed on GO-GO Ride.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003m31n6mx0bi6xp",
+     "isRead": false,
+     "link": null,
+     "message": "WB 01 AB 1234 has been verified and is now listed.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1,
+    "unread": 3
+   },
+   "success": true
+  }
+ },
+ "notifications type=ALARM": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications type=PROMO": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1,
+    "unread": 1
+   },
+   "success": true
+  }
+ },
+ "notifications unreadOnly=true": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:51.141Z",
+     "id": "cmua7jjlx000c3swhxg0ziidh",
+     "isRead": false,
+     "link": "/bookings/cmua7jjlo000bp25u4nrv96zo",
+     "message": "Your booking GGRMSGD456T for 2026-09-21 is confirmed.",
+     "readAt": null,
+     "title": "Booking confirmed",
+     "type": "USER",
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications unreadOnly=YES": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:27:08.817Z",
+     "id": "cmua7jx8x000otvvof7o2vtoa",
+     "isRead": false,
+     "link": null,
+     "message": "WB 99 ZZ 0001 has been verified and is now listed on GO-GO Ride.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003m31n6mx0bi6xp",
+     "isRead": false,
+     "link": null,
+     "message": "WB 01 AB 1234 has been verified and is now listed.",
+     "readAt": null,
+     "title": "Your bus is live",
+     "type": "USER",
+     "userId": "cmua7ig2h00030d5ia9e9j3el"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 2,
+    "page": 1,
+    "total": 3,
+    "totalPages": 2,
+    "unread": 3
+   },
+   "success": true
+  }
+ },
+ "notifications unreadOnly=0": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1,
+    "unread": 1
+   },
+   "success": true
+  }
+ },
+ "notifications repeated limit (last wins)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "createdAt": "2026-09-20T19:26:51.141Z",
+     "id": "cmua7jjlx000c3swhxg0ziidh",
+     "isRead": false,
+     "link": "/bookings/cmua7jjlo000bp25u4nrv96zo",
+     "message": "Your booking GGRMSGD456T for 2026-09-21 is confirmed.",
+     "readAt": null,
+     "title": "Booking confirmed",
+     "type": "USER",
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    },
+    {
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "id": "cmua7ihf4003lnnohuq465fhz",
+     "isRead": false,
+     "link": null,
+     "message": "Refresh the system to get the latest features.",
+     "readAt": null,
+     "title": "New version 2.1.0 available",
+     "type": "SYSTEM",
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 2,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications limit=+1 / 1_0": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 1,
+    "page": 10,
+    "total": 2,
+    "totalPages": 2,
+    "unread": 2
+   },
+   "success": true
+  }
+ },
+ "notifications bad type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "type",
+     "message": "Input should be 'SYSTEM', 'USER', 'PROMO' or 'ALARM'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications lower-case type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "type",
+     "message": "Input should be 'SYSTEM', 'USER', 'PROMO' or 'ALARM'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications bad unreadOnly": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "unreadOnly",
+     "message": "Input should be a valid boolean, unable to interpret input"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications empty unreadOnly": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "unreadOnly",
+     "message": "Input should be a valid boolean, unable to interpret input"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications many bad params": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "page",
+     "message": "Input should be greater than or equal to 1"
+    },
+    {
+     "field": "limit",
+     "message": "Input should be less than or equal to 100"
+    },
+    {
+     "field": "order",
+     "message": "Input should be 'asc' or 'desc'"
+    },
+    {
+     "field": "type",
+     "message": "Input should be 'SYSTEM', 'USER', 'PROMO' or 'ALARM'"
+    },
+    {
+     "field": "unreadOnly",
+     "message": "Input should be a valid boolean, unable to interpret input"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications limit=1.5": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "limit",
+     "message": "Input should be a valid integer, unable to parse string as an integer"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "notifications without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "unread count (passenger)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "count": 2
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "unread count (owner)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "count": 3
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "unread count (admin)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "count": 1
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "unread count without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "read-all without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "mark read without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "delete notification without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "broadcast without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "broadcast as passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "broadcast as owner": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "broadcast: empty body (admin)": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "title",
+     "message": "Field required"
+    },
+    {
+     "field": "message",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "broadcast: no body (admin)": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "broadcast: all fields invalid (super)": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "title",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "type",
+     "message": "Input should be 'SYSTEM', 'USER', 'PROMO' or 'ALARM'"
+    },
+    {
+     "field": "audience",
+     "message": "Input should be 'ALL', 'PASSENGER', 'BUS_OWNER', 'DRIVER', 'ADMIN' or 'SUPER_ADMIN'"
+    },
+    {
+     "field": "link",
+     "message": "Input should be a valid string"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "broadcast: too long": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "title",
+     "message": "String should have at most 120 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at most 500 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "tickets (admin, all)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets (super, all)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets (passenger, own)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets (owner, own)": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets (driver, own)": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets page 2 limit 1": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 1,
+    "page": 2,
+    "total": 2,
+    "totalPages": 2
+   },
+   "success": true
+  }
+ },
+ "tickets status=OPEN": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets status=RESOLVED": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets category=GENERAL": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets category=BUS": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets priority=NORMAL": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets priority=HIGH": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search subject (case-insensitive)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search ref (lower-case)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search name": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search no match": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search blank": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets search wildcard": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    },
+    {
+     "category": "BUS",
+     "createdAt": "2026-09-20T19:26:01.651Z",
+     "email": null,
+     "id": "cmua7ihf7003qxhra1fhuizqr",
+     "message": "The 07:30 AM S12 reached Esplanade 20 minutes late for three days in a row.",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "S12 timing seems wrong",
+     "ticketRef": "TKT100001",
+     "user": {
+      "avatarUrl": null,
+      "email": null,
+      "id": "cmua7ig2h0008af67g99rwmsv",
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "userId": "cmua7ig2h0008af67g99rwmsv"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets combined filters": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "category": "GENERAL",
+     "createdAt": "2026-09-20T19:27:15.487Z",
+     "email": null,
+     "id": "cmua7k2e7000q1posgeiwxbkd",
+     "message": "Cannot set an alarm on S12 route.",
+     "name": "Riya",
+     "phone": "91********",
+     "priority": "NORMAL",
+     "response": null,
+     "status": "OPEN",
+     "subject": "App issue",
+     "ticketRef": "TKTJGY3ZG",
+     "user": null,
+     "userId": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "tickets bad filters": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "status",
+     "message": "Input should be 'OPEN', 'IN_PROGRESS', 'RESOLVED' or 'CLOSED'"
+    },
+    {
+     "field": "category",
+     "message": "Input should be 'GENERAL', 'BUS', 'BOOKING', 'PAYMENT' or 'ACCOUNT'"
+    },
+    {
+     "field": "priority",
+     "message": "Input should be 'LOW', 'NORMAL' or 'HIGH'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "tickets bad filters + page": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "page",
+     "message": "Input should be a valid integer, unable to parse string as an integer"
+    },
+    {
+     "field": "status",
+     "message": "Input should be 'OPEN', 'IN_PROGRESS', 'RESOLVED' or 'CLOSED'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "tickets without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "ticket detail (admin)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "category": "GENERAL",
+    "createdAt": "2026-09-20T19:27:15.487Z",
+    "email": null,
+    "id": "cmua7k2e7000q1posgeiwxbkd",
+    "message": "Cannot set an alarm on S12 route.",
+    "name": "Riya",
+    "phone": "91********",
+    "priority": "NORMAL",
+    "response": null,
+    "status": "OPEN",
+    "subject": "App issue",
+    "ticketRef": "TKTJGY3ZG",
+    "user": null,
+    "userId": null
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "ticket detail (super)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "category": "GENERAL",
+    "createdAt": "2026-09-20T19:27:15.487Z",
+    "email": null,
+    "id": "cmua7k2e7000q1posgeiwxbkd",
+    "message": "Cannot set an alarm on S12 route.",
+    "name": "Riya",
+    "phone": "91********",
+    "priority": "NORMAL",
+    "response": null,
+    "status": "OPEN",
+    "subject": "App issue",
+    "ticketRef": "TKTJGY3ZG",
+    "user": null,
+    "userId": null
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "ticket detail (driver, not own)": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "ticket detail 404": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Ticket not found",
+   "success": false
+  }
+ },
+ "ticket detail 404 (passenger)": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Ticket not found",
+   "success": false
+  }
+ },
+ "ticket detail without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "ticket create: empty body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "Field required"
+    },
+    {
+     "field": "phone",
+     "message": "Field required"
+    },
+    {
+     "field": "subject",
+     "message": "Field required"
+    },
+    {
+     "field": "message",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: no body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: all invalid": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "phone",
+     "message": "Value error, Enter a valid 10-digit mobile number"
+    },
+    {
+     "field": "email",
+     "message": "Input should be a valid string"
+    },
+    {
+     "field": "category",
+     "message": "Input should be 'GENERAL', 'BUS', 'BOOKING', 'PAYMENT' or 'ACCOUNT'"
+    },
+    {
+     "field": "subject",
+     "message": "String should have at least 3 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at least 5 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: non-string phone": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "phone",
+     "message": "Input should be a valid string"
+    },
+    {
+     "field": "subject",
+     "message": "String should have at least 3 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at least 5 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: whitespace-only values": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at least 2 characters"
+    },
+    {
+     "field": "subject",
+     "message": "String should have at least 3 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at least 5 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: lower-case category": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "category",
+     "message": "Input should be 'GENERAL', 'BUS', 'BOOKING', 'PAYMENT' or 'ACCOUNT'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket create: too long": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "name",
+     "message": "String should have at most 80 characters"
+    },
+    {
+     "field": "subject",
+     "message": "String should have at most 120 characters"
+    },
+    {
+     "field": "message",
+     "message": "String should have at most 2000 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket update as passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "ticket update without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "ticket update 404": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Ticket not found",
+   "success": false
+  }
+ },
+ "ticket update invalid body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "status",
+     "message": "Input should be 'OPEN', 'IN_PROGRESS', 'RESOLVED' or 'CLOSED'"
+    },
+    {
+     "field": "priority",
+     "message": "Input should be 'LOW', 'NORMAL' or 'HIGH'"
+    },
+    {
+     "field": "response",
+     "message": "String should have at most 2000 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "ticket update no body": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Field required"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ }
+}

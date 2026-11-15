@@ -1,7 +1,7 @@
 # GO-GO Ride — Android App
 
 The GO-GO Ride passenger app for Android, built with [Capacitor](https://capacitorjs.com/).
-It is the same React app as `../go-go-ride website code`, packaged as a native app, plus phone-only features:
+A React app packaged as a native app with Capacitor, plus phone-only features:
 
 | Feature | Where |
 | --- | --- |
@@ -45,7 +45,7 @@ build-apk.bat https://api.yourdomain.com/api
 ## 3. Try it on your phone (same Wi-Fi as this PC)
 
 1. In `D:\Go-Go-Ride`, start the server in phone mode: `start-gogo-ride.bat phone`
-   (if Windows Firewall asks, allow Python on **Private** networks). It prints the address to use.
+   (if Windows Firewall asks, allow Node.js on **Private** networks). It prints the address to use.
 2. Copy `GO-GO-Ride.apk` to the phone and open it; allow "Install unknown apps" when Android asks.
 3. If the app says it can't reach the server, open **Server settings** on the login screen and enter
    the address printed by the launcher, e.g. `http://192.168.1.9:8000/api`.
@@ -74,5 +74,4 @@ npm run cap:sync     :: rebuild + copy into the Android project
 npm run cap:open     :: open in Android Studio (run on an emulator or a USB-connected phone)
 ```
 
-Changes to shared screens should be made in both this folder and `../go-go-ride website code`
-(they started as the same code). Native-only code lives in `src/native/`.
+Native-only code lives in `src/native/`. How the code is organised: see `../README.md`.

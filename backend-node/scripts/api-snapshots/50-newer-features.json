@@ -1,0 +1,668 @@
+{
+ "app version": {
+  "status": 200,
+  "body": {
+   "data": {
+    "url": "/download/GO-GO-Ride.apk"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "alarm timer without the key": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND"
+  }
+ },
+ "OTP request (OTP is off)": {
+  "status": 429,
+  "body": {
+   "code": "TOO_MANY_REQUESTS"
+  }
+ },
+ "local vehicles: Car": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah Station",
+     "availabilityLabel": "06:00 AM - 10:00 PM",
+     "availableFrom": "06:00",
+     "availableTo": "22:00",
+     "carModel": "Maruti Dzire",
+     "carNumber": "WB 22 AB 1122",
+     "createdAt": "2026-09-20T19:26:01.647Z",
+     "driverName": "Suman Dey",
+     "id": "cmua7ihf3003h3t4alvckh8n5",
+     "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+     "phone": "91********",
+     "photoUrl": null,
+     "ratingAvg": 4.8,
+     "ratingCount": 120,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.647Z",
+     "vehicleType": "CAR",
+     "verified": true
+    },
+    {
+     "area": "Belur Area",
+     "availabilityLabel": "06:00 AM - 10:00 PM",
+     "availableFrom": "06:00",
+     "availableTo": "22:00",
+     "carModel": "Toyota Etios",
+     "carNumber": "WB 22 EF 5566",
+     "createdAt": "2026-09-20T19:26:01.647Z",
+     "driverName": "Amit Mondal",
+     "id": "cmua7ihf3003jw0idjtxwqzmn",
+     "ownerId": null,
+     "phone": "91********",
+     "photoUrl": null,
+     "ratingAvg": 4.7,
+     "ratingCount": 64,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.647Z",
+     "vehicleType": "CAR",
+     "verified": true
+    },
+    {
+     "area": "Shibpur Area",
+     "availabilityLabel": "05:30 AM - 11:00 PM",
+     "availableFrom": "05:30",
+     "availableTo": "23:00",
+     "carModel": "Hyundai Aura",
+     "carNumber": "WB 22 CD 3344",
+     "createdAt": "2026-09-20T19:26:01.647Z",
+     "driverName": "Raju Shaw",
+     "id": "cmua7ihf3003icvtah7yp8918",
+     "ownerId": "cmua7ig2h000djv5ejr1983md",
+     "phone": "98********",
+     "photoUrl": null,
+     "ratingAvg": 4.6,
+     "ratingCount": 86,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.647Z",
+     "vehicleType": "CAR",
+     "verified": true
+    },
+    {
+     "area": "Salt Lake",
+     "availabilityLabel": "07:00 AM - 09:00 PM",
+     "availableFrom": "07:00",
+     "availableTo": "21:00",
+     "carModel": "Tata Tigor",
+     "carNumber": "WB 24 GH 7788",
+     "createdAt": "2026-09-20T19:26:01.648Z",
+     "driverName": "Kaushik Roy",
+     "id": "cmua7ihf4003kfqr0eob6lh2f",
+     "ownerId": null,
+     "phone": "91********",
+     "photoUrl": null,
+     "ratingAvg": 4.3,
+     "ratingCount": 29,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.648Z",
+     "vehicleType": "CAR",
+     "verified": false
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 4,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "local vehicles: Toto/Auto (none yet)": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "local vehicles: unknown type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "vehicleType",
+     "message": "Input should be 'TOTO_AUTO', 'CAR' or 'TOURIST_BUS'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "list a tourist bus": {
+  "status": 201,
+  "body": {
+   "data": {
+    "area": "Esplanade",
+    "availabilityLabel": "06:00 AM - 10:00 PM",
+    "availableFrom": "06:00",
+    "availableTo": "22:00",
+    "carModel": "Force Traveller",
+    "carNumber": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "driverName": "Test Tours",
+    "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+    "phone": "90********",
+    "photoUrl": null,
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "status": "ACTIVE",
+    "updatedAt": "2026-09-22T04:30:00.000Z",
+    "vehicleType": "TOURIST_BUS",
+    "verified": false
+   },
+   "message": "Submitted - our team will verify your details",
+   "success": true
+  }
+ },
+ "list with no type (becomes Car)": {
+  "status": 201,
+  "body": {
+   "data": {
+    "area": "Esplanade",
+    "availabilityLabel": "06:00 AM - 10:00 PM",
+    "availableFrom": "06:00",
+    "availableTo": "22:00",
+    "carModel": "Force Traveller",
+    "carNumber": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "driverName": "Test Tours",
+    "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+    "phone": "90********",
+    "photoUrl": null,
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "status": "ACTIVE",
+    "updatedAt": "2026-09-22T04:30:00.000Z",
+    "vehicleType": "CAR",
+    "verified": false
+   },
+   "message": "Submitted - our team will verify your details",
+   "success": true
+  }
+ },
+ "list with an unknown type": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "vehicleType",
+     "message": "Input should be 'TOTO_AUTO', 'CAR' or 'TOURIST_BUS'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "list signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "local vehicles: Tourist Bus": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Esplanade",
+     "availabilityLabel": "06:00 AM - 10:00 PM",
+     "availableFrom": "06:00",
+     "availableTo": "22:00",
+     "carModel": "Force Traveller",
+     "carNumber": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "driverName": "Test Tours",
+     "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+     "phone": "90********",
+     "photoUrl": null,
+     "ratingAvg": 0,
+     "ratingCount": 0,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-22T04:30:00.000Z",
+     "vehicleType": "TOURIST_BUS",
+     "verified": false
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "admin moves a listing to Toto/Auto": {
+  "status": 200,
+  "body": {
+   "data": {
+    "area": "Howrah Station",
+    "availabilityLabel": "06:00 AM - 10:00 PM",
+    "availableFrom": "06:00",
+    "availableTo": "22:00",
+    "carModel": "Maruti Dzire",
+    "carNumber": "WB 22 AB 1122",
+    "createdAt": "2026-09-20T19:26:01.647Z",
+    "driverName": "Suman Dey",
+    "id": "cmua7ihf3003h3t4alvckh8n5",
+    "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+    "phone": "91********",
+    "photoUrl": null,
+    "ratingAvg": 4.8,
+    "ratingCount": 120,
+    "status": "ACTIVE",
+    "updatedAt": "2026-09-22T04:30:00.000Z",
+    "vehicleType": "TOTO_AUTO",
+    "verified": true
+   },
+   "message": "Local car updated",
+   "success": true
+  }
+ },
+ "unknown type on edit": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "vehicleType",
+     "message": "Input should be 'TOTO_AUTO', 'CAR' or 'TOURIST_BUS'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "local vehicles: Toto/Auto after the change": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah Station",
+     "availabilityLabel": "06:00 AM - 10:00 PM",
+     "availableFrom": "06:00",
+     "availableTo": "22:00",
+     "carModel": "Maruti Dzire",
+     "carNumber": "WB 22 AB 1122",
+     "createdAt": "2026-09-20T19:26:01.647Z",
+     "driverName": "Suman Dey",
+     "id": "cmua7ihf3003h3t4alvckh8n5",
+     "ownerId": "cmua7ig2h000cny9i5kx90ffw",
+     "phone": "91********",
+     "photoUrl": null,
+     "ratingAvg": 4.8,
+     "ratingCount": 120,
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-22T04:30:00.000Z",
+     "vehicleType": "TOTO_AUTO",
+     "verified": true
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "bus import without a file": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Choose the Excel file to import",
+   "success": false
+  }
+ },
+ "bus import as a passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "route submission signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "route submission with one stop": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "stops",
+     "message": "List should have at least 2 items after validation, not 1"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "route submission": {
+  "status": 201,
+  "body": {
+   "data": {
+    "name": "Howrah Station - Esplanade",
+    "notes": "Test route",
+    "rejectionReason": null,
+    "reviewedAt": null,
+    "routeId": null,
+    "routeNumber": "S99",
+    "status": "PENDING",
+    "stops": [
+     {
+      "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+      "stopName": "Howrah Station"
+     },
+     {
+      "stopId": "cmua7ihdx000isb1mz8nyi6x0",
+      "stopName": "Esplanade"
+     }
+    ],
+    "submittedAt": "2026-09-22T04:30:00.000Z"
+   },
+   "message": "Route sent for verification. You will be notified once it is checked.",
+   "success": true
+  }
+ },
+ "my route submissions": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "name": "Howrah Station - Esplanade",
+     "notes": "Test route",
+     "rejectionReason": null,
+     "reviewedAt": null,
+     "routeId": null,
+     "routeNumber": "S99",
+     "status": "PENDING",
+     "stops": [
+      {
+       "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+       "stopName": "Howrah Station"
+      },
+      {
+       "stopId": "cmua7ihdx000isb1mz8nyi6x0",
+       "stopName": "Esplanade"
+      }
+     ],
+     "submittedAt": "2026-09-22T04:30:00.000Z"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "route requests (admin)": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "name": "Howrah Station - Esplanade",
+     "notes": "Test route",
+     "rejectionReason": null,
+     "reviewedAt": null,
+     "routeId": null,
+     "routeNumber": "S99",
+     "status": "PENDING",
+     "stops": [
+      {
+       "stopId": "cmua7ihdx000e1j9kasf7h8qe",
+       "stopName": "Howrah Station"
+      },
+      {
+       "stopId": "cmua7ihdx000isb1mz8nyi6x0",
+       "stopName": "Esplanade"
+      }
+     ],
+     "submittedAt": "2026-09-22T04:30:00.000Z",
+     "submittedBy": {
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     }
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "route requests as a passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "You do not have permission to perform this action",
+   "success": false
+  }
+ },
+ "review an unknown route request": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Route request not found",
+   "success": false
+  }
+ },
+ "review with a bad status": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "status",
+     "message": "Input should be 'APPROVED' or 'REJECTED'"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "leaderboard": {
+  "status": 200,
+  "body": {
+   "data": {
+    "me": null,
+    "rows": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "leaderboard signed in": {
+  "status": 200,
+  "body": {
+   "data": {
+    "me": null,
+    "rows": []
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "ping ball best before playing": {
+  "status": 200,
+  "body": {
+   "data": {
+    "best": 0
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "ping ball score": {
+  "status": 200,
+  "body": {
+   "data": {
+    "best": 120,
+    "points": 5,
+    "score": 120
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "ping ball score as text": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Invalid score",
+   "success": false
+  }
+ },
+ "ping ball best": {
+  "status": 200,
+  "body": {
+   "data": {
+    "best": 120
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "private chess room": {
+  "status": 200,
+  "body": {
+   "data": {
+    "game": "chess",
+    "players": [
+     {
+      "avatarUrl": null,
+      "name": "Ritaban",
+      "pointsEarned": 0,
+      "seat": 0
+     }
+    ],
+    "result": null,
+    "seat": 0,
+    "seats": 2,
+    "secondsLeft": null,
+    "status": "WAITING",
+    "turn": null,
+    "version": 1,
+    "view": null
+   },
+   "message": "OK",
+   "success": true
+  }
+ },
+ "quick chess match": {
+  "status": 200,
+  "body": {
+   "data": {
+    "game": "chess",
+    "players": [
+     {
+      "avatarUrl": null,
+      "name": "Suvajit",
+      "pointsEarned": 0,
+      "seat": 0
+     }
+    ],
+    "result": null,
+    "seat": 0,
+    "seats": 2,
+    "secondsLeft": null,
+    "status": "WAITING",
+    "turn": null,
+    "version": 1,
+    "view": null
+   },
+   "message": "OK",
+   "success": true
+  }
+ },
+ "quick match signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "unknown game": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Game not found",
+   "success": false
+  }
+ },
+ "join with a wrong code": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "No game found with that code",
+   "success": false
+  }
+ },
+ "open an unknown room": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Game not found",
+   "success": false
+  }
+ },
+ "move in an unknown room": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Game not found",
+   "success": false
+  }
+ },
+ "leave an unknown room": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Game not found",
+   "success": false
+  }
+ },
+ "logout without a refresh token": {
+  "status": 200,
+  "body": {
+   "code": null
+  }
+ }
+}

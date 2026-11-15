@@ -10,16 +10,12 @@
 // returned shape is what the map and tracking screens consume.
 
 import { haversineKm, stopPoint } from './locationService'
+import { toMinutes } from '../utils/format'
 
-export const toMinutes = (hhmm) => {
-  if (!hhmm) return null
-  const [h, m] = hhmm.split(':').map(Number)
-  return h * 60 + m
-}
 
-export const minutesNow = (date = new Date()) => date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60
+const minutesNow = (date = new Date()) => date.getHours() * 60 + date.getMinutes() + date.getSeconds() / 60
 
-export function format12h(totalMinutes) {
+function format12h(totalMinutes) {
   const m = ((Math.round(totalMinutes) % 1440) + 1440) % 1440
   const h = Math.floor(m / 60)
   const mm = String(m % 60).padStart(2, '0')
@@ -27,7 +23,7 @@ export function format12h(totalMinutes) {
 }
 
 /** Normalise a bus's timetable/stopages into ordered stops with times in minutes. */
-export function normaliseStops(bus) {
+function normaliseStops(bus) {
   const list = bus?.timetable?.length ? bus.timetable : bus?.stopages || []
   return [...list]
     .sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0))
@@ -59,7 +55,7 @@ export function normaliseStops(bus) {
  *   stops: ReturnType<typeof normaliseStops>,
  * }}
  */
-export function estimate(bus, { now = new Date(), isRunning = true } = {}) {
+function estimate(bus, { now = new Date(), isRunning = true } = {}) {
   const stops = normaliseStops(bus)
   const base = { stops, heading: null, nextIndex: null, minutesToNext: null, segmentProgress: 0 }
 
@@ -140,7 +136,7 @@ export function estimate(bus, { now = new Date(), isRunning = true } = {}) {
 }
 
 /** Minutes until the bus reaches stop `stopId` (null if passed / unknown). */
-export function minutesUntilStop(bus, stopId, now = new Date()) {
+function minutesUntilStop(bus, stopId, now = new Date()) {
   const stop = normaliseStops(bus).find((s) => s.id === stopId)
   if (!stop) return null
   const diff = stop.arr - minutesNow(now)
@@ -148,7 +144,7 @@ export function minutesUntilStop(bus, stopId, now = new Date()) {
 }
 
 /** Nearest stop on the bus's route to `origin` ({lat,lng}). */
-export function nearestStopOnRoute(bus, origin) {
+function nearestStopOnRoute(bus, origin) {
   let best = null
   for (const s of normaliseStops(bus)) {
     const d = haversineKm(origin, s.point)

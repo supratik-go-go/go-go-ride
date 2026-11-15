@@ -10,8 +10,6 @@ import { config } from './config.js'
 
 export const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-export const nowMs = () => Date.now()
-
 /** "07:30" -> 450 */
 export function toMinutes(hhmm) {
   const [h, m = '0'] = String(hhmm).split(':')
@@ -109,8 +107,3 @@ export const isoZ = (ms) => (ms === null || ms === undefined ? null : new Date(N
 export const dateOnly = (ms) => (ms === null || ms === undefined ? null : new Date(Number(ms)).toISOString().slice(0, 10))
 
 /** Parse an ISO datetime string from a request body to ms. */
-export function parseDateTime(value) {
-  const s = String(value)
-  const ms = Date.parse(/[zZ]|[+-]\d\d:?\d\d$/.test(s) ? s : `${s}Z`)
-  return Number.isNaN(ms) ? null : ms
-}

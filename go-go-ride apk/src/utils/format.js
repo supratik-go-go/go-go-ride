@@ -11,6 +11,13 @@ export function toISODate(d = new Date()) {
 
 export const todayISO = () => toISODate(new Date())
 
+/** "HH:mm" -> minutes after midnight. */
+export const toMinutes = (hhmm) => {
+  if (!hhmm) return null
+  const [h, m] = String(hhmm).split(':').map(Number)
+  return h * 60 + m
+}
+
 export function addDays(iso, days) {
   const d = parseISODate(iso)
   d.setDate(d.getDate() + days)
@@ -208,5 +215,5 @@ export function statusTone(value) {
   }
 }
 
-export const ROLES_ADMIN = ['ADMIN', 'SUPER_ADMIN']
+const ROLES_ADMIN = ['ADMIN', 'SUPER_ADMIN']
 export const isAdminRole = (role) => ROLES_ADMIN.includes(role)

@@ -54,13 +54,6 @@ export function openPicker(input) {
   input.click()
 }
 
-/** "HH:mm" -> minutes after midnight. */
-export const toMinutes = (hhmm) => {
-  if (!hhmm) return null
-  const [h, m] = String(hhmm).split(':').map(Number)
-  return h * 60 + m
-}
-
 /** Share a link with the native sheet, or copy it. Returns 'shared' | 'copied' | 'cancelled'. */
 export async function shareLink({ title, text, url }) {
   if (navigator.share) {
@@ -101,3 +94,5 @@ export const LOCAL_VEHICLE_TYPES = [
   { value: 'CAR', label: 'Car', emoji: '🚗' },
   { value: 'TOURIST_BUS', label: 'Tourist Bus', emoji: '🚌' },
 ]
+
+export { toMinutes } from '../../utils/format'

@@ -31,13 +31,6 @@ export function safeNext(next, fallback = '/home') {
   return next
 }
 
-/** "Something went wrong" style top-level message unless it was only a field validation error. */
-export function formLevelMessage(err) {
-  if (!err) return ''
-  if (err.code === 'BAD_REQUEST' && err.details?.length) return 'Please fix the highlighted fields.'
-  return err.message || 'Something went wrong. Please try again.'
-}
-
 /** Client checks mirroring POST /support/tickets (name 2-80, phone, subject 3-120, message 5-2000). */
 export function validateTicket(f, { withContact = true } = {}) {
   const e = {}

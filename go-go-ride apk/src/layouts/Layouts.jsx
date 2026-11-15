@@ -6,6 +6,7 @@ import { BottomNavigation } from '../components/navigation/BottomNavigation'
 import { Sidebar } from '../components/navigation/Sidebar'
 import { UserMenu } from '../components/navigation/UserMenu'
 import { Logo } from '../components/ui/Misc'
+import { ErrorBoundary } from '../components/ui/ErrorBoundary'
 import { useUnreadCount } from '../hooks/useUnreadCount'
 import { adminService, platformService } from '../services/adminService'
 import { useAuth } from '../context/AuthContext'
@@ -21,7 +22,7 @@ export function ScrollToTop() {
   return null
 }
 
-export function Footer() {
+function Footer() {
   const year = new Date().getFullYear()
   const [info, setInfo] = useState(null)
 
@@ -88,13 +89,23 @@ export function Footer() {
   )
 }
 
+/** The current screen, with a crash screen in place of a blank page; navigation still works around it. */
+function SafeOutlet({ home }) {
+  const { pathname } = useLocation()
+  return (
+    <ErrorBoundary resetKey={pathname} home={home}>
+      <Outlet />
+    </ErrorBoundary>
+  )
+}
+
 /** Public website pages: navbar + content + footer. */
 export function PublicLayout() {
   return (
     <div className="layout-public">
       <Navbar />
       <main className="layout-main">
-        <Outlet />
+        <SafeOutlet />
       </main>
       <Footer />
     </div>
@@ -112,7 +123,7 @@ export function AppLayout() {
         <Navbar />
       </div>
       <main className="app-main">
-        <Outlet />
+        <SafeOutlet />
       </main>
       <BottomNavigation />
     </div>
@@ -123,7 +134,7 @@ export function AppLayout() {
 export function AuthLayout() {
   return (
     <div className="layout-auth">
-      <Outlet />
+      <SafeOutlet />
     </div>
   )
 }
@@ -186,7 +197,7 @@ export function AdminLayout() {
           </div>
         </header>
         <main className="admin-main">
-          <Outlet />
+          <SafeOutlet home="/admin" />
         </main>
       </div>
     </div>

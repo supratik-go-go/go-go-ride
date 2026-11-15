@@ -82,4 +82,3 @@ The API sends alarm reminders by itself every minute. As an extra safety net you
 
 - **OTP sign-in** needs an SMS provider (e.g. MSG91 / Fast2SMS; India requires DLT registration). Until one is
   connected the live API never reveals codes, so the app uses **password** sign-in.
-- The VPS kit in `../deploy-hostinger/` is for the Python backend on a VPS — not needed with this setup.

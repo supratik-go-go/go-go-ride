@@ -1,0 +1,142 @@
+{
+ "health": {
+  "status": 200,
+  "body": {
+   "status": "ok",
+   "success": true
+  }
+ },
+ "stats": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": 6,
+    "routes": 7,
+    "stops": 18,
+    "users": 14
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "public settings": {
+  "status": 200,
+  "body": {
+   "data": {
+    "address": "123, Transport Office Road, Kolkata, West Bengal - 700001",
+    "contactNumber": "+91 98300 00000",
+    "currency": "INR",
+    "dateFormat": "DD MMM YYYY",
+    "id": "global",
+    "platformEmail": "***@gogoride.com",
+    "platformName": "GO-GO Ride",
+    "timeFormat": "12h",
+    "timezone": "Asia/Kolkata"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "unknown route 404": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND"
+  }
+ },
+ "me (passenger)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": null,
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Ritaban Guchait",
+    "phone": "91********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "me (admin)": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": "***@gogoride.com",
+    "id": "cmua7ig2h00022qtjqg7pglpb",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Operations Admin",
+    "phone": "98********",
+    "phoneVerified": true,
+    "role": "ADMIN",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "me without token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED"
+  }
+ },
+ "login: bad phone + empty password": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "login: wrong password": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Invalid mobile number or password",
+   "success": false
+  }
+ },
+ "register: existing phone": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "An account with this mobile number already exists",
+   "success": false
+  }
+ },
+ "register: missing fields": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "otp verify: no code requested": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Request a new verification code",
+   "success": false
+  }
+ },
+ "refresh: garbage token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Invalid or expired refresh token",
+   "success": false
+  }
+ },
+ "change password: wrong current": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Current password is incorrect",
+   "success": false
+  }
+ }
+}

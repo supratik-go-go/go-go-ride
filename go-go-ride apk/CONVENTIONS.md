@@ -5,11 +5,13 @@ Everything is wired to the real FastAPI backend — **there is no mock data anyw
 
 ## Running
 
+Double-click `start-gogo-ride.bat` in the main folder, or by hand:
+
 ```bash
-# backend (terminal 1)
-cd backend-python && .venv/Scripts/uvicorn app.main:app --reload --port 8000
-# frontend (terminal 2)
-cd frontend && npm run dev        # http://localhost:5173
+# API (terminal 1), its own test database in backend-node/data
+cd backend-node && node server.js
+# app (terminal 2)
+cd "go-go-ride apk" && node node_modules/vite/bin/vite.js --port 5174   # http://localhost:5174
 ```
 
 Vite proxies `/api` and `/uploads` to `localhost:8000`, so code always calls relative URLs.

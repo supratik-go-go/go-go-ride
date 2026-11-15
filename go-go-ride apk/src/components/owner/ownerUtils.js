@@ -20,7 +20,7 @@ export function formatServiceDays(value) {
 }
 
 /** Allowed upload types (backend: JPG / PNG / WEBP / PDF, 5 MB). */
-export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 export const DOC_ACCEPT = '.jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf'
 export const IMAGE_ACCEPT = '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp'
 const DOC_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']

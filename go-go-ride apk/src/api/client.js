@@ -247,7 +247,7 @@ export async function api(path, options) {
 }
 
 /** For list endpoints: returns { data, meta }. */
-export async function apiPage(path, options) {
+async function apiPage(path, options) {
   const json = await request(path, options)
   return { data: json?.data ?? [], meta: json?.meta ?? null }
 }

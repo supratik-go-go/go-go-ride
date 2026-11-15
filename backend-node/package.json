@@ -2,7 +2,7 @@
   "name": "gogoride-api",
   "version": "1.0.0",
   "private": true,
-  "description": "GO-GO Ride API (Node.js) - same endpoints and JSON as backend-python, built to run as a Hostinger Node.js web app",
+  "description": "GO-GO Ride API for the Android app, running as a Hostinger Node.js web app",
   "type": "module",
   "main": "server.js",
   "engines": {
@@ -11,7 +11,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "parity": "node scripts/parity.mjs"
+    "check": "node scripts/api-check.mjs",
+    "docs": "node scripts/api-docs.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

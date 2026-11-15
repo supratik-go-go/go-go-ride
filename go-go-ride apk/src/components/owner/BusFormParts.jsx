@@ -27,7 +27,7 @@ const keySalt = Math.random().toString(36).slice(2, 7)
 export const newStopRow = (patch) => ({ key: `r${keySalt}${(rowSeq += 1)}`, stop: null, arrivalTime: '', departureTime: '', distanceKm: '', ...patch })
 
 /** Stop autocomplete inside a bordered form box, with an accessible name and invalid state. */
-export function StopField({ value, onChange, placeholder = 'Type a stop name', ariaLabel, invalid, tag, icon, label, className }) {
+function StopField({ value, onChange, placeholder = 'Type a stop name', ariaLabel, invalid, tag, icon, label, className }) {
   const ref = useRef(null)
   useEffect(() => {
     const input = ref.current?.querySelector('input')

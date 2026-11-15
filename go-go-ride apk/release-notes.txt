@@ -1,1 +1,1 @@
-New Local Vehicle section: pick Toto/Auto, Car or Tourist Bus and call a driver. Also a cleaner Home screen with a green Live sign on Live Location Track.
+If a screen ever fails to open, you now get Reload and Go to Home buttons instead of a blank page. Plus behind-the-scenes clean-up.

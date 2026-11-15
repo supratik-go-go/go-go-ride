@@ -30,7 +30,7 @@ function readChoice() {
 export const themeChoice = () => choice
 
 /** What 'auto' means right now on this phone. */
-export const systemTheme = () => (darkQuery?.matches ? 'dark' : 'light')
+const systemTheme = () => (darkQuery?.matches ? 'dark' : 'light')
 
 /** The theme on screen: 'light' | 'dark'. */
 export const appliedTheme = () => shown || 'light'

@@ -1,7 +1,7 @@
 {
-  "version": "1.7",
-  "versionCode": 8,
-  "notes": "New Local Vehicle section: pick Toto/Auto, Car or Tourist Bus and call a driver. Also a cleaner Home screen with a green Live sign on Live Location Track.",
+  "version": "1.8",
+  "versionCode": 9,
+  "notes": "If a screen ever fails to open, you now get Reload and Go to Home buttons instead of a blank page. Plus behind-the-scenes clean-up.",
   "sizeMB": 5.9,
-  "builtAt": "2026-11-15T21:11:03.743Z"
+  "builtAt": "2026-11-15T22:10:34.659Z"
 }

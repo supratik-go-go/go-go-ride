@@ -24,7 +24,7 @@ function notificationId(alarmId) {
 }
 
 /** Local Date the reminder should fire, from the alarm's date + notifyAt (HH:mm). */
-export function reminderTime(alarm) {
+function reminderTime(alarm) {
   const day = String(alarm?.alarmDate || '').slice(0, 10)
   const at = alarm?.notifyAt
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^\d{2}:\d{2}$/.test(at || '')) return null

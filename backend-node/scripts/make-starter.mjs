@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Copies the current database (and uploaded files) into seed/ so a new server
 // starts with today's buses, routes, stops and accounts.
-//   node scripts/make-starter.mjs [path/to/gogoride.db]
+//   node scripts/make-starter.mjs path/to/gogoride.db   (for example data/test-8100.db)
 // Uses VACUUM INTO, which makes a consistent copy even while the API is running.
 import fs from 'node:fs'
 import path from 'node:path'
@@ -9,7 +9,11 @@ import { DatabaseSync } from 'node:sqlite'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const source = path.resolve(process.argv[2] || path.join(root, '..', 'backend-python', 'gogoride.db'))
+if (!process.argv[2]) {
+  console.error('Usage: node scripts/make-starter.mjs path/to/gogoride.db')
+  process.exit(1)
+}
+const source = path.resolve(process.argv[2])
 const target = path.join(root, 'seed', 'gogoride.db')
 
 if (!fs.existsSync(source)) {
