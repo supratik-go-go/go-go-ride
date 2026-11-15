@@ -54,7 +54,7 @@ export function Footer() {
           <Link to="/stops">Bus Stops Near You</Link>
           <Link to="/routes">All Routes</Link>
           <Link to="/running-car">Running Car</Link>
-          <Link to="/local-cars">Local Cars</Link>
+          <Link to="/local-cars">Local Vehicle</Link>
         </div>
         <div>
           <h4>Company</h4>

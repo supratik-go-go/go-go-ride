@@ -88,7 +88,7 @@ const FAQS = [
     q: 'How do local cars work?',
     a: (
       <>
-        Browse <Link to="/local-cars">Local Cars</Link> to find drivers in your area with their availability and ratings, then call them directly to agree on your trip and
+        Browse <Link to="/local-cars">Local Vehicle</Link> (Toto/Auto, Car or Tourist Bus) to find drivers in your area with their availability and ratings, then call them directly to agree on your trip and
         fare. A <strong>Verified</strong> badge means our team has checked the driver&apos;s details.
       </>
     ),

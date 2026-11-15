@@ -33,8 +33,8 @@ const STEPS = [
   {
     icon: CarFront,
     tone: 'warning',
-    title: 'Call a local car',
-    text: 'Open Local Cars, choose a verified driver near you and tap Call Driver to talk to them directly.',
+    title: 'Call a local vehicle',
+    text: 'Open Local Vehicle, pick Toto/Auto, Car or Tourist Bus, choose a driver near you and tap Call Driver to talk to them directly.',
     links: [{ to: '/local-cars', label: 'Local cars' }],
   },
   {

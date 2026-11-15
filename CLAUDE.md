@@ -32,6 +32,8 @@ The owner wants a phone app only; no website is hosted. Never paste secrets into
 
 ## Releasing an app version
 
+The owner releases without Claude by double-clicking `release-app.bat` (logic in `go-go-ride apk/scripts/release-app.mjs`): it asks the version and note, does steps 1 to 3 below, asks YES, refuses secret files, then commits, tags and pushes. The manual steps:
+
 1. Raise `versionCode` and `versionName` in `go-go-ride apk/android/app/build.gradle`, and `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` in `ios/App/App.xcodeproj/project.pbxproj`.
 2. Write one line for users in `go-go-ride apk/release-notes.txt`. It appears in the update popup.
 3. Run `& 'D:\Go-Go-Ride\go-go-ride apk\build-apk.bat' https://go-goride.com/api` in the Terminal panel. It takes 15 to 25 minutes and copies the APK and `app-info.json` into `backend-node/public/downloads/`.
@@ -39,11 +41,11 @@ The owner wants a phone app only; no website is hosted. Never paste secrets into
 
 The signing key (`go-go-ride apk/android/keystore/`, `android/keystore.properties`) is git-ignored. Never commit it. Losing it means every user has to reinstall.
 
-## Current state (2026-11-08)
+## Current state (2026-11-16)
 
-- Live app: **v1.6** (versionCode 7). Not yet tested on real phones.
+- Live app: **v1.7** (versionCode 8). Not yet tested on real phones.
 - Features: bus search with a Via stop (the travel date is the orange badge on Home; time filter is on the results page), alarms, local cars, Add Bus and Add Route Information with admin review, Daily News in English and Bengali, delete account, privacy page at `/privacy`, update popup.
-- Home tiles: Emergency Call List `/emergency`, SOS `/sos` (contacts kept on the phone only, opens the SMS app), Live Location `/my-location`, My Bus `/my-bus` (favourite buses), How to Use `/how-to-use` (`VIDEO_URL` in `HowToUse.jsx` is empty until the owner has a video).
+- Home has no Running Car banner (since v1.7; the page `/running-car` still exists, linked from Help). Local Vehicle (`/local-cars`, bottom tab and Home section) has 3 categories: Toto/Auto, Car, Tourist Bus (`LocalCar.vehicleType`: `TOTO_AUTO`, `CAR`, `TOURIST_BUS`; `/local-cars?type=` filters). Older listings default to Car; admins change the type in the admin Local Vehicles table. Home tiles: Emergency Call List `/emergency`, SOS `/sos` (contacts kept on the phone only, opens the SMS app), Live Location `/my-location` (green pulsing Live badge as its icon), My Bus `/my-bus` (favourite buses), How to Use `/how-to-use` (`VIDEO_URL` in `HowToUse.jsx` is empty until the owner has a video).
 - Admins import buses from Excel at `/admin/buses/import` (`backend-node/src/services/busImport.js`, POST `/api/admin/buses/import`, `?apply=1` writes). One row per bus; stops and times in one cell like `Howrah Station 07:00, Esplanade 07:35`. A known bus number updates that bus. Sample sheet: `docs/bus-import-template.xlsx`, also served at `/download/bus-import-template.xlsx`.
 - Settings is a menu with sub-pages under `/settings/*` (`src/pages/account/settings/`). Theme: Light / Dark / Auto in `src/utils/theme.js`; all dark CSS lives in `src/styles/dark.css`; admin pages always stay light. Language: English only, Bengali shown as coming soon. Server settings are hidden from ordinary users of the live app.
 - Online games, turn based and polled every 2.5 seconds: chess, ludo (2 players), callbreak (4), twentynine (4, two teams), carrom (2). Ping Ball is a score game only. Points: win 10, draw 3, loss 1; leaving earns 0; a pair only earns from 5 games together a day.
@@ -52,7 +54,7 @@ The signing key (`go-go-ride apk/android/keystore/`, `android/keystore.propertie
 ## Code
 
 - Server: routes in `src/routes`, logic in `src/services`, game engines in `src/games`. Engine contract: `seats`, `start()`, `turn(state)`, `view(state, seat)`, `move(state, seat, input)`, optional `forfeitWinners(seat)`. All randomness on the server with `node:crypto`; `view()` must never leak hidden cards or trump.
-- Database: SQLite with PascalCase tables, camelCase columns, timestamps in milliseconds, 0/1 booleans. New tables go in `ADDED_TABLES` in `src/db.js` (`CREATE TABLE IF NOT EXISTS`). Never change existing columns: the live database already has them.
+- Database: SQLite with PascalCase tables, camelCase columns, timestamps in milliseconds, 0/1 booleans. New tables go in `ADDED_TABLES` and new columns in `ADDED_COLUMNS` in `src/db.js` (both added on start if missing). Never change existing columns: the live database already has them.
 - Responses use `{ success, message, data, meta }`.
 - App: pages in `src/pages`, API calls in `src/services`, Android and iOS code in `src/native`. CSS classes are prefixed per area (`px-`, `own-`, `adm-`, `acc-`, `game-`). Icons come from `lucide-react` only; check them with `node scripts/check-icons.mjs`.
 - Match the surrounding code. Comments are sparse and explain why.

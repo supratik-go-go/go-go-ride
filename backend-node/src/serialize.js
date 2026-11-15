@@ -218,6 +218,7 @@ export const localCarOut = (c) =>
         driverName: c.driverName,
         phone: c.phone,
         area: c.area,
+        vehicleType: c.vehicleType ?? 'CAR',
         carModel: c.carModel ?? null,
         carNumber: c.carNumber ?? null,
         photoUrl: c.photoUrl ?? null,

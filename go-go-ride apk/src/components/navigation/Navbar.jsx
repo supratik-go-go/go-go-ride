@@ -12,7 +12,7 @@ const LINKS = [
   { to: '/search', label: 'Buses' },
   { to: '/stops', label: 'Bus Stops' },
   { to: '/running-car', label: 'Rides' },
-  { to: '/local-cars', label: 'Local Cars' },
+  { to: '/local-cars', label: 'Local Vehicle' },
   { to: '/about', label: 'About Us' },
   { to: '/contact', label: 'Contact' },
 ]

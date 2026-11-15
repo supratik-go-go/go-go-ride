@@ -9,6 +9,7 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 
 ## Now — owner
 
+- [ ] Admin panel → Local Vehicles: set the right Type (Toto/Auto, Car, Tourist Bus) for listings made before v1.7 — they all start as Car
 - [ ] Test the app on a real phone and note problems:
   - [ ] Search Howrah Station → Esplanade, open bus S12
   - [ ] Set an alarm (allow notifications) — does it save and ring?
@@ -70,7 +71,9 @@ Hostinger deploys automatically from GitHub (`main` branch, folder `backend-node
 2. `push-to-github.bat` → describe the change. Hostinger rebuilds and restarts the API by itself (1–3 minutes).
 3. Check https://go-goride.com/api/health. Live data in `~/gogoride-data` is never touched.
 
-**App change** (`go-go-ride apk/`):
+**App change** (`go-go-ride apk/`): double-click **`release-app.bat`**. It asks for the new version number and one line for users, builds the APK (15–25 minutes), then publishes when you type YES. If the build fails, run it again: it reuses the same version.
+
+What it does, if you ever need to do it by hand:
 1. Raise `versionCode` (+1) and `versionName` in `go-go-ride apk\android\app\build.gradle` — phones only accept an update with a higher versionCode.
    Use the same numbers for iPhone in Xcode (General tab) when that version is released.
 2. `"go-go-ride apk\build-apk.bat" https://go-goride.com/api` — builds the signed APK and puts it on the download page.
@@ -100,6 +103,7 @@ Every `push-to-github.bat` saves a restore point. If an update goes wrong, run `
 - [x] Repo ready for Hostinger auto-deploy (APK + download page committed)
 - [x] App v1.1: Guest Login / Create Account on the first screen, Via stop in bus search, bottom bar now Home · Local Cars · Game · Daily News · Profile (Running Car stays on the Home screen), "Service Coming Soon.." in place of not-found messages
 - [x] Add Bus Information / Add Route Information for any signed-in user, checked by admins in Bus Requests / Route Requests
+- [x] App v1.7: Local Vehicle with Toto/Auto, Car and Tourist Bus categories (Home section and bottom tab), Running Car banner removed from Home, green Live sign on the Live Location Track tile
 - [x] App v1.6: bus import from Excel for admins, app version on Profile and login, Server settings hidden unless the phone really uses a different server
 - [x] App v1.5: new Home tiles (Emergency, SOS, Live Location, My Bus, How to Use), date badge, dark theme, Settings menu, server settings hidden from users
 - [x] App v1.4: online Ludo, Call Break, 29 and Carrom; Ping Ball score game

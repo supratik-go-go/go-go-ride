@@ -10,22 +10,24 @@ import { useDebounce } from '../../hooks/useDebounce'
 import { usePagedQuery } from '../../hooks/usePagedQuery'
 import { localCarService } from '../../services'
 import { exportCsv } from '../../utils/csv'
-import { formatDate, formatPhone, label, timeAgo, todayISO } from '../../utils/format'
+import { LABELS, formatDate, formatPhone, label, timeAgo, todayISO } from '../../utils/format'
 import './admin.css'
 import './admin-ops.css'
 
 const TABS = [
-  { value: '', label: 'All Cars' },
+  { value: '', label: 'All Vehicles' },
   { value: 'true', label: 'Verified' },
   { value: 'false', label: 'Unverified' },
 ]
 
 const carLine = (c) => [c.carModel, c.carNumber].filter(Boolean).join(' · ')
+const typeName = (c) => label('localVehicleType', c.vehicleType || 'CAR')
 
 const CSV_COLUMNS = [
   { header: 'Driver', value: 'driverName' },
   { header: 'Phone', value: 'phone' },
   { header: 'Area', value: 'area' },
+  { header: 'Type', value: typeName },
   { header: 'Car Model', value: (c) => c.carModel || '' },
   { header: 'Car Number', value: (c) => c.carNumber || '' },
   { header: 'Availability', value: (c) => c.availabilityLabel || `${c.availableFrom} - ${c.availableTo}` },
@@ -65,7 +67,7 @@ function CarDetailsModal({ carId, initial, onClose, onVerify, onStatus, verifyin
       open={Boolean(carId)}
       onClose={onClose}
       size="md"
-      title="Local car details"
+      title="Local vehicle details"
       footer={
         car && (
           <div className="adm-footer-row">
@@ -108,7 +110,7 @@ function CarDetailsModal({ carId, initial, onClose, onVerify, onStatus, verifyin
                   <Badge tone="warning">Not verified</Badge>
                 )}
               </div>
-              <span className="text-sm text-2">{carLine(car) || 'Car details not added'}</span>
+              <span className="text-sm text-2">{[typeName(car), carLine(car)].filter(Boolean).join(' · ')}</span>
               <span className="row wrap" style={{ '--gap': '8px' }}>
                 <StarRating value={car.ratingAvg || 0} size={15} />
                 <span className="text-xs text-muted">
@@ -127,6 +129,10 @@ function CarDetailsModal({ carId, initial, onClose, onVerify, onStatus, verifyin
               <div>
                 <div className="adm-fact-label">Area</div>
                 <div className="adm-fact-value">{car.area}</div>
+              </div>
+              <div>
+                <div className="adm-fact-label">Type</div>
+                <div className="adm-fact-value">{typeName(car)}</div>
               </div>
               <div>
                 <div className="adm-fact-label">Availability</div>
@@ -191,7 +197,7 @@ function CarDetailsModal({ carId, initial, onClose, onVerify, onStatus, verifyin
 
 export default function LocalCarsAdmin() {
   const toast = useToast()
-  const list = usePagedQuery(localCarService.list, { limit: 10, initialFilters: { verified: '', area: '' } })
+  const list = usePagedQuery(localCarService.list, { limit: 10, initialFilters: { verified: '', area: '', vehicleType: '' } })
   const counts = useStatusCounts(localCarService.list, 'verified', TABS.map((t) => t.value))
   const [area, setArea] = useState('')
   const debouncedArea = useDebounce(area.trim(), 300)
@@ -239,6 +245,18 @@ export default function LocalCarsAdmin() {
     } catch (err) {
       toast.error(err)
       throw err
+    }
+  }
+
+  // Listings made before v1.8 all start as Car, so admins move totos and buses here.
+  const setType = async (car, next) => {
+    try {
+      const updated = await localCarService.update(car.id, { vehicleType: next })
+      list.patchRow(car.id, updated)
+      setViewing((v) => (v?.id === car.id ? { ...v, ...updated } : v))
+      toast.success(`${car.driverName} is now listed under ${label('localVehicleType', next)}`)
+    } catch (err) {
+      toast.error(err)
     }
   }
 
@@ -293,8 +311,27 @@ export default function LocalCarsAdmin() {
     },
     { key: 'area', header: 'Area', render: (c) => c.area },
     {
+      key: 'type',
+      header: 'Type',
+      render: (c) => (
+        <select
+          className="select ops-type-select"
+          value={c.vehicleType || 'CAR'}
+          onChange={(e) => setType(c, e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          aria-label={`Vehicle type for ${c.driverName}`}
+        >
+          {Object.entries(LABELS.localVehicleType).map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
       key: 'car',
-      header: 'Car',
+      header: 'Vehicle',
       render: (c) =>
         carLine(c) ? (
           <div className="adm-cell">
@@ -359,7 +396,7 @@ export default function LocalCarsAdmin() {
 
   return (
     <div className="adm-page">
-      <SectionHeader title="Local Cars" subtitle="Drivers passengers can call directly - verify them, hide or remove listings." />
+      <SectionHeader title="Local Vehicles" subtitle="Toto/Auto, Car and Tourist Bus drivers passengers can call directly - set the type, verify them, hide or remove listings." />
 
       <section className="adm-card adm-table-card ops-dense">
         <AdminTabs items={tabItems} value={list.filters.verified} onChange={(v) => list.setFilter('verified', v)} ariaLabel="Verification" />
@@ -373,6 +410,17 @@ export default function LocalCarsAdmin() {
             </Button>
           }
         >
+          <label className="adm-toolbar-field">
+            <span>Type</span>
+            <select className="select" value={list.filters.vehicleType} onChange={(e) => list.setFilter('vehicleType', e.target.value)}>
+              <option value="">All</option>
+              {Object.entries(LABELS.localVehicleType).map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
           <input className="input ops-toolbar-input" value={area} onChange={(e) => setArea(e.target.value)} placeholder="Filter by area…" aria-label="Filter by area" />
         </TableToolbar>
         <div className="card-note">
@@ -389,7 +437,7 @@ export default function LocalCarsAdmin() {
           noun="cars"
           empty={{
             icon: <CarFront size={24} />,
-            title: list.search || area ? 'No cars match your filters' : 'No local cars here',
+            title: list.search || area || list.filters.vehicleType ? 'No vehicles match your filters' : 'No local vehicles here',
             message: list.search || area ? 'Try a different name, area or car model.' : 'Cars listed by owners or the team will appear here.',
           }}
         />

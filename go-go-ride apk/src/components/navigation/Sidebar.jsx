@@ -28,7 +28,7 @@ const ITEMS = [
   { to: '/admin/stops', label: 'Bus Stops', icon: MapPin },
   { to: '/admin/tracking', label: 'Live Tracking', icon: Navigation },
   { to: '/admin/rides', label: 'Running Car (Rides)', icon: CarFront },
-  { to: '/admin/local-cars', label: 'Local Cars', icon: CarTaxiFront },
+  { to: '/admin/local-cars', label: 'Local Vehicles', icon: CarTaxiFront },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { to: '/admin/reports', label: 'Reports & Analytics', icon: BarChart3 },

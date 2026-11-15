@@ -16,13 +16,12 @@ import {
 } from 'lucide-react'
 import { AddViaButton, StopInput, ViaInput } from '../../components/navigation/SearchBar'
 import { Avatar, Badge, Button, EmptyState, Logo, Skeleton, Spinner, useToast } from '../../components/ui'
-import { LocalCarCard, NotifyMeModal, firstName, openPicker } from '../../components/passenger'
-import { localCarService, locationService, rideService, routeService, stopService } from '../../services'
+import { LocalVehicleTypes, firstName, openPicker } from '../../components/passenger'
+import { locationService, routeService, stopService } from '../../services'
 import { useAuth } from '../../context/AuthContext'
 import { useAsync } from '../../hooks/useAsync'
 import { useUnreadCount } from '../../hooks/useUnreadCount'
 import { formatDate, todayISO } from '../../utils/format'
-import runningCarImg from '../../assets/brand/running-car.jpg'
 import './passenger.css'
 
 const MODES = [
@@ -51,13 +50,10 @@ export default function Home() {
   const [q, setQ] = useState('')
   const [date, setDate] = useState(todayISO())
   const [locating, setLocating] = useState(false)
-  const [notifyOpen, setNotifyOpen] = useState(false)
   const searchRef = useRef(null)
   const qRef = useRef(null)
   const focusQ = useRef(false)
 
-  const rides = useAsync(() => rideService.status(), [])
-  const cars = useAsync(() => localCarService.list({ verified: true, limit: 3 }), [])
   const popular = useAsync(() => routeService.popular(6), [])
 
   useEffect(() => {
@@ -134,8 +130,6 @@ export default function Home() {
   }
 
   const greetingName = ready ? (isAuthenticated ? firstName(user?.name) || 'there' : 'Traveller') : ''
-  const status = rides.data?.status
-  const isLive = status === 'LIVE'
 
   return (
     <div className="px-page px-home">
@@ -282,7 +276,11 @@ export default function Home() {
               <span>1 Click Help</span>
             </Link>
             <Link to="/my-location" className="px-quick-tile">
-              <MapPin size={26} />
+              <span className="px-quick-live" aria-hidden="true">
+                <Badge tone="success" square>
+                  <span className="dot dot-pulse" /> Live
+                </Badge>
+              </span>
               <span>Live Location Track</span>
             </Link>
             <Link to="/my-bus" className="px-quick-tile">
@@ -324,43 +322,6 @@ export default function Home() {
               <ArrowRight size={18} />
             </Link>
           </nav>
-
-          <section className="px-rc" aria-labelledby="px-rc-title" style={{ order: 3 }}>
-            <div className="px-rc-text">
-              <div className="row px-rc-head" style={{ '--gap': '12px' }}>
-                <span className="px-rc-icon">
-                  <CarFront size={24} />
-                </span>
-                <div className="stack" style={{ '--gap': '4px', alignItems: 'flex-start' }}>
-                  <h2 id="px-rc-title">Running Car</h2>
-                  {rides.loading && !rides.data ? (
-                    <Skeleton width={90} height={20} radius={6} />
-                  ) : isLive ? (
-                    <Badge tone="success" square>
-                      <span className="dot dot-pulse" /> Live
-                    </Badge>
-                  ) : status === 'COMING_SOON' ? (
-                    <span className="badge badge-accent badge-square">Coming Soon</span>
-                  ) : null}
-                </div>
-              </div>
-              <p className="px-rc-tagline">{rides.data?.tagline || 'Book shared rides on your route. Affordable, faster and smarter.'}</p>
-              {isLive ? (
-                <Button to="/running-car" size="sm" iconRight={<ArrowRight size={16} />}>
-                  Find a ride
-                </Button>
-              ) : status === 'COMING_SOON' ? (
-                <Button size="sm" onClick={() => setNotifyOpen(true)}>
-                  Notify Me
-                </Button>
-              ) : (
-                <Button to="/running-car" size="sm" variant="outline">
-                  Learn more
-                </Button>
-              )}
-            </div>
-            <img src={runningCarImg} alt="" className="px-rc-img" aria-hidden="true" />
-          </section>
 
           {/* ---------------- popular routes ---------------- */}
           <section className="px-section" aria-labelledby="px-popular-title" style={{ order: 5 }}>
@@ -411,7 +372,7 @@ export default function Home() {
           </section>
         </div>
 
-        {/* ---------------- local cars ---------------- */}
+        {/* ---------------- local vehicle ---------------- */}
         <section className="card px-cars-panel" aria-labelledby="px-cars-title" style={{ order: 4 }}>
           <div className="px-section-head">
             <div className="row" style={{ '--gap': '12px', minWidth: 0 }}>
@@ -420,57 +381,19 @@ export default function Home() {
               </span>
               <div style={{ minWidth: 0 }}>
                 <h2 id="px-cars-title" className="px-section-title">
-                  Local Cars Near You
+                  Local Vehicle
                 </h2>
-                <p className="text-sm text-muted">Call verified local drivers directly.</p>
+                <p className="text-sm text-muted">Pick a type and call local drivers directly.</p>
               </div>
             </div>
             <Link to="/local-cars" className="link-btn nowrap">
               View All <ChevronRight size={16} />
             </Link>
           </div>
-          {cars.loading && !cars.data ? (
-            <div className="px-cars-row">
-              {Array.from({ length: 3 }, (_, i) => (
-                <Skeleton key={i} height={170} radius={14} className="px-cars-skel" />
-              ))}
-            </div>
-          ) : cars.error && !cars.data ? (
-            <div className="alert alert-danger">
-              <span className="grow">{cars.error.message}</span>
-              <button type="button" className="link-btn" onClick={() => cars.reload()}>
-                Retry
-              </button>
-            </div>
-          ) : !cars.data?.data?.length ? (
-            <EmptyState
-              compact
-              icon={<CarFront size={24} />}
-              title="No verified drivers yet"
-              message="Verified local drivers will show up here soon."
-              action={
-                <Button to="/local-cars" size="sm" variant="outline">
-                  Browse all drivers
-                </Button>
-              }
-            />
-          ) : (
-            <div className="px-cars-row">
-              {cars.data.data.map((car) => (
-                <LocalCarCard key={car.id} car={car} />
-              ))}
-            </div>
-          )}
+          <LocalVehicleTypes />
         </section>
       </div>
 
-      <NotifyMeModal
-        open={notifyOpen}
-        onClose={() => setNotifyOpen(false)}
-        onDone={() => {
-          rides.reload({ silent: true })
-        }}
-      />
     </div>
   )
 }

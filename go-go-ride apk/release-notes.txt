@@ -1,1 +1,1 @@
-New for admins: import many buses at once from an Excel sheet. Also shows the app version on Profile and the login screen.
+New Local Vehicle section: pick Toto/Auto, Car or Tourist Bus and call a driver. Also a cleaner Home screen with a green Live sign on Live Location Track.

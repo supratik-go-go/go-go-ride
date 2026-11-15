@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS "ArcadeRun" (
 CREATE INDEX IF NOT EXISTS "ix_ArcadeRun_userId_game_createdAt" ON "ArcadeRun" ("userId", game, "createdAt");
 `
 
+// Columns added after launch: [table, column, definition]. Existing rows get the default.
+const ADDED_COLUMNS = [['LocalCar', 'vehicleType', `VARCHAR NOT NULL DEFAULT 'CAR'`]]
+
 function openDatabase() {
   const file = config.databasePath
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -87,6 +90,10 @@ function openDatabase() {
   db.exec('PRAGMA foreign_keys = ON')
   db.exec('PRAGMA busy_timeout = 5000')
   db.exec(ADDED_TABLES)
+  for (const [table, column, definition] of ADDED_COLUMNS) {
+    const has = db.prepare(`PRAGMA table_info("${table}")`).all().some((c) => c.name === column)
+    if (!has) db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${definition}`)
+  }
   return db
 }
 

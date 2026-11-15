@@ -71,6 +71,7 @@ export const ENUMS = {
   favoriteType: ['BUS', 'ROUTE', 'STOP', 'LOCAL_CAR'],
   searchType: ['ROUTE', 'BUS_NUMBER', 'BUS_NAME'],
   vehicleType: ['CAR', 'AUTO', 'BIKE'],
+  localVehicleType: ['TOTO_AUTO', 'CAR', 'TOURIST_BUS'],
   rideStatus: ['SCHEDULED', 'RUNNING', 'COMPLETED', 'CANCELLED'],
   bookingType: ['BUS', 'RIDE', 'LOCAL_CAR'],
   bookingStatus: ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'],

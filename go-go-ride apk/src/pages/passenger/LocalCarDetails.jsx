@@ -6,7 +6,7 @@ import { BookingModal, CarPhoto, FavoriteButton, ReviewForm, ReviewList, ratingT
 import { localCarService } from '../../services'
 import { useAsync } from '../../hooks/useAsync'
 import { useAuth } from '../../context/AuthContext'
-import { formatPhone } from '../../utils/format'
+import { formatPhone, label } from '../../utils/format'
 import './passenger.css'
 
 /** Is "now" inside the driver's HH:mm window (handles overnight shifts)? */
@@ -103,8 +103,8 @@ export default function LocalCarDetails() {
             <div className="px-lcd-facts">
               <InfoItem icon={<MapPin size={18} />} label="Area" value={car.area} />
               <InfoItem icon={<Clock size={18} />} label="Available" value={car.availabilityLabel} />
-              <InfoItem icon={<CarFront size={18} />} label="Car" value={car.carModel || '—'} />
-              <InfoItem icon={<Hash size={18} />} label="Car number" value={car.carNumber || '—'} />
+              <InfoItem icon={<CarFront size={18} />} label="Vehicle" value={[label('localVehicleType', car.vehicleType || 'CAR'), car.carModel].filter(Boolean).join(' · ')} />
+              <InfoItem icon={<Hash size={18} />} label="Vehicle number" value={car.carNumber || '—'} />
               <InfoItem icon={<Phone size={18} />} label="Phone" value={formatPhone(car.phone)} />
             </div>
 

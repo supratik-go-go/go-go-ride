@@ -3,6 +3,7 @@ import { Camera, CarFront, Clock, Hash, MapPin, Phone, UserRound, X } from 'luci
 import { assetUrl } from '../../api/client'
 import { localCarService } from '../../services'
 import { useAuth } from '../../context/AuthContext'
+import { LOCAL_VEHICLE_TYPES } from '../passenger/helpers'
 import { Button, Input, Modal, useToast } from '../ui'
 import { isValidPhone } from '../../utils/format'
 import { IMAGE_ACCEPT, cleanMessage, formatBytes, serverFieldErrors, validateUpload } from './ownerUtils'
@@ -12,6 +13,7 @@ const blank = (user) => ({
   driverName: user?.name || '',
   phone: user?.phone || '',
   area: '',
+  vehicleType: 'CAR',
   carModel: '',
   carNumber: '',
   availableFrom: '06:00',
@@ -40,6 +42,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
             driverName: car.driverName || '',
             phone: car.phone || '',
             area: car.area || '',
+            vehicleType: car.vehicleType || 'CAR',
             carModel: car.carModel || '',
             carNumber: car.carNumber || '',
             availableFrom: car.availableFrom || '06:00',
@@ -77,7 +80,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
     if (!isValidPhone(form.phone)) e.phone = 'Enter a valid 10-digit mobile number'
     if (form.area.trim().length < 2) e.area = 'Enter the area where you take rides'
     if (form.carModel.trim().length > 80) e.carModel = 'Keep the model under 80 characters'
-    if (form.carNumber.trim().length > 20) e.carNumber = 'Car number is too long'
+    if (form.carNumber.trim().length > 20) e.carNumber = 'Vehicle number is too long'
     if (!form.availableFrom) e.availableFrom = 'Required'
     if (!form.availableTo) e.availableTo = 'Required'
     if (form.availableFrom && form.availableFrom === form.availableTo) e.availableTo = 'Must differ from the start time'
@@ -101,6 +104,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
       driverName: form.driverName.trim(),
       phone: form.phone.replace(/\D/g, '').slice(-10),
       area: form.area.trim(),
+      vehicleType: form.vehicleType,
       carModel: form.carModel.trim() || (editing ? null : undefined),
       carNumber: form.carNumber.trim().toUpperCase() || (editing ? null : undefined),
       availableFrom: form.availableFrom,
@@ -126,7 +130,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
       }
     }
     setBusy(false)
-    toast.success(editing ? 'Listing updated' : saved.verified ? 'Car listed' : 'Car listed — our team will verify your details')
+    toast.success(editing ? 'Listing updated' : saved.verified ? 'Vehicle listed' : 'Vehicle listed — our team will verify your details')
     onSaved?.(saved, { created: !editing })
     onClose?.()
   }
@@ -138,7 +142,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
       open={open}
       onClose={busy ? undefined : onClose}
       dismissible={!busy}
-      title={editing ? 'Edit car listing' : 'List your car'}
+      title={editing ? 'Edit vehicle listing' : 'List your vehicle'}
       subtitle={editing ? car?.carNumber || car?.carModel : 'Passengers nearby can call you directly'}
       footer={
         <>
@@ -146,7 +150,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
             Cancel
           </Button>
           <Button type="submit" form="own-car-form" loading={busy}>
-            {editing ? 'Save changes' : 'List car'}
+            {editing ? 'Save changes' : 'List vehicle'}
           </Button>
         </>
       }
@@ -154,11 +158,11 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
       <form id="own-car-form" className="stack" style={{ '--gap': '14px' }} onSubmit={submit} noValidate>
         <div className="own-photo-pick">
           <div className="own-photo-preview">
-            {currentPhoto ? <img src={currentPhoto} alt="Car" /> : <CarFront size={34} />}
+            {currentPhoto ? <img src={currentPhoto} alt="Vehicle" /> : <CarFront size={34} />}
           </div>
           <div className="stack" style={{ '--gap': '6px', minWidth: 0 }}>
-            <span className="fw-600 text-sm">Car photo</span>
-            <span className="text-xs text-muted">A clear photo helps passengers recognise your car. JPG, PNG or WEBP, up to 5 MB.</span>
+            <span className="fw-600 text-sm">Vehicle photo</span>
+            <span className="text-xs text-muted">A clear photo helps passengers recognise your vehicle. JPG, PNG or WEBP, up to 5 MB.</span>
             <div className="row wrap" style={{ '--gap': '8px' }}>
               <label className="btn btn-outline btn-sm own-file-btn">
                 <Camera size={15} /> {currentPhoto ? 'Change photo' : 'Add photo'}
@@ -171,6 +175,17 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
               )}
             </div>
             {photoError && <span className="field-error">{photoError}</span>}
+          </div>
+        </div>
+
+        <div className="field">
+          <span className="field-label">Vehicle type</span>
+          <div className="segmented" role="radiogroup" aria-label="Vehicle type">
+            {LOCAL_VEHICLE_TYPES.map((t) => (
+              <button key={t.value} type="button" role="radio" aria-checked={form.vehicleType === t.value} className={form.vehicleType === t.value ? 'active' : ''} onClick={() => set('vehicleType', t.value)}>
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -198,9 +213,9 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
             error={errors.area}
             maxLength={80}
           />
-          <Input label="Car model" icon={<CarFront size={17} />} placeholder="e.g. Maruti Dzire" value={form.carModel} onChange={(e) => set('carModel', e.target.value)} error={errors.carModel} maxLength={80} />
+          <Input label="Vehicle model" icon={<CarFront size={17} />} placeholder="e.g. Maruti Dzire" value={form.carModel} onChange={(e) => set('carModel', e.target.value)} error={errors.carModel} maxLength={80} />
           <Input
-            label="Car number"
+            label="Vehicle number"
             icon={<Hash size={17} />}
             placeholder="WB 22 AB 1122"
             value={form.carNumber}
@@ -220,7 +235,7 @@ export function CarFormModal({ open, car, onClose, onSaved }) {
                 </button>
               ))}
             </div>
-            <span className="field-hint">{form.status === 'ACTIVE' ? 'Visible in Local Cars' : 'Hidden from the Local Cars list'}</span>
+            <span className="field-hint">{form.status === 'ACTIVE' ? 'Visible in Local Vehicle' : 'Hidden from the Local Vehicle list'}</span>
           </div>
           <Input label="Available from" type="time" required icon={<Clock size={17} />} value={form.availableFrom} onChange={(e) => set('availableFrom', e.target.value)} error={errors.availableFrom} />
           <Input label="Available until" type="time" required icon={<Clock size={17} />} value={form.availableTo} onChange={(e) => set('availableTo', e.target.value)} error={errors.availableTo} />

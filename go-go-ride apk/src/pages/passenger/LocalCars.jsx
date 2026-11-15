@@ -1,27 +1,45 @@
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { CarFront, ChevronRight, Search, Star, X } from 'lucide-react'
 import { Button, EmptyState, ErrorState, PageHeader, Pagination, Skeleton } from '../../components/ui'
-import { LocalCarCard } from '../../components/passenger'
+import { LOCAL_VEHICLE_TYPES, LocalCarCard, LocalVehicleTypes } from '../../components/passenger'
 import { localCarService } from '../../services'
 import { usePagedQuery } from '../../hooks/usePagedQuery'
 import { useAuth } from '../../context/AuthContext'
+import { label } from '../../utils/format'
 import './passenger.css'
 
 export default function LocalCars() {
   const { user } = useAuth()
-  const list = usePagedQuery(localCarService.list, { limit: 12, initialFilters: { verified: '', minRating: '' } })
+  const [params] = useSearchParams()
+  const asked = params.get('type')
+  const type = LOCAL_VEHICLE_TYPES.some((t) => t.value === asked) ? asked : ''
+  const typeName = type ? label('localVehicleType', type) : ''
+  const list = usePagedQuery(localCarService.list, { limit: 12, initialFilters: { verified: '', minRating: '', vehicleType: type } })
+  const { setFilter } = list
+  const shownType = list.filters.vehicleType
   const verifiedOnly = list.filters.verified === 'true'
   const topRated = list.filters.minRating === 4
   const filtered = Boolean(list.search || verifiedOnly || topRated)
   const total = list.meta?.total
 
+  // The category lives in the URL (?type=), so Home's boxes and the back button both work.
+  useEffect(() => {
+    if (shownType !== type) setFilter('vehicleType', type)
+  }, [type, shownType, setFilter])
+
   const clearAll = () => {
     list.setSearch('')
-    list.setFilters({ verified: '', minRating: '' })
+    list.setFilters({ verified: '', minRating: '', vehicleType: type })
   }
 
   return (
     <div className="px-page px-wide">
-      <PageHeader title="Local Cars" subtitle="Call verified local drivers directly" />
+      <PageHeader title="Local Vehicle" subtitle="Call local drivers directly" />
+
+      <div className="px-lv-page-types">
+        <LocalVehicleTypes active={type} replace />
+      </div>
 
       <div className="card px-lc-toolbar">
         <div className="input-wrap has-icon has-suffix">
@@ -33,8 +51,8 @@ export default function LocalCars() {
             type="search"
             value={list.search}
             onChange={(e) => list.setSearch(e.target.value)}
-            placeholder="Search by area, driver or car (e.g. Salt Lake)"
-            aria-label="Search local cars by area, driver or car"
+            placeholder="Search area or driver"
+            aria-label="Search local vehicles by area, driver or vehicle"
             enterKeyHint="search"
           />
           {list.search && (
@@ -63,7 +81,7 @@ export default function LocalCars() {
 
       {total != null && list.rows.length > 0 && (
         <p className="text-sm text-muted" style={{ margin: '0 2px 10px' }}>
-          {total} driver{total === 1 ? '' : 's'} {filtered ? 'match your filters' : 'available'}
+          {total} {typeName ? `${typeName} ` : ''}driver{total === 1 ? '' : 's'} {filtered ? 'match your filters' : 'available'}
         </p>
       )}
 
@@ -78,8 +96,8 @@ export default function LocalCars() {
       ) : !list.rows.length ? (
         <EmptyState
           icon={<CarFront size={26} />}
-          title={filtered ? 'No drivers match your filters' : 'No local cars listed yet'}
-          message={filtered ? 'Try a nearby area or turn off a filter.' : 'Local drivers will appear here once they list their cars.'}
+          title={filtered ? 'No drivers match your filters' : typeName ? `No ${typeName} listed yet` : 'No local vehicles listed yet'}
+          message={filtered ? 'Try a nearby area or turn off a filter.' : 'Local drivers will appear here once they list their vehicles.'}
           action={
             filtered ? (
               <Button variant="outline" size="sm" onClick={clearAll}>
@@ -111,11 +129,11 @@ export default function LocalCars() {
           <CarFront size={22} />
         </span>
         <div className="grow" style={{ minWidth: 0 }}>
-          <div className="fw-600">Drive a car in your area?</div>
+          <div className="fw-600">Drive a toto, auto, car or tourist bus?</div>
           <div className="text-sm text-muted">List it on GO-GO Ride and get calls from passengers nearby.</div>
         </div>
         <Button to={user ? '/driver/cars' : '/register'} size="sm" variant="outline-accent" iconRight={<ChevronRight size={16} />}>
-          {user ? 'List car' : 'Join'}
+          {user ? 'List vehicle' : 'Join'}
         </Button>
       </div>
     </div>

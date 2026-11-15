@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { BadgeCheck, CarFront, Clock, MapPin, Phone, Star } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { assetUrl } from '../../api/client'
-import { formatPhone } from '../../utils/format'
+import { formatPhone, label } from '../../utils/format'
 import { ratingText } from './helpers'
 import './passenger-ui.css'
 
@@ -18,7 +18,7 @@ export function CarPhoto({ car, className = 'px-car-photo', iconSize = 30 }) {
 }
 
 /**
- * Local driver card (Home strip + Local Cars grid).
+ * Local driver card (Local Vehicle list).
  * `showDetails` adds a Details button next to Call Driver.
  */
 export function LocalCarCard({ car, showDetails = false, showCar = false, className = '' }) {
@@ -51,10 +51,10 @@ export function LocalCarCard({ car, showDetails = false, showCar = false, classN
             <MapPin size={13} />
             <span>{car.area}</span>
           </div>
-          {showCar && (car.carModel || car.carNumber) && (
+          {showCar && (
             <div className="px-car-line">
               <CarFront size={13} />
-              <span>{[car.carModel, car.carNumber].filter(Boolean).join(' · ')}</span>
+              <span>{[label('localVehicleType', car.vehicleType || 'CAR'), car.carModel, car.carNumber].filter(Boolean).join(' · ')}</span>
             </div>
           )}
           <div className="px-car-line">

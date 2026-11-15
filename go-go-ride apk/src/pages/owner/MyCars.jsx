@@ -32,7 +32,7 @@ import {
 } from '../../components/ui'
 import { CarFormModal } from '../../components/owner/CarFormModal'
 import { IMAGE_ACCEPT, cleanMessage, validateUpload } from '../../components/owner/ownerUtils'
-import { formatPhone } from '../../utils/format'
+import { formatPhone, label } from '../../utils/format'
 import './owner.css'
 
 function CarsSkeleton() {
@@ -111,16 +111,16 @@ export default function MyCars() {
 
   return (
     <div className="own-page">
-      <PageHeader title="My Car Listings" subtitle="Local Cars passengers can call" />
+      <PageHeader title="My Vehicle Listings" subtitle="Local vehicles passengers can call" />
 
       <div className="own-car-intro card">
         <span className="icon-tile lg accent">
           <CarFront size={26} />
         </span>
         <div className="grow stack" style={{ '--gap': '6px' }}>
-          <h2 className="own-section-title">{isDriver ? 'Get rides from passengers nearby' : 'Drive a local car? List it here'}</h2>
+          <h2 className="own-section-title">{isDriver ? 'Get rides from passengers nearby' : 'Drive a toto, auto, car or tourist bus? List it here'}</h2>
           <p className="text-sm text-2">
-            Your listing appears under Local Cars with your phone number, so passengers in your area can call you directly — no booking fees.
+            Your listing appears under Local Vehicle with your phone number, so passengers in your area can call you directly — no booking fees.
           </p>
           <ul className="own-car-points">
             <li>
@@ -132,7 +132,7 @@ export default function MyCars() {
           </ul>
         </div>
         <Button icon={<Plus size={18} />} onClick={() => setFormFor('new')} className="own-car-intro-btn">
-          Add car
+          Add vehicle
         </Button>
       </div>
 
@@ -144,11 +144,11 @@ export default function MyCars() {
         <div className="card">
           <EmptyState
             icon={<CarFront size={26} />}
-            title="No cars listed yet"
-            message="Add your car with your area and available hours. Passengers nearby will be able to call you."
+            title="No vehicles listed yet"
+            message="Add your vehicle with your area and available hours. Passengers nearby will be able to call you."
             action={
               <Button icon={<Plus size={18} />} onClick={() => setFormFor('new')}>
-                List your first car
+                List your first vehicle
               </Button>
             }
           />
@@ -203,13 +203,13 @@ export default function MyCars() {
                       <MapPin size={15} /> {car.area}
                     </li>
                     <li>
-                      <CarFront size={15} /> {[car.carModel, car.carNumber].filter(Boolean).join(' · ') || 'Car details not added'}
+                      <CarFront size={15} /> {[label('localVehicleType', car.vehicleType || 'CAR'), car.carModel, car.carNumber].filter(Boolean).join(' · ')}
                     </li>
                     <li>
                       <Clock size={15} /> {car.availabilityLabel}
                     </li>
                   </ul>
-                  {car.status === 'INACTIVE' && <p className="text-xs text-muted">Inactive — hidden from the Local Cars list.</p>}
+                  {car.status === 'INACTIVE' && <p className="text-xs text-muted">Inactive — hidden from the Local Vehicle list.</p>}
                 </div>
 
                 <div className="own-car-actions">
@@ -237,7 +237,7 @@ export default function MyCars() {
         onClose={() => setDeleting(null)}
         onConfirm={remove}
         title="Remove this listing?"
-        message={deleting ? `${deleting.driverName}'s ${deleting.carModel || 'car'} will be removed from Local Cars. Passengers won't be able to find or call it here any more.` : ''}
+        message={deleting ? `${deleting.driverName}'s ${deleting.carModel || 'vehicle'} will be removed from Local Vehicle. Passengers won't be able to find or call it here any more.` : ''}
         confirmLabel="Remove listing"
       />
     </div>

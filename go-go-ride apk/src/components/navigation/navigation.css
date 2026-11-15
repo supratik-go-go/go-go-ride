@@ -119,7 +119,8 @@
   bottom: 0;
   z-index: 50;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* min-content: a long label (Local Vehicle) gets the room it needs, the others share the rest. */
+  grid-template-columns: repeat(5, minmax(min-content, 1fr));
   gap: 2px;
   padding: 8px 6px calc(8px + var(--safe-bottom));
   background: var(--surface);
@@ -133,6 +134,7 @@
   justify-content: center;
   gap: 3px;
   height: 54px;
+  padding: 0 6px;
   border-radius: 14px;
   color: var(--primary);
   font-size: 11px;

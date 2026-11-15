@@ -165,6 +165,7 @@ export const LABELS = {
   userStatus: { ACTIVE: 'Active', INACTIVE: 'Inactive', BLOCKED: 'Blocked' },
   recordStatus: { ACTIVE: 'Active', INACTIVE: 'Inactive' },
   vehicleType: { CAR: 'Car', AUTO: 'Auto', BIKE: 'Bike' },
+  localVehicleType: { TOTO_AUTO: 'Toto/Auto', CAR: 'Car', TOURIST_BUS: 'Tourist Bus' },
   rideStatus: { SCHEDULED: 'Scheduled', RUNNING: 'Running', COMPLETED: 'Completed', CANCELLED: 'Cancelled' },
   ticketCategory: { GENERAL: 'General', BUS: 'Bus', BOOKING: 'Booking', PAYMENT: 'Payment', ACCOUNT: 'Account' },
   ticketStatus: { OPEN: 'Open', IN_PROGRESS: 'In Progress', RESOLVED: 'Resolved', CLOSED: 'Closed' },

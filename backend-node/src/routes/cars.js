@@ -48,6 +48,8 @@ const assertCarOwner = (car, user) => {
 
 // ================================================================ local cars
 
+const LOCAL_TYPES = ENUMS.localVehicleType
+
 /** Local Cars Near You. Driver phone numbers are public by design - the app dials them from 'Call Driver'. */
 router.get('/local-cars', (req, res) => {
   const q = new Query(req.query)
@@ -55,10 +57,15 @@ router.get('/local-cars', (req, res) => {
   const area = q.str('area')
   const verified = q.bool('verified')
   const minRating = q.float('minRating', null, { ge: 0, le: 5 })
+  const vehicleType = q.oneOf('vehicleType', LOCAL_TYPES)
   q.done()
 
   const where = ['status = ?']
   const params = ['ACTIVE']
+  if (vehicleType) {
+    where.push('"vehicleType" = ?')
+    params.push(vehicleType)
+  }
   if (area) {
     where.push('area LIKE ?')
     params.push(like(area))
@@ -104,6 +111,7 @@ const LocalCarBody = {
   driverName: required(str({ min: 2, max: 80 })),
   phone: required(phone()),
   area: required(str({ min: 2, max: 80 })),
+  vehicleType: oneOf(LOCAL_TYPES, { default: 'CAR' }),
   carModel: optional(str({ max: 80 })),
   carNumber: optional(str({ max: 20 })),
   availableFrom: str({ pattern: HHMM, default: '06:00' }),
@@ -121,6 +129,7 @@ router.post('/local-cars', requireUser, (req, res) => {
     driverName: b.driverName,
     phone: b.phone,
     area: b.area,
+    vehicleType: b.vehicleType,
     carModel: b.carModel,
     carNumber: b.carNumber,
     photoUrl: null,
@@ -146,6 +155,7 @@ const LocalCarUpdateBody = {
   driverName: optional(str({ min: 2, max: 80 })),
   phone: optional(str()),
   area: optional(str()),
+  vehicleType: optional(oneOf(LOCAL_TYPES)),
   carModel: optional(str()),
   carNumber: optional(str()),
   availableFrom: optional(str({ pattern: HHMM })),

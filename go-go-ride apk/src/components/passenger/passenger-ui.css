@@ -379,3 +379,26 @@ a.px-tl-content:hover .px-tl-name { color: var(--primary-600); }
   height: 100%;
   cursor: pointer;
 }
+
+/* Local Vehicle category boxes (LocalVehicleTypes.jsx) */
+.px-lv-types { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.px-lv-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--t) var(--ease), box-shadow var(--t), border-color var(--t), color var(--t);
+}
+.px-lv-type:hover { color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--primary-100); }
+.px-lv-type.active { color: var(--primary); background: var(--primary-50); border-color: var(--primary); }
+.px-lv-emoji { font-size: 30px; line-height: 34px; }

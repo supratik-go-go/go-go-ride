@@ -489,3 +489,4 @@
   .ops-settings-foot .btn { flex: 1 1 auto; min-width: 0; }
   .ops-dirty { width: 100%; }
 }
+.ops-type-select { min-height: 34px; padding-top: 4px; padding-bottom: 4px; font-size: var(--fs-sm); width: auto; }

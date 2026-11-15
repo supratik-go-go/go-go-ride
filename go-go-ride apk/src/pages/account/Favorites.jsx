@@ -12,7 +12,7 @@ const GROUPS = [
   { key: 'buses', type: 'BUS', title: 'Buses', icon: BusFront, empty: 'Tap the heart on a bus to keep its timetable one tap away.' },
   { key: 'routes', type: 'ROUTE', title: 'Routes', icon: Waypoints, empty: 'Save the routes you ride often.' },
   { key: 'stops', type: 'STOP', title: 'Stops', icon: Signpost, empty: 'Save your home and office stops to see buses quickly.' },
-  { key: 'localCars', type: 'LOCAL_CAR', title: 'Local Cars', icon: CarTaxiFront, empty: 'Save drivers you trust so you can call them again.' },
+  { key: 'localCars', type: 'LOCAL_CAR', title: 'Local Vehicles', icon: CarTaxiFront, empty: 'Save drivers you trust so you can call them again.' },
 ]
 
 function Rating({ value }) {

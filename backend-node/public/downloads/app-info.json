@@ -1,7 +1,7 @@
 {
-  "version": "1.6",
-  "versionCode": 7,
-  "notes": "New for admins: import many buses at once from an Excel sheet. Also shows the app version on Profile and the login screen.",
+  "version": "1.7",
+  "versionCode": 8,
+  "notes": "New Local Vehicle section: pick Toto/Auto, Car or Tourist Bus and call a driver. Also a cleaner Home screen with a green Live sign on Live Location Track.",
   "sizeMB": 5.9,
-  "builtAt": "2026-11-08T15:13:27.809Z"
+  "builtAt": "2026-11-15T21:11:03.743Z"
 }

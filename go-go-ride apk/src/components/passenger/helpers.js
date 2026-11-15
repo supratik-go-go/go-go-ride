@@ -94,3 +94,10 @@ export const ratingText = (avg, count) => (count > 0 || avg > 0 ? Number(avg || 
 
 /** First name for greetings. */
 export const firstName = (name) => (name || '').trim().split(/\s+/)[0] || ''
+
+/** The Local Vehicle categories, in the order the owner asked for. Values match the server's localVehicleType. */
+export const LOCAL_VEHICLE_TYPES = [
+  { value: 'TOTO_AUTO', label: 'Toto/Auto', emoji: '🛺' },
+  { value: 'CAR', label: 'Car', emoji: '🚗' },
+  { value: 'TOURIST_BUS', label: 'Tourist Bus', emoji: '🚌' },
+]
