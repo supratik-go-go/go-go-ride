@@ -21,12 +21,18 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 - [ ] Back up `deploy-hostinger-cloud\production-secrets.txt` the same way
 - [ ] Check both GitHub repos are **Private** (repo → Settings)
 - [x] Demo accounts blocked on the live server (2026-11-25); deleted at the MySQL switch
+- [x] Live server moved to MySQL (2026-11-25): demo data removed, 1,092 buses from the Excel file loaded
+- [ ] Sign in with 9382480016 and the temporary password in `backend-node\data\YOUR-TEMPORARY-PASSWORD.txt`, then Profile → Change password; delete that file afterwards
+- [ ] Change the MySQL password in hPanel → Databases (it was written in a chat), then update `MYSQL_PASSWORD` in Environment variables and in `production-secrets.txt`
+- [ ] Local Vehicle has no listings now (the 4 were demo): add real drivers, or ask drivers to list themselves
+- [ ] Check the 51 buses in `Downloads\bus-import-check-list.xlsx` (15 were not loaded); fix them in Excel and import again from Admin → Buses → Import
+- [ ] Keep the old SQLite file `gogoride-data/gogoride.db` on Hostinger as a backup for a few weeks; don't delete it yet
 
 ## Hostinger setup — owner
 
 Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root directory **backend-node**. Every push goes live, so only push finished work.
 
-**Never delete the website in hPanel.** Deleting it also deletes `gogoride-data`, the live database. Back it up first if there is ever a reason to.
+**Never delete the website in hPanel.** Deleting it also deletes `gogoride-data` (uploaded photos and documents, and the old SQLite backup). The live database is MySQL in hPanel → Databases since 2026-11-25.
 
 - [ ] Change `CRON_KEY` in hPanel → Environment variables (the old value appeared in a screenshot). Low risk.
 - [ ] Delete the leftover `gogoride-data-empty` folder in File Manager
@@ -35,7 +41,21 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 
 - [ ] Google Play Store? If yes: create a developer account at play.google.com/console (US$25, identity check takes days)
 - [ ] iPhone launch: the project is ready, see `go-go-ride apk\IOS.md`. Needs a Mac and an Apple Developer account (US$99 per year)
-- [ ] OTP login by SMS? If yes: account with an SMS provider (e.g. MSG91 / Fast2SMS) + DLT registration, then share the API key
+- [x] OTP by SMS: decided 2026-11-25 to use a spare Android phone + SIM as a free SMS sender (about 100 SMS a day)
+
+## App v1.9 — the owner's changes (2026-11-25)
+
+1. Home search box 20% shorter (same layout, tighter spacing)
+2. Add Bus Info: choose "Manually" (today's form) or "Upload your ticket photo" (camera or gallery, note, Submit ticket); new admin page "Ticket photos"
+3. (no change 3)
+4. Emergency Call List: a search box over every number; a "Local police" section; signed-in users add their local police station, shown after an admin approves it
+5. Voice search: microphone inside the orange Search Buses button, sound-wave bars while listening; English, Hindi and Bengali ("X to Y", "X থেকে Y", "X से Y" fill From and To; the server matches Bengali/Hindi spellings to stop names)
+6. Add Bus Information: Bus Number optional, Bus Name required instead (owner and admin forms too)
+7. Live Location: "Allow location" goes straight to Android's permission popup, the phone's Location switch, or the app's permission page; no instruction screen; "While using the app" only
+8. Home: remove Popular Routes; add Recent Search (today / yesterday cards, repeat or remove, View All); guests keep theirs on the phone
+9. Forgot password by OTP to the account's own number, sent through the owner's own phone (free); new password + confirm
+- Also: search card shows the bus name when there is no bus number, and hides "₹0" when the fare is not known
+- Also: update `express-rate-limit` to 8.7.5 (Hostinger security warning, moderate)
 
 ## Development backlog — Claude
 
