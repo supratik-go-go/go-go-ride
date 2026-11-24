@@ -63,6 +63,7 @@ General rules (agreed):
 
 - `buses` columns as suggested: `bus_number`, `bus_name`, `owner_id`, `route_id`, `is_ac` (Yes / No instead of AC / NON_AC), `category`, `operator`, `total_seats`, `fare` (exact rupees), `contact_number`, `call_from` / `call_until`, `runs_on`, `picture_url`, `status`, `rejection_reason`, `rating_average`, `rating_count`, `submitted_at`, `reviewed_at`, `reviewed_by`.
 - Bus names in any language, plus optional `other_name` (same rule as stops and routes).
+- **Bus number is optional** (owner, 2026-11-24): many real buses are known only by name. It stays unique when given. Screens show the bus name when there is no number (app update with the Excel import).
 - **Many trips per bus** (bigger change, needs an app update): new table `bus_trips` (one row per trip: which bus, direction / start and end stop, departure time, optional own days). `bus_timetable` rows belong to a trip (`trip_id`, `stop_id`, `stop_order`, `arrival_time`, `departure_time`, `distance_from_start_km`). Each bus's current timetable becomes its first trip. Search, alarms, live tracking, the Excel import (one row per trip) and the owner and admin bus pages change to match.
 - `bus_off_days`: `bus_id`, `off_date`, `reason` (applies to all of that bus's trips).
 - `bus_documents`: `bus_id`, `document_type`, `file_url`, `original_file_name`, `uploaded_at`.
@@ -165,13 +166,53 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 - Local test database on this PC: MariaDB 11.4 in `C:\GoGoTools\mariadb`, data in `C:\GoGoTools\mariadb-data`, port 3307, local only. Start it in the Terminal panel with `& 'C:\GoGoTools\mariadbin\mariadbd.exe' --defaults-file='C:\GoGoTools\mariadb-data\my.ini' --console`. Its password is in `backend-node/data/mysql-test.env` (git-ignored).
 - Server package: `mysql2`.
 
+### Owner's order (2026-11-24)
+
+1. Finish the move to MySQL, with bus number optional.
+2. Then load the owner's Excel file (`bus-import-template_filled.xlsx`: 1,107 buses, about 13,300 stop rows, mostly two trips per bus: out and back; some times unknown, `--:--`). Needs a few data decisions with the owner first.
+3. Remove the demo data during the switch, after the owner confirms the exact list (it cannot be undone).
+
 ### Progress
 
 - [x] Design written and loaded into the test database (32 tables, 301 columns, 53 links; Bengali works)
 - [x] Copy script `backend-node/scripts/sqlite-to-mysql.mjs`: every conversion, every row count checked (demo copy 679 rows, fuller test copy 844 rows). Phone columns are 64 long because deleted accounts keep `deleted-<id>` (33 characters)
-- [ ] Server data layer for MySQL (async)
+- [x] Server data layer for MySQL (`src/db.js`, async, camelCase rows, India-time dates); `config.mysql` from MYSQL_* settings
 - [ ] Every route and service moved to the new names (about 390 places in 25 files)
+  - Done: `db.js`, `config.js`, `serialize.js`, `auth.js` (sign-in checks), `services/common.js`, `pyfields.js` (saveChanges), `routes/platform.js`, `routes/auth.js`
+  - To do: `routes/profile.js`, `routes/network.js`, `routes/buses.js` + `services/buses.js`, `routes/alarms.js`, `routes/cars.js`, `routes/bookings.js`, `routes/messaging.js`, `routes/admin.js` + `services/reports.js`, `routes/contributions.js`, `routes/games.js` + `services/games.js` + `services/pingball.js`, `services/busImport.js`, `services/privacy.js`, `scheduler.js`, `app.js` / `server.js` (call `ensureSchema()` on start), `scripts/api-check.mjs` (fresh MySQL copy per run) and `scripts/api-docs.mjs`
+  - Callers to update when their file is ported: `getSettingsRow()` and `platformCounters()` are async now
 - [ ] Automatic clean-ups (sign-ins 30 days, searches 10, notifications 15 days, game moves 3 days, activity log 1 year)
 - [ ] All 727 checks pass against MySQL
 - [ ] Owner creates the MySQL database in hPanel; night-time switch; user count checked
+
+### Porting rules (for every route and service)
+
+- `src/db.js` is async (mysql2). Every database call gets `await`; every function that calls one becomes `async`, up to the route handler (Express 5 handles async handlers).
+- SQL uses the new names without quotes: `"Bus"` → `buses`, `"busNumber"` → `bus_number`. SQLite-only syntax changes: `||` → `CONCAT()`, `IS ?` on yes/no → `= ?`, `INSERT OR IGNORE` → `INSERT IGNORE`, `ON CONFLICT … DO UPDATE` → `ON DUPLICATE KEY UPDATE`, `strftime` → MySQL date functions.
+- Rows come back camelCased from the new names, so code uses the new property names below. Dates in raw SQL parameters go through `at(ms)` (date and time) or `day(ms)` (date only); `insert()` / `update()` convert by themselves.
+- API replies must not change: `serialize.js` maps the new names back to the old JSON fields.
+
+Property renames (old → new), all others only change from `"camelCase"` columns to snake_case in SQL:
+
+| Table | Renames |
+| --- | --- |
+| users | passwordHash → password, avatarUrl → pictureUrl |
+| bus_route_stops | sequence → stopOrder |
+| buses | type ('AC'/'NON_AC') → isAc (1/0), contactStart → callFrom, contactEnd → callUntil, serviceDays → runsOn, imageUrl → pictureUrl, ratingAvg → ratingAverage, reviewedById → reviewedBy |
+| bus_timetable (BusStopage) | sequence → stopOrder, distanceKm → distanceFromStartKm, new tripId |
+| bus_off_days | date → offDate |
+| bus_documents | docType → documentType, originalName → originalFileName |
+| local_vehicles | carModel → vehicleModel, carNumber → vehicleNumber, photoUrl → pictureUrl, availableTo → availableUntil, ratingAvg → ratingAverage, verified → isVerified |
+| shared_rides | departureAt → departsAt, availableSeats → seatsLeft |
+| alarms | boardingStopId → getOnStopId, arrivalStopId → getOffStopId, alarmDate → travelDate, expectedArrival → busArrivesAt, remindBeforeMin → remindMinutesBefore, notifiedAt → rangAt, new tripId |
+| recent_searches | query → searchText |
+| reviews | localCarId → localVehicleId |
+| bookings | bookingRef → bookingNumber, rideId → sharedRideId, localCarId → localVehicleId, paymentMode → paymentMethod, new tripId |
+| bus_route_requests | userId → sentBy, routeId → createdRouteId, reviewedById → reviewedBy |
+| notifications | link → openScreen |
+| support_tickets | ticketRef → ticketNumber; response → latest team row in support_ticket_messages |
+| activity_log | actorId → doneBy, entityType → itemType, entityId → itemId |
+| app_settings | platformName → appName, platformEmail → supportEmail; timezone, currency, dateFormat, timeFormat removed (replies keep the fixed defaults) |
+| game_rooms | code → roomCode, state → gameData, turnDeadline → turnEndsAt |
+| game_players | roomId → gameRoomId |
 

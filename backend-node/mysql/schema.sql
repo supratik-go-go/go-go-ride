@@ -113,7 +113,7 @@ CREATE TABLE bus_route_stops (
 
 CREATE TABLE buses (
   id               VARCHAR(32)  NOT NULL PRIMARY KEY,
-  bus_number       VARCHAR(64)  NOT NULL,
+  bus_number       VARCHAR(64)  NULL COMMENT 'Registration number, optional (many buses are known only by name)',
   bus_name         VARCHAR(190) NULL,
   other_name       VARCHAR(190) NULL,
   owner_id         VARCHAR(32)  NOT NULL,

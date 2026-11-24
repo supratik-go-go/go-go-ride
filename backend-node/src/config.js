@@ -9,6 +9,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 // Node's built-in .env loader; real environment variables win.
 const envFile = path.join(ROOT, '.env')
 if (fs.existsSync(envFile)) process.loadEnvFile(envFile)
+// Local runs point MYSQL_ENV_FILE at data/mysql-test.env, which holds the test database password.
+if (process.env.MYSQL_ENV_FILE) process.loadEnvFile(path.resolve(ROOT, process.env.MYSQL_ENV_FILE))
 
 const env = (key, fallback) => {
   const v = process.env[key]
@@ -36,9 +38,15 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
-  // Production defaults live in the home folder so redeploys never wipe them.
-  databasePath: resolve(env('DATABASE_PATH', isProd ? '~/gogoride-data/gogoride.db' : './data/gogoride.db')),
-  starterDatabase: resolve(env('STARTER_DATABASE', './seed/gogoride.db')),
+  // MySQL: on Hostinger the five MYSQL_* values come from hPanel > Databases. Locally they come
+  // from data/mysql-test.env (MYSQL_ENV_FILE), the test MariaDB on this PC.
+  mysql: {
+    host: env('MYSQL_HOST', '127.0.0.1'),
+    port: num('MYSQL_PORT', 3306),
+    user: env('MYSQL_USER', ''),
+    password: env('MYSQL_PASSWORD', ''),
+    database: env('MYSQL_DATABASE', ''),
+  },
 
   uploadDir: resolve(env('UPLOAD_DIR', isProd ? '~/gogoride-data/uploads' : './data/uploads')),
   starterUploads: resolve(env('STARTER_UPLOADS', './seed/uploads')),

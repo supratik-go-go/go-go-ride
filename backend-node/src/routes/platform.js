@@ -31,42 +31,41 @@ router.get('/news', async (req, res) => {
 })
 
 /** Homepage counters: buses, routes, stops, users. */
-export const platformCounters = () => ({
-  buses: Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE status = ?', 'APPROVED') || 0),
-  routes: Number(scalar('SELECT COUNT(id) FROM "Route" WHERE status = ?', 'ACTIVE') || 0),
-  stops: Number(scalar('SELECT COUNT(id) FROM "BusStop" WHERE status = ?', 'ACTIVE') || 0),
-  users: Number(scalar('SELECT COUNT(id) FROM "User"') || 0),
-})
+export const platformCounters = async () => {
+  const [buses, routes, stops, users] = await Promise.all([
+    scalar('SELECT COUNT(id) FROM buses WHERE status = ?', 'APPROVED'),
+    scalar('SELECT COUNT(id) FROM bus_routes WHERE status = ?', 'ACTIVE'),
+    scalar('SELECT COUNT(id) FROM bus_stops WHERE status = ?', 'ACTIVE'),
+    scalar('SELECT COUNT(id) FROM users'),
+  ])
+  return { buses: Number(buses || 0), routes: Number(routes || 0), stops: Number(stops || 0), users: Number(users || 0) }
+}
 
-router.get('/stats', (req, res) => ok(res, platformCounters()))
+router.get('/stats', async (req, res) => ok(res, await platformCounters()))
 
 /** The single settings row, created with defaults on first use. */
-export function getSettingsRow() {
-  let row = loadSettings()
+export async function getSettingsRow() {
+  let row = await loadSettings()
   if (!row) {
-    insert('Setting', {
+    await insert('app_settings', {
       id: 'global',
-      platformName: 'GO-GO Ride',
-      platformEmail: 'support@gogoride.com',
+      appName: 'GO-GO Ride',
+      supportEmail: 'support@gogoride.com',
       contactNumber: '+91 12345 43210',
       address: '123, Transport Office Road, Kolkata, West Bengal - 700001',
-      timezone: 'Asia/Kolkata',
-      currency: 'INR',
-      dateFormat: 'DD MMM YYYY',
-      timeFormat: '12h',
       updatedAt: Date.now(),
     })
-    row = loadSettings()
+    row = await loadSettings()
   }
   return row
 }
 
-router.get('/settings', (req, res) => ok(res, settingsOut(getSettingsRow())))
+router.get('/settings', async (req, res) => ok(res, settingsOut(await getSettingsRow())))
 
 // Backup trigger for the alarm job (e.g. an hPanel cron job hitting this every minute).
-router.get('/internal/run-alarms', (req, res) => {
+router.get('/internal/run-alarms', async (req, res) => {
   if (!config.cronKey || req.query.key !== config.cronKey) throw ApiError.notFound('Not Found')
-  ok(res, { fired: processDueAlarms() })
+  ok(res, { fired: await processDueAlarms() })
 })
 
 export default router

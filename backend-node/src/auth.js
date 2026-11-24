@@ -72,20 +72,20 @@ function bearer(req) {
   return m ? m[1].trim() : null
 }
 
-function loadUser(token) {
+async function loadUser(token) {
   const payload = decodeAccessToken(token)
-  const user = byId('User', payload.sub)
+  const user = await byId('users', payload.sub)
   if (!user) throw ApiError.unauthorized('Account no longer exists')
   if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
   return user
 }
 
 /** Requires a valid token; sets req.user (raw User row). */
-export function requireUser(req, res, next) {
+export async function requireUser(req, res, next) {
   const token = bearer(req)
   if (!token) return next(ApiError.unauthorized())
   try {
-    req.user = loadUser(token)
+    req.user = await loadUser(token)
     next()
   } catch (err) {
     next(err)
@@ -93,12 +93,12 @@ export function requireUser(req, res, next) {
 }
 
 /** Attaches req.user when a valid token is present; never rejects. */
-export function optionalUser(req, res, next) {
+export async function optionalUser(req, res, next) {
   const token = bearer(req)
   req.user = null
   if (token) {
     try {
-      req.user = loadUser(token)
+      req.user = await loadUser(token)
     } catch {
       req.user = null
     }
