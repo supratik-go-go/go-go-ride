@@ -94,8 +94,33 @@ function openDatabase() {
     const has = db.prepare(`PRAGMA table_info("${table}")`).all().some((c) => c.name === column)
     if (!has) db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${definition}`)
   }
+  // The demo accounts from the starter database had their passwords published, so on the live
+  // server they can never sign in. They are deleted when the data moves to MySQL.
+  if (config.isProd) {
+    const ids = DEMO_USER_IDS.map(() => '?').join(', ')
+    db.prepare(`UPDATE "User" SET status = 'BLOCKED', "updatedAt" = ? WHERE status != 'BLOCKED' AND id IN (${ids})`).run(Date.now(), ...DEMO_USER_IDS)
+    db.prepare(`DELETE FROM "RefreshToken" WHERE "userId" IN (${ids})`).run(...DEMO_USER_IDS)
+  }
   return db
 }
+
+/** The 14 demo accounts that came with the starter database (seed/gogoride.db). */
+const DEMO_USER_IDS = [
+  'cmua7ig2h00022qtjqg7pglpb',
+  'cmua7ig2h000795zwi3b9r3f2',
+  'cmua7ig2h0005cfxuwboi328e',
+  'cmua7ig2h00030d5ia9e9j3el',
+  'cmua7ig2h00069vaw2wu2otum',
+  'cmua7ig2h00048d0r8drcpfl6',
+  'cmua7ig2h000djv5ejr1983md',
+  'cmua7ig2h000cny9i5kx90ffw',
+  'cmua7ig2h0009bwu7ytsbe46m',
+  'cmua7ig2h000b1pqoxik1f2di',
+  'cmua7j6mi0005vvgmex8dlkq6',
+  'cmua7ig2h000ay5ju49mm798z',
+  'cmua7ig2h0008af67g99rwmsv',
+  'cmua7ig2h00015xwt9nft5jh8',
+]
 
 export const db = openDatabase()
 

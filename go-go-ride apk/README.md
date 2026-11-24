@@ -49,7 +49,7 @@ build-apk.bat https://api.yourdomain.com/api
 2. Copy `GO-GO-Ride.apk` to the phone and open it; allow "Install unknown apps" when Android asks.
 3. If the app says it can't reach the server, open **Server settings** on the login screen and enter
    the address printed by the launcher, e.g. `http://192.168.1.9:8000/api`.
-4. Log in with a demo account (passenger `9123456789` / `Rider@123`), set an alarm, and allow notifications.
+4. Log in with a demo account (passwords in `backend-node/seed/demo-logins.txt`), set an alarm, and allow notifications.
    For reminders exactly on time, allow **Alarms & reminders** when the app's Settings screen asks.
 
 ## 4. Publish on the Play Store

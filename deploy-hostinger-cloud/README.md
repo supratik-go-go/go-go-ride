@@ -52,8 +52,8 @@ Open **https://go-goride.com/api/health** in a browser → `{"success":true,"sta
 **https://go-goride.com** shows the download page with live bus/route/stop counts and the **Download for Android**
 button. Share that link with people so they can install the app.
 
-Then, straight away: log in to the app with the demo **admin** accounts (`9876500001`, `9876500002`, password
-`Admin@123`) → Admin → Profile → **change both passwords**, and block or delete the demo passenger/owner/driver accounts.
+The demo accounts from the starter database are blocked on the live server automatically (their passwords
+were once published); sign in with your own admin account.
 
 ## 6. Build the app for the live server
 

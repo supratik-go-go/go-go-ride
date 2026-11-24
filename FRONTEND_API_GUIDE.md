@@ -17,13 +17,16 @@ database from `backend-node/seed/` (18 Kolkata stops, 7 routes, buses, local veh
 
 ### Seeded logins
 
-| Role | Phone | Password | Screens it unlocks |
-| --- | --- | --- | --- |
-| Passenger | `9123456789` | `Rider@123` | app, alarms, bookings, favourites |
-| Bus owner | `9876543210` | `Owner@123` | Add Bus, my buses |
-| Driver | `9000011223` | `Driver@123` | local car listings |
-| Admin | `9876500002` | `Admin@123` | admin panel |
-| Super admin | `9876500001` | `Admin@123` | admin panel + user management |
+Passwords are in `backend-node/seed/demo-logins.txt` on the owner's PC (not in git). These accounts exist
+only in the local test database; on the live server they are blocked.
+
+| Role | Phone | Screens it unlocks |
+| --- | --- | --- |
+| Passenger | `9123456789` | app, alarms, bookings, favourites |
+| Bus owner | `9876543210` | Add Bus, my buses |
+| Driver | `9000011223` | local car listings |
+| Admin | `9876500002` | admin panel |
+| Super admin | `9876500001` | admin panel + user management |
 
 ### Try it before writing code
 

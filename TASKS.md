@@ -20,8 +20,7 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
   `go-go-ride apk\android\keystore\` and `go-go-ride apk\android\keystore.properties`
 - [ ] Back up `deploy-hostinger-cloud\production-secrets.txt` the same way
 - [ ] Check both GitHub repos are **Private** (repo → Settings)
-- [ ] Change the demo admin passwords (9876500001, 9876500002 — `Admin@123`) before sharing the app widely
-- [ ] Block/delete the demo passenger, owner and driver accounts when real users join
+- [x] Demo accounts blocked on the live server (2026-11-25); deleted at the MySQL switch
 
 ## Hostinger setup — owner
 
