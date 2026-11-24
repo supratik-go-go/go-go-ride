@@ -6,14 +6,14 @@ import { newId } from '../ids.js'
  * Persist an in-app notification. userId null = broadcast to everyone.
  * Push/SMS delivery is pluggable: add it in dispatch() when FCM / an SMS gateway is wired.
  */
-export async function notify({ userId = null, title, message, type = 'SYSTEM', link = null }) {
-  const row = await insert('notifications', {
+export function notify({ userId = null, title, message, type = 'SYSTEM', link = null }) {
+  const row = insert('Notification', {
     id: newId(),
     userId,
     title,
     message,
     type,
-    openScreen: link,
+    link,
     isRead: 0,
     readAt: null,
     createdAt: Date.now(),
@@ -22,8 +22,8 @@ export async function notify({ userId = null, title, message, type = 'SYSTEM', l
   return row
 }
 
-export async function notifyMany(userIds, { title, message, type = 'SYSTEM', link = null }) {
-  for (const userId of userIds) await notify({ userId, title, message, type, link })
+export function notifyMany(userIds, { title, message, type = 'SYSTEM', link = null }) {
+  for (const userId of userIds) notify({ userId, title, message, type, link })
   return userIds.length
 }
 
@@ -32,9 +32,9 @@ function dispatch(n) {
 }
 
 /** Feeds the admin dashboard's "Recent Activities" list. Never breaks the request. */
-export async function logActivity({ actorId = null, action, message, entityType = null, entityId = null }) {
+export function logActivity({ actorId = null, action, message, entityType = null, entityId = null }) {
   try {
-    await insert('activity_log', { id: newId(), doneBy: actorId, action, itemType: entityType, itemId: entityId, message, createdAt: Date.now() })
+    insert('ActivityLog', { id: newId(), actorId, action, entityType, entityId, message, createdAt: Date.now() })
   } catch (err) {
     console.error('[activity] failed to log', action, err.message)
   }

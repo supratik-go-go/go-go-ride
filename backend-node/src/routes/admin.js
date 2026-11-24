@@ -1,6 +1,6 @@
 // Admin panel: dashboard, approvals, users, reports and settings (port of app/api/admin.py).
 import { Router } from 'express'
-import { all, at, byId, get, insert, run, scalar, tx, update, like } from '../db.js'
+import { all, byId, get, insert, run, scalar, tx, update, like } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok, okPage } from '../http.js'
 import { newId } from '../ids.js'
@@ -131,45 +131,48 @@ function listQuery(query, enums = {}) {
 
 const QUEUE = ['PENDING', 'UNDER_REVIEW']
 
-router.get('/admin/dashboard', requireAdmin, async (req, res) => {
+router.get('/admin/dashboard', requireAdmin, (req, res) => {
   const window = resolveRange(req.query.from, req.query.to)
 
-  const pending = await all('SELECT * FROM buses WHERE status IN (?, ?) ORDER BY submitted_at DESC, id LIMIT ? OFFSET ?', ...QUEUE, 5, 0)
-  const activities = await all('SELECT * FROM activity_log ORDER BY created_at DESC, id LIMIT ? OFFSET ?', 8, 0)
+  const pending = all(
+    `SELECT * FROM "Bus" WHERE status IN (?, ?) ORDER BY "submittedAt" DESC LIMIT ? OFFSET ?`,
+    ...QUEUE,
+    5,
+    0,
+  )
+  const activities = all('SELECT * FROM "ActivityLog" ORDER BY "createdAt" DESC LIMIT ? OFFSET ?', 8, 0)
 
   ok(res, {
-    ...(await dashboardStats(window)),
-    charts: await dailySeries(window),
-    recentActivities: await Promise.all(
-      activities.map(async (a) => {
-        const actor = await byId('users', a.doneBy)
-        return {
-          id: a.id,
-          action: a.action,
-          message: a.message,
-          entityType: a.itemType ?? null,
-          entityId: a.itemId ?? null,
-          createdAt: isoZ(a.createdAt),
-          actor: actor ? { id: actor.id, name: actor.name } : null,
-        }
-      }),
-    ),
-    pendingRequests: await Promise.all(pending.map(busOut)),
-    topRoutes: await topRoutes(window),
+    ...dashboardStats(window),
+    charts: dailySeries(window),
+    recentActivities: activities.map((a) => {
+      const actor = byId('User', a.actorId)
+      return {
+        id: a.id,
+        action: a.action,
+        message: a.message,
+        entityType: a.entityType ?? null,
+        entityId: a.entityId ?? null,
+        createdAt: isoZ(a.createdAt),
+        actor: actor ? { id: actor.id, name: actor.name } : null,
+      }
+    }),
+    pendingRequests: pending.map(busOut),
+    topRoutes: topRoutes(window),
   })
 })
 
-router.get('/admin/activities', requireAdmin, async (req, res) => {
+router.get('/admin/activities', requireAdmin, (req, res) => {
   const page = listQuery(req.query)
-  const total = Number((await scalar('SELECT COUNT(id) FROM activity_log')) || 0)
-  const items = await all('SELECT * FROM activity_log ORDER BY created_at DESC, id LIMIT ? OFFSET ?', page.limit, page.skip)
-  okPage(res, await Promise.all(items.map(activityLogOut)), total, page)
+  const total = Number(scalar('SELECT COUNT(id) FROM "ActivityLog"') || 0)
+  const items = all('SELECT * FROM "ActivityLog" ORDER BY "createdAt" DESC LIMIT ? OFFSET ?', page.limit, page.skip)
+  okPage(res, items.map(activityLogOut), total, page)
 })
 
 // ---------------------------------------------------------------- bus approvals
 
 // Defaults to PENDING + UNDER_REVIEW, with owner contact, documents and stopages.
-router.get('/admin/bus-requests', requireAdmin, async (req, res) => {
+router.get('/admin/bus-requests', requireAdmin, (req, res) => {
   const page = listQuery(req.query, { status: ENUMS.busStatus })
   const where = []
   const params = []
@@ -181,13 +184,18 @@ router.get('/admin/bus-requests', requireAdmin, async (req, res) => {
     params.push(...QUEUE)
   }
   if (page.search) {
-    where.push('(bus_number LIKE ? OR owner_id IN (SELECT id FROM users WHERE name LIKE ?))')
+    where.push('("busNumber" LIKE ? OR "ownerId" IN (SELECT id FROM "User" WHERE name LIKE ?))')
     params.push(like(page.search.toUpperCase()), like(page.search))
   }
   const clause = where.join(' AND ')
-  const total = Number((await scalar(`SELECT COUNT(id) FROM buses WHERE ${clause}`, ...params)) || 0)
-  const items = await all(`SELECT * FROM buses WHERE ${clause} ORDER BY submitted_at DESC, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
-  okPage(res, await Promise.all(items.map(busOut)), total, page)
+  const total = Number(scalar(`SELECT COUNT(id) FROM "Bus" WHERE ${clause}`, ...params) || 0)
+  const items = all(
+    `SELECT * FROM "Bus" WHERE ${clause} ORDER BY "submittedAt" DESC LIMIT ? OFFSET ?`,
+    ...params,
+    page.limit,
+    page.skip,
+  )
+  okPage(res, items.map(busOut), total, page)
 })
 
 const BusStatusBody = [
@@ -197,16 +205,14 @@ const BusStatusBody = [
 
 // Approve, reject, or move a bus to review. A rejection needs a reason; the owner
 // is notified and the action is audited.
-router.patch('/admin/buses/:busId/status', requireAdmin, async (req, res) => {
+router.patch('/admin/buses/:busId/status', requireAdmin, (req, res) => {
   const b = validateBody(req, BusStatusBody)
   const admin = req.user
   const status = b.status
   if (status === 'REJECTED' && !b.reason) throw ApiError.badRequest('Give the owner a reason for the rejection')
 
-  const bus = await byId('buses', req.params.busId)
+  const bus = byId('Bus', req.params.busId)
   if (!bus) throw ApiError.notFound('Bus not found')
-  // Many buses are known only by name (the bus number is optional).
-  bus.busNumber = bus.busNumber || bus.busName
 
   const readable = status.toLowerCase().replaceAll('_', ' ')
   let activity
@@ -226,34 +232,34 @@ router.patch('/admin/buses/:busId/status', requireAdmin, async (req, res) => {
     message = `${bus.busNumber} is now ${readable}.`
   }
 
-  await tx(async () => {
+  tx(() => {
     const now = Date.now()
-    await update('buses', bus.id, {
+    update('Bus', bus.id, {
       status,
       rejectionReason: status === 'REJECTED' ? b.reason : null,
       reviewedAt: now,
-      reviewedBy: admin.id,
+      reviewedById: admin.id,
       updatedAt: now,
     })
     if (status === 'APPROVED') {
       // Stops typed by a contributor go public with the bus they came with.
-      await run(
-        'UPDATE bus_stops SET status = ?, updated_at = ? WHERE status = ? AND id IN (SELECT stop_id FROM bus_timetable WHERE bus_id = ?)',
+      run(
+        'UPDATE "BusStop" SET status = ?, "updatedAt" = ? WHERE status = ? AND id IN (SELECT "stopId" FROM "BusStopage" WHERE "busId" = ?)',
         'ACTIVE',
-        at(now),
+        now,
         'INACTIVE',
         bus.id,
       )
     }
-    await logActivity({ actorId: admin.id, action: `BUS_${status}`, entityType: 'BUS', entityId: bus.id, message: activity })
-    await notify({ userId: bus.ownerId, title, message, type: 'USER' })
+    logActivity({ actorId: admin.id, action: `BUS_${status}`, entityType: 'BUS', entityId: bus.id, message: activity })
+    notify({ userId: bus.ownerId, title, message, type: 'USER' })
   })
-  ok(res, await busById(bus.id), 'Bus status updated')
+  ok(res, busById(bus.id), 'Bus status updated')
 })
 
 // ---------------------------------------------------------------- user admin
 
-router.get('/admin/users', requireAdmin, async (req, res) => {
+router.get('/admin/users', requireAdmin, (req, res) => {
   const page = listQuery(req.query, { role: ENUMS.role, status: ENUMS.userStatus })
   const where = []
   const params = []
@@ -270,27 +276,27 @@ router.get('/admin/users', requireAdmin, async (req, res) => {
     params.push(like(page.search), like(page.search), like(page.search))
   }
   const clause = where.length ? ` WHERE ${where.join(' AND ')}` : ''
-  const total = Number((await scalar(`SELECT COUNT(id) FROM users${clause}`, ...params)) || 0)
-  const items = await all(`SELECT * FROM users${clause} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  const total = Number(scalar(`SELECT COUNT(id) FROM "User"${clause}`, ...params) || 0)
+  const items = all(`SELECT * FROM "User"${clause} ORDER BY "createdAt" DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
   okPage(res, items.map(userOut), total, page)
 })
 
 // User with buses, latest bookings and sign-ins.
-router.get('/admin/users/:userId', requireAdmin, async (req, res) => {
+router.get('/admin/users/:userId', requireAdmin, (req, res) => {
   const userId = req.params.userId
-  const user = await byId('users', userId)
+  const user = byId('User', userId)
   if (!user) throw ApiError.notFound('User not found')
 
-  const buses = await all('SELECT * FROM buses WHERE owner_id = ? ORDER BY created_at, id', userId)
-  const bookings = await all('SELECT * FROM bookings WHERE user_id = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?', userId, 10, 0)
-  const logins = await all('SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?', userId, 10, 0)
+  const buses = all('SELECT * FROM "Bus" WHERE "ownerId" = ?', userId)
+  const bookings = all('SELECT * FROM "Booking" WHERE "userId" = ? ORDER BY "createdAt" DESC LIMIT ? OFFSET ?', userId, 10, 0)
+  const logins = all('SELECT * FROM "LoginActivity" WHERE "userId" = ? ORDER BY "createdAt" DESC LIMIT ? OFFSET ?', userId, 10, 0)
 
   ok(res, {
     ...userOut(user),
     buses: buses.map((b) => ({ id: b.id, busNumber: b.busNumber, status: b.status })),
     bookings: bookings.map((b) => ({
       id: b.id,
-      bookingRef: b.bookingNumber,
+      bookingRef: b.bookingRef,
       amount: Number(b.amount),
       status: b.status,
       travelDate: isoZ(b.travelDate),
@@ -316,29 +322,29 @@ const UserCreateBody = [
 ]
 
 // Create a staff or owner account (super admin).
-router.post('/admin/users', requireSuperAdmin, async (req, res) => {
+router.post('/admin/users', requireSuperAdmin, (req, res) => {
   const b = validateBody(req, UserCreateBody)
   const admin = req.user
-  if (await get('SELECT id FROM users WHERE phone = ?', b.phone)) {
+  if (get('SELECT id FROM "User" WHERE phone = ?', b.phone)) {
     throw ApiError.conflict('An account with this mobile number already exists')
   }
-  const user = await tx(async () => {
+  const user = tx(() => {
     const now = Date.now()
-    const u = await insert('users', {
+    const u = insert('User', {
       id: newId(),
       name: b.name,
       phone: b.phone,
       email: b.email ?? null,
-      password: hashPassword(b.password),
+      passwordHash: hashPassword(b.password),
       role: b.role,
-      pictureUrl: null,
+      avatarUrl: null,
       status: 'ACTIVE',
       phoneVerified: 0,
       lastLoginAt: null,
       createdAt: now,
       updatedAt: now,
     })
-    await logActivity({
+    logActivity({
       actorId: admin.id,
       action: 'USER_CREATED',
       entityType: 'USER',
@@ -347,7 +353,7 @@ router.post('/admin/users', requireSuperAdmin, async (req, res) => {
     })
     return u
   })
-  ok(res, userOut(await byId('users', user.id)), 'User created', 201)
+  ok(res, userOut(byId('User', user.id)), 'User created', 201)
 })
 
 const UserUpdateBody = [
@@ -358,7 +364,7 @@ const UserUpdateBody = [
 ]
 
 // Update role or status.
-router.patch('/admin/users/:userId', requireAdmin, async (req, res) => {
+router.patch('/admin/users/:userId', requireAdmin, (req, res) => {
   const b = validateBody(req, UserUpdateBody)
   const admin = req.user
   const userId = req.params.userId
@@ -374,7 +380,7 @@ router.patch('/admin/users/:userId', requireAdmin, async (req, res) => {
     throw ApiError.badRequest('You cannot change your own role')
   }
 
-  const user = await byId('users', userId)
+  const user = byId('User', userId)
   if (!user) throw ApiError.notFound('User not found')
   // Admin accounts (including super admins) can only be edited, blocked or
   // demoted by a super admin - otherwise any admin could lock out the owner.
@@ -382,17 +388,17 @@ router.patch('/admin/users/:userId', requireAdmin, async (req, res) => {
     throw ApiError.forbidden("Only a super admin can change another admin's account")
   }
 
-  await tx(async () => {
+  tx(() => {
     const now = Date.now()
     // Every field the client sent is written, nulls included (a null name/role/status
     // fails the NOT NULL constraint -> 400 DB_ERROR, as in Python).
-    if (Object.keys(b).length) await update('users', user.id, { ...b, updatedAt: now })
+    if (Object.keys(b).length) update('User', user.id, { ...b, updatedAt: now })
     // A blocked user's sessions must die immediately.
     if (b.status && b.status !== 'ACTIVE') {
-      await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL', at(now), user.id)
+      run('UPDATE "RefreshToken" SET "revokedAt" = ? WHERE "userId" = ? AND "revokedAt" IS NULL', now, user.id)
     }
   })
-  ok(res, userOut(await byId('users', user.id)), 'User updated')
+  ok(res, userOut(byId('User', user.id)), 'User updated')
 })
 
 const dbError = () => new ApiError(400, 'Could not save the record', 'DB_ERROR')
@@ -406,41 +412,41 @@ const dbError = () => new ApiError(400, 'Could not save the record', 'DB_ERROR')
 // fails (400 DB_ERROR); anything else still pointing at the user or its buses
 // (audit log, tickets, rides, other users' bookings) fails the foreign key
 // (400 INVALID_REFERENCE). Either way nothing is changed.
-router.delete('/admin/users/:userId', requireSuperAdmin, async (req, res) => {
+router.delete('/admin/users/:userId', requireSuperAdmin, (req, res) => {
   const admin = req.user
   const userId = req.params.userId
   if (userId === admin.id) throw ApiError.badRequest('You cannot delete your own account')
-  const user = await byId('users', userId)
+  const user = byId('User', userId)
   if (!user) throw ApiError.notFound('User not found')
 
-  await tx(async () => {
-    if (await get('SELECT id FROM bookings WHERE user_id = ? LIMIT 1', user.id)) throw dbError()
-    await leaveActiveRooms(user.id)
-    await run('UPDATE local_vehicles SET owner_id = NULL, updated_at = ? WHERE owner_id = ?', at(Date.now()), user.id)
-    await run('DELETE FROM buses WHERE owner_id = ?', user.id)
-    await run('DELETE FROM alarms WHERE user_id = ?', user.id)
-    await run('DELETE FROM favorites WHERE user_id = ?', user.id)
-    await run('DELETE FROM users WHERE id = ?', user.id)
+  tx(() => {
+    if (get('SELECT id FROM "Booking" WHERE "userId" = ? LIMIT 1', user.id)) throw dbError()
+    leaveActiveRooms(user.id)
+    run('UPDATE "LocalCar" SET "ownerId" = NULL, "updatedAt" = ? WHERE "ownerId" = ?', Date.now(), user.id)
+    run('DELETE FROM "Bus" WHERE "ownerId" = ?', user.id)
+    run('DELETE FROM "Alarm" WHERE "userId" = ?', user.id)
+    run('DELETE FROM "Favorite" WHERE "userId" = ?', user.id)
+    run('DELETE FROM "User" WHERE id = ?', user.id)
   })
   ok(res, null, 'User deleted')
 })
 
 // ---------------------------------------------------------------- reports / settings
 
-router.get('/admin/reports', requireAdmin, async (req, res) => {
+router.get('/admin/reports', requireAdmin, (req, res) => {
   const window = resolveRange(req.query.from, req.query.to)
   ok(res, {
-    ...(await reportSummary(window)),
-    series: await dailySeries(window),
-    topRoutes: await topRoutes(window, 10),
+    ...reportSummary(window),
+    series: dailySeries(window),
+    topRoutes: topRoutes(window, 10),
   })
 })
 
 // The daily series as CSV (same text as Python: no trailing newline, revenue as a float).
-router.get('/admin/reports/export', requireAdmin, async (req, res) => {
+router.get('/admin/reports/export', requireAdmin, (req, res) => {
   const window = resolveRange(req.query.from, req.query.to)
   const lines = ['date,buses_added,bookings,revenue']
-  for (const r of await dailySeries(window)) lines.push(`${r.date},${r.buses},${r.bookings},${pyFloatStr(r.revenue)}`)
+  for (const r of dailySeries(window)) lines.push(`${r.date},${r.buses},${r.bookings},${pyFloatStr(r.revenue)}`)
   res
     .status(200)
     .set('Content-Type', 'text/csv; charset=utf-8')
@@ -448,11 +454,7 @@ router.get('/admin/reports/export', requireAdmin, async (req, res) => {
     .send(lines.join('\n'))
 })
 
-router.get('/admin/settings', requireAdmin, async (req, res) => ok(res, settingsOut(await getSettingsRow())))
-
-// Request field -> app_settings column; timezone, currency, dateFormat and timeFormat are accepted but
-// no longer stored (the app never used them).
-const SETTING_COLUMNS = { platformName: 'appName', platformEmail: 'supportEmail', contactNumber: 'contactNumber', address: 'address' }
+router.get('/admin/settings', requireAdmin, (req, res) => ok(res, settingsOut(getSettingsRow())))
 
 const SettingsBody = [
   { name: 'platformName', type: 'str', min: 2, max: 80 },
@@ -465,19 +467,18 @@ const SettingsBody = [
   { name: 'timeFormat', type: 'enum', values: ['12h', '24h'] },
 ]
 
-router.patch('/admin/settings', requireAdmin, async (req, res) => {
+router.patch('/admin/settings', requireAdmin, (req, res) => {
   const b = validateBody(req, SettingsBody)
   const admin = req.user
-  const row = await getSettingsRow()
+  const row = getSettingsRow()
   // Python parity: a null for any of these (NOT NULL) columns makes the flush in
   // log_activity fail; Python swallows that, rolls everything back and still
   // answers "Settings saved" with the unchanged settings (and no audit entry).
   if (Object.values(b).some((v) => v === null)) return ok(res, settingsOut(row), 'Settings saved')
 
-  const columns = Object.fromEntries(Object.entries(b).filter(([k]) => SETTING_COLUMNS[k]).map(([k, v]) => [SETTING_COLUMNS[k], v]))
-  await tx(async () => {
-    if (Object.keys(columns).length) await update('app_settings', row.id, { ...columns, updatedAt: Date.now() })
-    await logActivity({
+  tx(() => {
+    if (Object.keys(b).length) update('Setting', row.id, { ...b, updatedAt: Date.now() })
+    logActivity({
       actorId: admin.id,
       action: 'SETTINGS_UPDATED',
       entityType: 'SETTING',
@@ -485,7 +486,7 @@ router.patch('/admin/settings', requireAdmin, async (req, res) => {
       message: 'Platform settings updated',
     })
   })
-  ok(res, settingsOut(await getSettingsRow()), 'Settings saved')
+  ok(res, settingsOut(getSettingsRow()), 'Settings saved')
 })
 
 // ---------------------------------------------------------------- bus import from Excel
@@ -495,8 +496,8 @@ router.post('/admin/buses/import', requireAdmin, singleFile, async (req, res) =>
   const file = req.file
   if (!file?.size) throw ApiError.badRequest('Choose the Excel file to import')
   if (!/\.xlsx$/i.test(file.originalname || '')) throw ApiError.badRequest('Save the sheet as an Excel .xlsx file and choose that')
-  const plan = await busImport.planImport(await busImport.readSheet(file.buffer))
-  const applied = req.query.apply === '1' ? await busImport.applyImport(plan, req.user, { publish: req.body?.publish !== 'false' }) : null
+  const plan = busImport.planImport(await busImport.readSheet(file.buffer))
+  const applied = req.query.apply === '1' ? busImport.applyImport(plan, req.user, { publish: req.body?.publish !== 'false' }) : null
   const count = (action) => plan.filter((p) => p.action === action).length
   ok(res, {
     summary: { create: count('create'), update: count('update'), error: count('error') },
@@ -510,9 +511,6 @@ router.post('/admin/buses/import', requireAdmin, singleFile, async (req, res) =>
       fare: p.fare,
       days: p.days,
       stops: p.stops.map((s) => ({ name: s.name, time: s.time, isNew: !s.stopId })),
-      trips: p.trips ? p.trips.length : 1,
-      estimatedTimes: p.estimated ?? 0,
-      warnings: p.warnings ?? [],
       errors: p.errors,
     })),
   })

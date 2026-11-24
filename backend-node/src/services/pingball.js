@@ -1,6 +1,6 @@
 // Ping Ball is played alone on the phone because live play needs a connection the host forbids.
 // The phone reports its own score and can fake it, so a run is worth little and few runs pay.
-import { at, get, insert, run, tx } from '../db.js'
+import { get, insert, run, tx } from '../db.js'
 import { ApiError } from '../errors.js'
 import { newId } from '../ids.js'
 
@@ -18,34 +18,32 @@ export function pointsFor(score, runsToday) {
   return Math.min(MAX_POINTS, Math.floor(score / POINT_EVERY))
 }
 
-const paidRunsToday = async (userId) =>
-  Number(
-    (await get('SELECT COUNT(id) AS runs FROM arcade_scores WHERE user_id = ? AND game = ? AND points > 0 AND created_at >= ?', userId, GAME, at(Date.now() - DAY_MS)))
-      .runs,
-  )
+const paidRunsToday = (userId) =>
+  get(
+    `SELECT COUNT(id) AS runs FROM "ArcadeRun" WHERE "userId" = ? AND game = ? AND points > 0 AND "createdAt" >= ?`,
+    userId, GAME, Date.now() - DAY_MS,
+  ).runs
 
-async function addScore(userId, points) {
-  const now = at(Date.now())
-  await run(
-    `INSERT INTO leaderboard (user_id, points, wins, draws, played, updated_at) VALUES (?, ?, 0, 0, 1, ?)
-     ON DUPLICATE KEY UPDATE points = points + ?, played = played + 1, updated_at = ?`,
+function addScore(userId, points) {
+  const now = Date.now()
+  run(
+    `INSERT INTO "GameScore" ("userId", points, wins, draws, played, "updatedAt") VALUES (?, ?, 0, 0, 1, ?)
+     ON CONFLICT ("userId") DO UPDATE SET points = points + ?, played = played + 1, "updatedAt" = ?`,
     userId, points, now, points, now,
   )
 }
 
-export async function bestScore(userId) {
-  return (await get('SELECT MAX(score) AS best FROM arcade_scores WHERE user_id = ? AND game = ?', userId, GAME)).best ?? 0
+export function bestScore(userId) {
+  return get('SELECT MAX(score) AS best FROM "ArcadeRun" WHERE "userId" = ? AND game = ?', userId, GAME).best ?? 0
 }
 
-export async function recordScore(user, score) {
-  return tx(async () => {
-    const points = pointsFor(score, await paidRunsToday(user.id))
+export function recordScore(user, score) {
+  return tx(() => {
+    const points = pointsFor(score, paidRunsToday(user.id))
     // Anyone can post scores all day, so a run that pays nothing and beats nothing leaves no row.
-    if (points > 0 || score > (await bestScore(user.id))) {
-      await insert('arcade_scores', { id: newId(), userId: user.id, game: GAME, score, points, createdAt: Date.now() })
-    }
+    if (points > 0 || score > bestScore(user.id)) insert('ArcadeRun', { id: newId(), userId: user.id, game: GAME, score, points, createdAt: Date.now() })
     // Unpaid runs stay off the board, as unscored room games do: a tie is broken by the older updatedAt.
-    if (points > 0) await addScore(user.id, points)
-    return { score, points, best: await bestScore(user.id) }
+    if (points > 0) addScore(user.id, points)
+    return { score, points, best: bestScore(user.id) }
   })
 }

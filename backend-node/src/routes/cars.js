@@ -1,7 +1,7 @@
 // Local cars (call the driver) and Running Car shared rides (port of app/api/cars.py).
 import { Router } from 'express'
 import { isAdmin, optionalUser, requireAdmin, requireUser } from '../auth.js'
-import { all, at, byId, get, insert, like, run, scalar, tx, update } from '../db.js'
+import { all, byId, get, insert, like, run, scalar, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok, okPage } from '../http.js'
 import { newId } from '../ids.js'
@@ -31,13 +31,13 @@ import { ENUMS } from '../validate.js'
 const router = Router()
 
 /** LocalCarDetails: the car plus its 10 most recent reviews (reviewer names only). */
-async function withReviews(car, reviews) {
+function withReviews(car, reviews) {
   const { availabilityLabel, ...fields } = localCarOut(car)
-  return { ...fields, reviews: await Promise.all(reviews.map(async (r) => publicReview(await reviewOut(r)))), availabilityLabel }
+  return { ...fields, reviews: reviews.map((r) => publicReview(reviewOut(r))), availabilityLabel }
 }
 
-const carOr404 = async (id) => {
-  const car = await byId('local_vehicles', id)
+const carOr404 = (id) => {
+  const car = byId('LocalCar', id)
   if (!car) throw ApiError.notFound('Local car not found')
   return car
 }
@@ -51,7 +51,7 @@ const assertCarOwner = (car, user) => {
 const LOCAL_TYPES = ENUMS.localVehicleType
 
 /** Local Cars Near You. Driver phone numbers are public by design - the app dials them from 'Call Driver'. */
-router.get('/local-cars', async (req, res) => {
+router.get('/local-cars', (req, res) => {
   const q = new Query(req.query)
   const page = q.page()
   const area = q.str('area')
@@ -63,7 +63,7 @@ router.get('/local-cars', async (req, res) => {
   const where = ['status = ?']
   const params = ['ACTIVE']
   if (vehicleType) {
-    where.push('vehicle_type = ?')
+    where.push('"vehicleType" = ?')
     params.push(vehicleType)
   }
   if (area) {
@@ -71,21 +71,21 @@ router.get('/local-cars', async (req, res) => {
     params.push(like(area))
   }
   if (verified !== null) {
-    where.push('is_verified = ?')
+    where.push('verified IS ?')
     params.push(verified ? 1 : 0)
   }
   if (minRating !== null) {
-    where.push('rating_average >= ?')
+    where.push('"ratingAvg" >= ?')
     params.push(minRating)
   }
   if (page.search) {
-    where.push('(driver_name LIKE ? OR area LIKE ? OR vehicle_model LIKE ?)')
+    where.push('("driverName" LIKE ? OR area LIKE ? OR "carModel" LIKE ?)')
     params.push(like(page.search), like(page.search), like(page.search))
   }
   const sqlWhere = where.join(' AND ')
-  const total = Number((await scalar(`SELECT count(id) FROM local_vehicles WHERE ${sqlWhere}`, ...params)) || 0)
-  const rows = await all(
-    `SELECT * FROM local_vehicles WHERE ${sqlWhere} ORDER BY is_verified DESC, rating_average DESC, created_at, id LIMIT ? OFFSET ?`,
+  const total = Number(scalar(`SELECT count("LocalCar".id) FROM "LocalCar" WHERE ${sqlWhere}`, ...params) || 0)
+  const rows = all(
+    `SELECT * FROM "LocalCar" WHERE ${sqlWhere} ORDER BY verified DESC, "ratingAvg" DESC LIMIT ? OFFSET ?`,
     ...params,
     page.limit,
     page.skip,
@@ -94,15 +94,15 @@ router.get('/local-cars', async (req, res) => {
 })
 
 // Registered before /local-cars/:id.
-router.get('/local-cars/mine/list', requireUser, async (req, res) => {
-  const rows = await all('SELECT * FROM local_vehicles WHERE owner_id = ? ORDER BY created_at, id', req.user.id)
+router.get('/local-cars/mine/list', requireUser, (req, res) => {
+  const rows = all('SELECT * FROM "LocalCar" WHERE "ownerId" = ?', req.user.id)
   ok(res, rows.map(localCarOut))
 })
 
-router.get('/local-cars/:id', async (req, res) => {
-  const car = await carOr404(req.params.id)
-  const reviews = await all('SELECT * FROM reviews WHERE local_vehicle_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id LIMIT 10', car.id)
-  ok(res, await withReviews(car, reviews))
+router.get('/local-cars/:id', (req, res) => {
+  const car = carOr404(req.params.id)
+  const reviews = all('SELECT * FROM "Review" WHERE "localCarId" = ? ORDER BY "createdAt" DESC LIMIT 10', car.id)
+  ok(res, withReviews(car, reviews))
 })
 
 const STATUS = ENUMS.recordStatus
@@ -119,32 +119,32 @@ const LocalCarBody = {
   status: oneOf(STATUS, { default: 'ACTIVE' }),
 }
 
-router.post('/local-cars', requireUser, async (req, res) => {
+router.post('/local-cars', requireUser, (req, res) => {
   const { data: b } = parseBody(req, LocalCarBody)
   const admin = isAdmin(req.user)
   const now = Date.now()
-  const car = await insert('local_vehicles', {
+  const car = insert('LocalCar', {
     id: newId(),
     ownerId: req.user.id,
     driverName: b.driverName,
     phone: b.phone,
     area: b.area,
     vehicleType: b.vehicleType,
-    vehicleModel: b.carModel,
-    vehicleNumber: b.carNumber,
-    pictureUrl: null,
+    carModel: b.carModel,
+    carNumber: b.carNumber,
+    photoUrl: null,
     availableFrom: b.availableFrom,
-    availableUntil: b.availableTo,
-    ratingAverage: 0,
+    availableTo: b.availableTo,
+    ratingAvg: 0,
     ratingCount: 0,
-    isVerified: admin ? 1 : 0,
+    verified: admin ? 1 : 0,
     status: b.status,
     createdAt: now,
     updatedAt: now,
   })
   ok(
     res,
-    localCarOut(await byId('local_vehicles', car.id)),
+    localCarOut(byId('LocalCar', car.id)),
     admin ? 'Local car added' : 'Submitted - our team will verify your details',
     201,
   )
@@ -163,43 +163,40 @@ const LocalCarUpdateBody = {
   status: optional(oneOf(STATUS)),
 }
 
-// Request field -> column (camelCase) where the names differ.
-const CAR_COLUMNS = { carModel: 'vehicleModel', carNumber: 'vehicleNumber', availableTo: 'availableUntil' }
-
-router.patch('/local-cars/:id', requireUser, async (req, res) => {
+router.patch('/local-cars/:id', requireUser, (req, res) => {
   const { data, set } = parseBody(req, LocalCarUpdateBody)
-  const car = await carOr404(req.params.id)
+  const car = carOr404(req.params.id)
   assertCarOwner(car, req.user)
-  await saveChanges(update, 'local_vehicles', car, Object.fromEntries(set.map((k) => [CAR_COLUMNS[k] || k, data[k]])))
-  ok(res, localCarOut(await byId('local_vehicles', car.id)), 'Local car updated')
+  saveChanges(update, 'LocalCar', car, Object.fromEntries(set.map((k) => [k, data[k]])))
+  ok(res, localCarOut(byId('LocalCar', car.id)), 'Local car updated')
 })
 
-router.post('/local-cars/:id/photo', requireUser, singleFile, async (req, res) => {
+router.post('/local-cars/:id/photo', requireUser, singleFile, (req, res) => {
   // FastAPI validates the File() parameter before the handler runs.
   if (!req.file) fail([{ field: 'file', message: REQUIRED }])
-  const car = await carOr404(req.params.id)
+  const car = carOr404(req.params.id)
   assertCarOwner(car, req.user)
-  const pictureUrl = saveUpload(req.file, 'cars')
-  await saveChanges(update, 'local_vehicles', car, { pictureUrl })
-  ok(res, localCarOut(await byId('local_vehicles', car.id)), 'Photo updated')
+  const photoUrl = saveUpload(req.file, 'cars')
+  saveChanges(update, 'LocalCar', car, { photoUrl })
+  ok(res, localCarOut(byId('LocalCar', car.id)), 'Photo updated')
 })
 
-router.delete('/local-cars/:id', requireUser, async (req, res) => {
-  const car = await carOr404(req.params.id)
+router.delete('/local-cars/:id', requireUser, (req, res) => {
+  const car = carOr404(req.params.id)
   assertCarOwner(car, req.user)
-  await tx(async () => {
+  tx(() => {
     // SQLAlchemy's cascade="all, delete-orphan" removes the car's reviews first.
-    await run('DELETE FROM reviews WHERE local_vehicle_id = ?', car.id)
-    await run('DELETE FROM local_vehicles WHERE id = ?', car.id)
+    run('DELETE FROM "Review" WHERE "localCarId" = ?', car.id)
+    run('DELETE FROM "LocalCar" WHERE id = ?', car.id)
   })
   ok(res, null, 'Local car removed')
 })
 
-router.patch('/local-cars/:id/verify', requireAdmin, async (req, res) => {
+router.patch('/local-cars/:id/verify', requireAdmin, (req, res) => {
   const { data: b } = parseBody(req, { verified: required(bool()) })
-  const car = await carOr404(req.params.id)
-  await saveChanges(update, 'local_vehicles', car, { isVerified: b.verified })
-  ok(res, localCarOut(await byId('local_vehicles', car.id)), b.verified ? 'Driver verified' : 'Verification removed')
+  const car = carOr404(req.params.id)
+  saveChanges(update, 'LocalCar', car, { verified: b.verified })
+  ok(res, localCarOut(byId('LocalCar', car.id)), b.verified ? 'Driver verified' : 'Verification removed')
 })
 
 const ReviewBody = {
@@ -207,35 +204,35 @@ const ReviewBody = {
   comment: optional(str({ max: 500 })),
 }
 
-router.post('/local-cars/:id/reviews', requireUser, async (req, res) => {
+router.post('/local-cars/:id/reviews', requireUser, (req, res) => {
   const { data: b } = parseBody(req, ReviewBody)
-  const car = await carOr404(req.params.id)
-  const review = await tx(async () => {
-    const row = await insert('reviews', {
+  const car = carOr404(req.params.id)
+  const review = tx(() => {
+    const row = insert('Review', {
       id: newId(),
       userId: req.user.id,
       busId: null,
-      localVehicleId: car.id,
+      localCarId: car.id,
       rating: b.rating,
       comment: b.comment,
       createdAt: Date.now(),
     })
-    const agg = await get('SELECT avg(rating) AS avg, count(id) AS count FROM reviews WHERE local_vehicle_id = ?', car.id)
-    await saveChanges(update, 'local_vehicles', car, {
-      ratingAverage: pyRound2(Number(agg.avg || 0)),
+    const agg = get('SELECT avg(rating) AS avg, count(id) AS count FROM "Review" WHERE "localCarId" = ?', car.id)
+    saveChanges(update, 'LocalCar', car, {
+      ratingAvg: pyRound2(Number(agg.avg || 0)),
       ratingCount: Number(agg.count || 0),
     })
     return row
   })
-  ok(res, await reviewOut(await byId('reviews', review.id)), 'Thanks for your feedback', 201)
+  ok(res, reviewOut(byId('Review', review.id)), 'Thanks for your feedback', 201)
 })
 
 // ================================================================ rides (Running Car)
 
 /** Feature status - drives the 'Coming Soon' card. COMING_SOON until at least one scheduled ride exists, then LIVE. */
-router.get('/rides/status', async (req, res) => {
-  const active = Number((await scalar('SELECT count(id) FROM shared_rides WHERE status IN (?, ?)', 'SCHEDULED', 'RUNNING')) || 0)
-  const waitlist = Number((await scalar('SELECT count(id) FROM ride_waitlist')) || 0)
+router.get('/rides/status', (req, res) => {
+  const active = Number(scalar('SELECT count("Ride".id) FROM "Ride" WHERE status IN (?, ?)', 'SCHEDULED', 'RUNNING') || 0)
+  const waitlist = Number(scalar('SELECT count("RideWaitlist".id) FROM "RideWaitlist"') || 0)
   ok(res, {
     feature: 'RUNNING_CAR',
     status: active > 0 ? 'LIVE' : 'COMING_SOON',
@@ -251,15 +248,15 @@ const NotifyMeBody = {
 }
 
 /** Join the launch waitlist - the 'Notify Me' button. */
-router.post('/rides/notify-me', optionalUser, async (req, res) => {
+router.post('/rides/notify-me', optionalUser, (req, res) => {
   const { data: b } = parseBody(req, NotifyMeBody)
   const user = req.user
-  let entry = await get('SELECT * FROM ride_waitlist WHERE phone = ?', b.phone)
+  let entry = get('SELECT * FROM "RideWaitlist" WHERE phone = ?', b.phone)
   if (!entry) {
-    entry = await insert('ride_waitlist', { id: newId(), userId: user ? user.id : null, phone: b.phone, area: b.area, createdAt: Date.now() })
+    entry = insert('RideWaitlist', { id: newId(), userId: user ? user.id : null, phone: b.phone, area: b.area, createdAt: Date.now() })
   } else {
-    await saveChanges(update, 'ride_waitlist', entry, { area: b.area, userId: user ? user.id : entry.userId }, { touch: false })
-    entry = await byId('ride_waitlist', entry.id)
+    saveChanges(update, 'RideWaitlist', entry, { area: b.area, userId: user ? user.id : entry.userId }, { touch: false })
+    entry = byId('RideWaitlist', entry.id)
   }
   ok(res, { id: entry.id, phone: entry.phone, area: entry.area ?? null }, 'We will notify you as soon as Running Car goes live', 201)
 })
@@ -278,7 +275,7 @@ function departureMs(value, field = 'departureAt') {
   return p.wall
 }
 
-router.get('/rides', async (req, res) => {
+router.get('/rides', (req, res) => {
   const q = new Query(req.query)
   const page = q.page()
   const fromStopId = q.str('fromStopId')
@@ -291,42 +288,42 @@ router.get('/rides', async (req, res) => {
   const where = ['status = ?']
   const params = [status || 'SCHEDULED']
   if (fromStopId) {
-    where.push('from_stop_id = ?')
+    where.push('"fromStopId" = ?')
     params.push(fromStopId)
   }
   if (toStopId) {
-    where.push('to_stop_id = ?')
+    where.push('"toStopId" = ?')
     params.push(toStopId)
   }
   if (vehicleType) {
-    where.push('vehicle_type = ?')
+    where.push('"vehicleType" = ?')
     params.push(vehicleType)
   }
   if (date) {
     // datetime.fromisoformat(date): an offset, when given, is honoured here.
     const p = parseIsoParts(date)
     if (!p) fail([{ field: 'date', message: 'Input should be a valid date or datetime' }])
-    const dayStart = p.wall - p.offsetMs
-    where.push('departs_at >= ?', 'departs_at < ?')
-    params.push(at(dayStart), at(dayStart + 86400000))
+    const day = p.wall - p.offsetMs
+    where.push('"departureAt" >= ?', '"departureAt" < ?')
+    params.push(day, day + 86400000)
   } else {
-    where.push('departs_at >= ?')
-    params.push(at(Date.now()))
+    where.push('"departureAt" >= ?')
+    params.push(Date.now())
   }
   const sqlWhere = where.join(' AND ')
-  const total = Number((await scalar(`SELECT count(id) FROM shared_rides WHERE ${sqlWhere}`, ...params)) || 0)
-  const rows = await all(`SELECT * FROM shared_rides WHERE ${sqlWhere} ORDER BY departs_at, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
-  okPage(res, await Promise.all(rows.map(async (r) => publicRide(await rideOut(r)))), total, page)
+  const total = Number(scalar(`SELECT count("Ride".id) FROM "Ride" WHERE ${sqlWhere}`, ...params) || 0)
+  const rows = all(`SELECT * FROM "Ride" WHERE ${sqlWhere} ORDER BY "departureAt" LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  okPage(res, rows.map((r) => publicRide(rideOut(r))), total, page)
 })
 
-const rideOr404 = async (id) => {
-  const ride = await byId('shared_rides', id)
+const rideOr404 = (id) => {
+  const ride = byId('Ride', id)
   if (!ride) throw ApiError.notFound('Ride not found')
   return ride
 }
 
-router.get('/rides/:id', async (req, res) => {
-  ok(res, publicRide(await rideOut(await rideOr404(req.params.id))))
+router.get('/rides/:id', (req, res) => {
+  ok(res, publicRide(rideOut(rideOr404(req.params.id))))
 })
 
 const RideBody = {
@@ -340,26 +337,26 @@ const RideBody = {
   farePerSeat: required(float({ ge: 0 })),
 }
 
-router.post('/rides', requireUser, async (req, res) => {
+router.post('/rides', requireUser, (req, res) => {
   const { data: b } = parseBody(req, RideBody)
   if (b.fromStopId === b.toStopId) throw ApiError.badRequest('Pick two different stops')
   const now = Date.now()
-  const ride = await insert('shared_rides', {
+  const ride = insert('Ride', {
     id: newId(),
     routeId: b.routeId,
     fromStopId: b.fromStopId,
     toStopId: b.toStopId,
     driverId: b.driverId || req.user.id,
     vehicleType: b.vehicleType,
-    departsAt: departureMs(b.departureAt),
+    departureAt: departureMs(b.departureAt),
     totalSeats: b.totalSeats,
-    seatsLeft: b.totalSeats,
+    availableSeats: b.totalSeats,
     farePerSeat: b.farePerSeat,
     status: 'SCHEDULED',
     createdAt: now,
     updatedAt: now,
   })
-  ok(res, await rideOut(await byId('shared_rides', ride.id)), 'Ride published', 201)
+  ok(res, rideOut(byId('Ride', ride.id)), 'Ride published', 201)
 })
 
 const RideUpdateBody = {
@@ -374,21 +371,21 @@ const RideUpdateBody = {
   status: optional(oneOf(RIDE_STATUS)),
 }
 
-router.patch('/rides/:id', requireUser, async (req, res) => {
+router.patch('/rides/:id', requireUser, (req, res) => {
   const { data, set } = parseBody(req, RideUpdateBody)
-  const ride = await rideOr404(req.params.id)
+  const ride = rideOr404(req.params.id)
   if (ride.driverId !== req.user.id && !isAdmin(req.user)) throw ApiError.forbidden('You can only edit your own rides')
 
   const patch = {}
   for (const key of set) if (key !== 'departureAt') patch[key] = data[key]
-  if (data.departureAt) patch.departsAt = departureMs(data.departureAt)
-  await saveChanges(update, 'shared_rides', ride, patch)
-  ok(res, await rideOut(await byId('shared_rides', ride.id)), 'Ride updated')
+  if (data.departureAt) patch.departureAt = departureMs(data.departureAt)
+  saveChanges(update, 'Ride', ride, patch)
+  ok(res, rideOut(byId('Ride', ride.id)), 'Ride updated')
 })
 
-router.delete('/rides/:id', requireAdmin, async (req, res) => {
-  const ride = await rideOr404(req.params.id)
-  await run('DELETE FROM shared_rides WHERE id = ?', ride.id)
+router.delete('/rides/:id', requireAdmin, (req, res) => {
+  const ride = rideOr404(req.params.id)
+  run('DELETE FROM "Ride" WHERE id = ?', ride.id)
   ok(res, null, 'Ride removed')
 })
 

@@ -8,7 +8,6 @@ import { insert, scalar } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok } from '../http.js'
 import { processDueAlarms } from '../scheduler.js'
-import { cleanUpHourly } from '../services/cleanup.js'
 import { latestNews } from '../services/news.js'
 import { loadSettings, settingsOut } from '../serialize.js'
 
@@ -32,43 +31,42 @@ router.get('/news', async (req, res) => {
 })
 
 /** Homepage counters: buses, routes, stops, users. */
-export const platformCounters = async () => {
-  const [buses, routes, stops, users] = await Promise.all([
-    scalar('SELECT COUNT(id) FROM buses WHERE status = ?', 'APPROVED'),
-    scalar('SELECT COUNT(id) FROM bus_routes WHERE status = ?', 'ACTIVE'),
-    scalar('SELECT COUNT(id) FROM bus_stops WHERE status = ?', 'ACTIVE'),
-    scalar('SELECT COUNT(id) FROM users'),
-  ])
-  return { buses: Number(buses || 0), routes: Number(routes || 0), stops: Number(stops || 0), users: Number(users || 0) }
-}
+export const platformCounters = () => ({
+  buses: Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE status = ?', 'APPROVED') || 0),
+  routes: Number(scalar('SELECT COUNT(id) FROM "Route" WHERE status = ?', 'ACTIVE') || 0),
+  stops: Number(scalar('SELECT COUNT(id) FROM "BusStop" WHERE status = ?', 'ACTIVE') || 0),
+  users: Number(scalar('SELECT COUNT(id) FROM "User"') || 0),
+})
 
-router.get('/stats', async (req, res) => ok(res, await platformCounters()))
+router.get('/stats', (req, res) => ok(res, platformCounters()))
 
 /** The single settings row, created with defaults on first use. */
-export async function getSettingsRow() {
-  let row = await loadSettings()
+export function getSettingsRow() {
+  let row = loadSettings()
   if (!row) {
-    await insert('app_settings', {
+    insert('Setting', {
       id: 'global',
-      appName: 'GO-GO Ride',
-      supportEmail: 'support@gogoride.com',
+      platformName: 'GO-GO Ride',
+      platformEmail: 'support@gogoride.com',
       contactNumber: '+91 12345 43210',
       address: '123, Transport Office Road, Kolkata, West Bengal - 700001',
+      timezone: 'Asia/Kolkata',
+      currency: 'INR',
+      dateFormat: 'DD MMM YYYY',
+      timeFormat: '12h',
       updatedAt: Date.now(),
     })
-    row = await loadSettings()
+    row = loadSettings()
   }
   return row
 }
 
-router.get('/settings', async (req, res) => ok(res, settingsOut(await getSettingsRow())))
+router.get('/settings', (req, res) => ok(res, settingsOut(getSettingsRow())))
 
 // Backup trigger for the alarm job (e.g. an hPanel cron job hitting this every minute).
-router.get('/internal/run-alarms', async (req, res) => {
+router.get('/internal/run-alarms', (req, res) => {
   if (!config.cronKey || req.query.key !== config.cronKey) throw ApiError.notFound('Not Found')
-  const fired = await processDueAlarms()
-  await cleanUpHourly()
-  ok(res, { fired })
+  ok(res, { fired: processDueAlarms() })
 })
 
 export default router

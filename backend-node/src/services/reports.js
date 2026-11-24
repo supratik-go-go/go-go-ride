@@ -1,10 +1,11 @@
 // Dashboard statistics and the Reports & Analytics figures (port of app/services/reports.py).
 //
-// Bookings are read in id order (ids start with their creation time, so this is the order they were
-// added in, as the old SQLite rowid order was). Float sums and first-seen orders stay the same.
+// The queries are the same as the Python service's (same WHERE clauses, no
+// extra ORDER BY), so rows come back in the same order and float sums are
+// accumulated in the same order - the rounded figures match to the last digit.
 //
 // (Python's reports.platform_counters lives in routes/platform.js here.)
-import { all, at, byId, scalar } from '../db.js'
+import { all, byId, scalar } from '../db.js'
 import { ApiError } from '../errors.js'
 import { addDays, dateOnly, startOfDay, todayMs } from '../time.js'
 
@@ -105,34 +106,33 @@ export function trend(current, previous) {
   return pyRound(((current - previous) / previous) * 100, 1)
 }
 
-async function count(table, start, end) {
+function count(table, start, end) {
   const n =
     start === undefined
-      ? await scalar(`SELECT COUNT(id) FROM ${table}`)
-      : await scalar(`SELECT COUNT(id) FROM ${table} WHERE created_at >= ? AND created_at < ?`, at(start), at(end))
+      ? scalar(`SELECT COUNT(id) FROM "${table}"`)
+      : scalar(`SELECT COUNT(id) FROM "${table}" WHERE "createdAt" >= ? AND "createdAt" < ?`, start, end)
   return Number(n || 0)
 }
 
-export async function dashboardStats(window) {
+export function dashboardStats(window) {
   const span = window.end - window.start
   const prev = { start: window.start - span, end: window.start }
 
-  const totalBuses = await count('buses')
-  const pending = Number((await scalar(`SELECT COUNT(id) FROM buses WHERE status IN ('PENDING', 'UNDER_REVIEW')`)) || 0)
-  const totalRoutes = await count('bus_routes')
-  const totalUsers = await count('users')
+  const totalBuses = count('Bus')
+  const pending = Number(scalar(`SELECT COUNT(id) FROM "Bus" WHERE status IN ('PENDING', 'UNDER_REVIEW')`) || 0)
+  const totalRoutes = count('Route')
+  const totalUsers = count('User')
 
-  const busesNow = await count('buses', window.start, window.end)
-  const busesPrev = await count('buses', prev.start, prev.end)
-  const usersNow = await count('users', window.start, window.end)
-  const usersPrev = await count('users', prev.start, prev.end)
-  const routesNow = await count('bus_routes', window.start, window.end)
-  const routesPrev = await count('bus_routes', prev.start, prev.end)
-  const bookingsNow = await count('bookings', window.start, window.end)
-  const bookingsPrev = await count('bookings', prev.start, prev.end)
+  const busesNow = count('Bus', window.start, window.end)
+  const busesPrev = count('Bus', prev.start, prev.end)
+  const usersNow = count('User', window.start, window.end)
+  const usersPrev = count('User', prev.start, prev.end)
+  const routesNow = count('Route', window.start, window.end)
+  const routesPrev = count('Route', prev.start, prev.end)
+  const bookingsNow = count('Booking', window.start, window.end)
+  const bookingsPrev = count('Booking', prev.start, prev.end)
 
-  // Alphabetical, as before: MySQL would otherwise sort a status list in its defined order.
-  const breakdown = (await all('SELECT status, COUNT(id) AS n FROM buses GROUP BY status ORDER BY CAST(status AS CHAR)')).map((r) => ({
+  const breakdown = all('SELECT status, COUNT(id) AS n FROM "Bus" GROUP BY status').map((r) => ({
     status: r.status,
     count: Number(r.n),
     percentage: totalBuses === 0 ? 0 : pyRound((Number(r.n) / totalBuses) * 100, 1),
@@ -152,12 +152,12 @@ export async function dashboardStats(window) {
 }
 
 const bookingsIn = (window) =>
-  all('SELECT * FROM bookings WHERE created_at >= ? AND created_at < ? ORDER BY id', at(window.start), at(window.end))
+  all('SELECT * FROM "Booking" WHERE "createdAt" >= ? AND "createdAt" < ?', window.start, window.end)
 
 /** Per-day counts behind the dashboard line charts (one row per day of the window). */
-export async function dailySeries(window) {
-  const buses = await all('SELECT * FROM buses WHERE created_at >= ? AND created_at < ? ORDER BY created_at, id', at(window.start), at(window.end))
-  const bookings = await bookingsIn(window)
+export function dailySeries(window) {
+  const buses = all('SELECT * FROM "Bus" WHERE "createdAt" >= ? AND "createdAt" < ?', window.start, window.end)
+  const bookings = bookingsIn(window)
 
   const days = []
   for (let cursor = window.start; cursor < window.end; cursor = addDays(cursor, 1)) days.push(dateOnly(cursor))
@@ -188,22 +188,22 @@ export async function dailySeries(window) {
 function busRouteLookup() {
   const buses = new Map()
   const routes = new Map()
-  const bus = async (id) => {
+  const bus = (id) => {
     if (!id) return null
-    if (!buses.has(id)) buses.set(id, (await byId('buses', id)) || null)
+    if (!buses.has(id)) buses.set(id, byId('Bus', id) || null)
     return buses.get(id)
   }
-  const route = async (b) => {
+  const route = (b) => {
     if (!b || !b.routeId) return null
-    if (!routes.has(b.routeId)) routes.set(b.routeId, (await byId('bus_routes', b.routeId)) || null)
+    if (!routes.has(b.routeId)) routes.set(b.routeId, byId('Route', b.routeId) || null)
     return routes.get(b.routeId)
   }
   return { bus, route }
 }
 
 /** Revenue, trips, occupancy, distance and the payment-mode split. */
-export async function reportSummary(window) {
-  const bookings = await bookingsIn(window)
+export function reportSummary(window) {
+  const bookings = bookingsIn(window)
   const { bus, route } = busRouteLookup()
 
   const completed = bookings.filter((b) => b.status !== 'CANCELLED')
@@ -214,18 +214,18 @@ export async function reportSummary(window) {
   for (const b of completed) totalRevenue += Number(b.amount)
   for (const b of completed) seatsBooked += b.seats
   for (const b of completed) {
-    const bb = await bus(b.busId)
-    const r = await route(bb)
+    const bb = bus(b.busId)
+    const r = route(bb)
     totalDistance += (bb && r ? Number(r.distanceKm) : 0) * b.seats
   }
   for (const b of completed) {
-    const bb = await bus(b.busId)
+    const bb = bus(b.busId)
     capacity += bb ? bb.totalSeats : 0
   }
   const occupancy = capacity === 0 ? 0 : pyRound((seatsBooked / capacity) * 100, 1)
 
   const byMode = new Map()
-  for (const b of completed) byMode.set(b.paymentMethod, (byMode.get(b.paymentMethod) || 0) + Number(b.amount))
+  for (const b of completed) byMode.set(b.paymentMode, (byMode.get(b.paymentMode) || 0) + Number(b.amount))
   const paymentSplit = [...byMode].map(([mode, amount]) => ({
     mode,
     amount: pyRound(amount, 2),
@@ -248,17 +248,17 @@ export async function reportSummary(window) {
 }
 
 /** The "Top Routes by Bookings" panel (seats booked per route, most first). */
-export async function topRoutes(window, limit = 5) {
-  const bookings = await all(
-    'SELECT * FROM bookings WHERE created_at >= ? AND created_at < ? AND bus_id IS NOT NULL ORDER BY id',
-    at(window.start),
-    at(window.end),
+export function topRoutes(window, limit = 5) {
+  const bookings = all(
+    'SELECT * FROM "Booking" WHERE "createdAt" >= ? AND "createdAt" < ? AND "busId" IS NOT NULL',
+    window.start,
+    window.end,
   )
   const { bus, route } = busRouteLookup()
 
   const tally = new Map()
   for (const booking of bookings) {
-    const r = await route(await bus(booking.busId))
+    const r = route(bus(booking.busId))
     if (!r) continue
     if (!tally.has(r.id)) tally.set(r.id, { routeId: r.id, name: r.name, routeNumber: r.routeNumber, bookings: 0 })
     tally.get(r.id).bookings += booking.seats
