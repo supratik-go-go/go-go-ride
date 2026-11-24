@@ -23772,10 +23772,6 @@
    "code": "BAD_REQUEST",
    "details": [
     {
-     "field": "busNumber",
-     "message": "Field required"
-    },
-    {
      "field": "type",
      "message": "Field required"
     },
@@ -23802,10 +23798,6 @@
    "code": "BAD_REQUEST",
    "details": [
     {
-     "field": "busNumber",
-     "message": "Field required"
-    },
-    {
      "field": "type",
      "message": "Field required"
     },
@@ -23831,10 +23823,6 @@
   "body": {
    "code": "BAD_REQUEST",
    "details": [
-    {
-     "field": "busNumber",
-     "message": "Field required"
-    },
     {
      "field": "type",
      "message": "Field required"

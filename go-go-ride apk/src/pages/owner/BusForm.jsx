@@ -269,13 +269,14 @@ function BusFormScreen({ admin, id, contributor }) {
   // ---------------------------------------------------------------- validation
   function validate() {
     const e = {}
+    // The registration number is optional (many buses are known only by name); the name is not.
     if (!editing) {
       const bn = form.busNumber.trim()
-      if (!bn) e.busNumber = 'Enter the bus registration number'
-      else if (bn.length < 4 || bn.length > 20) e.busNumber = 'Bus number must be 4–20 characters'
+      if (bn && (bn.length < 4 || bn.length > 20)) e.busNumber = 'Bus number must be 4–20 characters'
     }
     const name = form.busName.trim()
-    if (name && name.length < 2) e.busName = 'Bus name must be at least 2 characters'
+    if (!name) e.busName = 'Enter the bus name passengers know it by'
+    else if (name.length < 2) e.busName = 'Bus name must be at least 2 characters'
     if (name.length > 80) e.busName = 'Keep the bus name under 80 characters'
     if (!form.type) e.type = 'Select the bus type'
     if (!form.category) e.category = 'Select the bus category'
@@ -352,7 +353,7 @@ function BusFormScreen({ admin, id, contributor }) {
         distanceKm: Number(r.distanceKm || 0),
       })),
     }
-    if (!editing) p.busNumber = form.busNumber.trim().toUpperCase()
+    if (!editing && form.busNumber.trim()) p.busNumber = form.busNumber.trim().toUpperCase()
     if (admin) p.routeId = form.routeId || (editing ? null : undefined)
     return p
   }
@@ -479,7 +480,7 @@ function BusFormScreen({ admin, id, contributor }) {
   const header = admin ? (
     <SectionHeader
       title={title}
-      subtitle={editing ? (bus ? `${bus.busNumber}${bus.busName ? ` · ${bus.busName}` : ''}` : 'Loading…') : 'Create a bus with its route timetable. New buses start as Pending.'}
+      subtitle={editing ? (bus ? [bus.busNumber, bus.busName].filter(Boolean).join(' · ') : 'Loading…') : 'Create a bus with its route timetable. New buses start as Pending.'}
       actions={
         <Button variant="outline" icon={<ArrowLeft size={17} />} to={listPath}>
           Back to buses
@@ -542,7 +543,7 @@ function BusFormScreen({ admin, id, contributor }) {
         </span>
         <h2>{admin ? 'Bus created' : 'Submitted for verification'}</h2>
         <p className="text-2">
-          <strong>{created.busNumber}</strong> is now <StatusBadge value={created.status || 'PENDING'} group="busStatus" />.{' '}
+          <strong>{created.busNumber || created.busName}</strong> is now <StatusBadge value={created.status || 'PENDING'} group="busStatus" />.{' '}
           {admin
             ? 'Approve it from Bus Requests to make it visible to passengers.'
             : contributor
@@ -611,7 +612,7 @@ function BusFormScreen({ admin, id, contributor }) {
                 <BusFront size={18} />
               </span>
               <div>
-                <div className="fw-700">{bus.busNumber}</div>
+                <div className="fw-700">{bus.busNumber || bus.busName}</div>
                 <div className="text-xs text-muted">Submitted {formatDate(bus.submittedAt || bus.createdAt)}</div>
               </div>
             </div>
@@ -647,8 +648,7 @@ function BusFormScreen({ admin, id, contributor }) {
         <Section title="Bus Details">
           <div className="own-grid">
             <Input
-              label="Bus Number"
-              required={!editing}
+              label="Bus Number (optional)"
               icon={<BusFront size={18} />}
               placeholder="WB 01 AB 1234"
               value={form.busNumber}
@@ -656,11 +656,12 @@ function BusFormScreen({ admin, id, contributor }) {
               disabled={editing}
               maxLength={20}
               error={errors.busNumber}
-              hint={editing ? "The registration number can't be changed. Contact support if it's wrong." : 'As printed on the RC book'}
+              hint={editing ? "The registration number can't be changed. Contact support if it's wrong." : "As printed on the RC book. Leave it empty if you don't know it"}
               autoCapitalize="characters"
             />
             <Input
               label="Bus Name"
+              required
               icon={<BusFront size={18} />}
               placeholder="e.g., Shree Travels"
               value={form.busName}

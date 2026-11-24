@@ -148,7 +148,7 @@ export default function RouteDetails() {
                   <div className="grow" style={{ minWidth: 0 }}>
                     <div className="fw-600 truncate">{b.busName || b.busNumber}</div>
                     <div className="text-xs text-muted truncate">
-                      {b.busNumber} · {label('busType', b.type)} · {label('busCategory', b.category)}
+                      {b.busNumber || b.busName} · {label('busType', b.type)} · {label('busCategory', b.category)}
                     </div>
                   </div>
                   <div className="px-route-bus-side">

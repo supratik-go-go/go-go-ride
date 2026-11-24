@@ -11,17 +11,19 @@ import {
   FileText,
   Hash,
   MapPin,
+  Mic,
   Route,
   Search,
 } from 'lucide-react'
 import { AddViaButton, StopInput, ViaInput } from '../../components/navigation/SearchBar'
-import { Avatar, Badge, Button, EmptyState, Logo, Skeleton, Spinner, useToast } from '../../components/ui'
-import { LocalVehicleTypes, firstName, openPicker } from '../../components/passenger'
-import { locationService, routeService, stopService } from '../../services'
+import { Avatar, Badge, Button, Logo, Spinner, useToast } from '../../components/ui'
+import { LocalVehicleTypes, RecentSearchStrip, firstName, openPicker } from '../../components/passenger'
+import { locationService, stopService } from '../../services'
 import { useAuth } from '../../context/AuthContext'
-import { useAsync } from '../../hooks/useAsync'
 import { useUnreadCount } from '../../hooks/useUnreadCount'
 import { formatDate, todayISO } from '../../utils/format'
+import { saveLocalSearch } from '../../utils/localSearches'
+import { listenOnce } from '../../native/device'
 import './passenger.css'
 
 const MODES = [
@@ -29,6 +31,14 @@ const MODES = [
   { value: 'BUS_NAME', label: 'Bus Name', icon: FileText },
   { value: 'ROUTE', label: 'Route', icon: Route },
 ]
+
+// Voice search languages; the choice is remembered on the phone.
+const VOICE_LANGS = {
+  'en-IN': { name: 'English', short: 'EN', prompt: 'Say: Howrah to Esplanade' },
+  'hi-IN': { name: 'हिन्दी', short: 'हि', prompt: 'बोलिए: हावड़ा से एस्प्लेनेड' },
+  'bn-IN': { name: 'বাংলা', short: 'বা', prompt: 'বলুন: হাওড়া থেকে এসপ্ল্যানেড' },
+}
+const VOICE_KEY = 'gogo.voiceLang'
 
 /** "2026-11-07" -> "7 Nov 26" */
 function shortDate(iso) {
@@ -50,11 +60,12 @@ export default function Home() {
   const [q, setQ] = useState('')
   const [date, setDate] = useState(todayISO())
   const [locating, setLocating] = useState(false)
+  const [listening, setListening] = useState(false)
+  const [voiceLang, setVoiceLang] = useState(() => (VOICE_LANGS[localStorage.getItem(VOICE_KEY)] ? localStorage.getItem(VOICE_KEY) : 'en-IN'))
+  const [langOpen, setLangOpen] = useState(false)
   const searchRef = useRef(null)
   const qRef = useRef(null)
   const focusQ = useRef(false)
-
-  const popular = useAsync(() => routeService.popular(6), [])
 
   useEffect(() => {
     if (mode !== 'ROUTE' && focusQ.current) {
@@ -97,6 +108,52 @@ export default function Home() {
     setTo(from)
   }
 
+  // Voice: "Howrah to Esplanade" / "হাওড়া থেকে এসপ্ল্যানেড" / "हावड़ा से एस्प्लेनेड" fills From and To;
+  // when both stops are certain the search runs straight away.
+  const listen = async () => {
+    if (listening) return
+    setLangOpen(false)
+    setListening(true)
+    try {
+      const heard = await listenOnce(voiceLang, VOICE_LANGS[voiceLang].prompt)
+      if (!heard.length) {
+        toast.info('Didn\'t catch that. Tap the microphone and say, for example, "Howrah to Esplanade".')
+        return
+      }
+      const r = await stopService.voiceTrip(heard)
+      const pick = (sure, options, text) => sure || options?.[0] || (text ? { name: text } : null)
+      const nextFrom = r.fromText ? pick(r.from, r.fromOptions, r.fromText) : from
+      const nextTo = pick(r.to, r.toOptions, r.toText)
+      if (!nextTo) {
+        toast.info(`Heard "${r.heard}", but no stop matched. Try again or type it.`)
+        return
+      }
+      setMode('ROUTE')
+      setFrom(nextFrom)
+      setTo(nextTo)
+      const sure = r.to && (r.from || (!r.fromText && from?.id))
+      if (sure && nextFrom?.id !== nextTo.id) {
+        if (!isAuthenticated) saveLocalSearch({ searchType: 'ROUTE', fromText: nextFrom.name, toText: nextTo.name })
+        navigate(`/search?${new URLSearchParams({ searchType: 'ROUTE', date, from: nextFrom.name, to: nextTo.name, fromId: nextFrom.id, toId: nextTo.id })}`)
+      } else if (!nextFrom) toast.info(`Heard "${r.heard}". Now choose where you are starting from.`)
+      else toast.warning(`Heard "${r.heard}". Check the stops, then tap Search Buses.`)
+    } catch (err) {
+      toast.error(err)
+    } finally {
+      setListening(false)
+    }
+  }
+
+  const chooseVoiceLang = (code) => {
+    setVoiceLang(code)
+    setLangOpen(false)
+    try {
+      localStorage.setItem(VOICE_KEY, code)
+    } catch {
+      // not remembered; still used this time
+    }
+  }
+
   const submit = (e) => {
     e.preventDefault()
     const params = new URLSearchParams({ searchType: mode, date })
@@ -125,6 +182,10 @@ export default function Home() {
         return
       }
       params.set('q', text)
+    }
+    // Signed-in searches are remembered by the server; a guest's stay on this phone.
+    if (!isAuthenticated) {
+      saveLocalSearch(mode === 'ROUTE' ? { searchType: mode, fromText: from.name.trim(), toText: to.name.trim() } : { searchType: mode, query: q.trim() })
     }
     navigate(`/search?${params}`)
   }
@@ -260,9 +321,47 @@ export default function Home() {
               </div>
             </div>
 
-            <Button type="submit" variant="accent" size="lg" block icon={<Search size={22} />} className="px-search-submit">
-              Search Buses
-            </Button>
+            {/* microphone inside the orange button (owner's design): voice on the left, search on the right */}
+            <div className={`px-search-go ${listening ? 'is-listening' : ''}`}>
+              <span className="px-voice-waves" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <button
+                type="button"
+                className="px-voice-btn"
+                onClick={listen}
+                aria-label={listening ? 'Listening' : `Search by voice in ${VOICE_LANGS[voiceLang].name}`}
+              >
+                {listening ? <Spinner size={22} /> : <Mic size={24} />}
+              </button>
+              <button
+                type="button"
+                className="px-voice-lang"
+                onClick={() => setLangOpen((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={langOpen}
+                aria-label={`Voice language: ${VOICE_LANGS[voiceLang].name}. Tap to change.`}
+              >
+                {VOICE_LANGS[voiceLang].short}
+              </button>
+              <span className="px-search-go-sep" aria-hidden="true" />
+              <button type="submit" className="px-search-go-main">
+                <Search size={22} /> Search Buses
+              </button>
+              {langOpen && (
+                <div className="px-voice-menu" role="menu" aria-label="Voice language">
+                  {Object.entries(VOICE_LANGS).map(([code, l]) => (
+                    <button key={code} type="button" role="menuitemradio" aria-checked={code === voiceLang} onClick={() => chooseVoiceLang(code)}>
+                      {l.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </form>
 
           {/* ---------------- quick actions ---------------- */}
@@ -297,7 +396,7 @@ export default function Home() {
         <div className="px-home-col">
           {/* ---------------- running car ---------------- */}
           <nav className="px-contrib-links" aria-label="Add information" style={{ order: 3 }}>
-            <Link to="/owner/buses/new" className="card px-contrib-link">
+            <Link to="/add-bus" className="card px-contrib-link">
               <span className="icon-tile sm">
                 <BusFront size={20} />
               </span>
@@ -323,53 +422,8 @@ export default function Home() {
             </Link>
           </nav>
 
-          {/* ---------------- popular routes ---------------- */}
-          <section className="px-section" aria-labelledby="px-popular-title" style={{ order: 5 }}>
-            <div className="px-section-head">
-              <h2 id="px-popular-title" className="px-section-title">
-                Popular Routes
-              </h2>
-              <Link to="/routes" className="link-btn">
-                View All <ChevronRight size={16} />
-              </Link>
-            </div>
-            {popular.loading && !popular.data ? (
-              <div className="px-popular">
-                {Array.from({ length: 4 }, (_, i) => (
-                  <Skeleton key={i} height={64} radius={12} />
-                ))}
-              </div>
-            ) : popular.error && !popular.data ? (
-              <div className="alert alert-danger">
-                <span className="grow">{popular.error.message}</span>
-                <button type="button" className="link-btn" onClick={() => popular.reload()}>
-                  Retry
-                </button>
-              </div>
-            ) : !popular.data?.length ? (
-              <EmptyState compact icon={<Route size={24} />} title="No routes yet" message="Routes will appear here once they are added." />
-            ) : (
-              <div className="px-popular">
-                {popular.data.map((r) => (
-                  <Link
-                    key={r.id}
-                    className="px-popular-item"
-                    to={`/search?${new URLSearchParams({ from: r.from || '', to: r.to || '', searchType: 'ROUTE', date: todayISO() })}`}
-                    title={r.name}
-                  >
-                    <span className="icon-tile sm">
-                      <BusFront size={18} />
-                    </span>
-                    <span className="px-popular-text">
-                      <span className="truncate fw-600">{r.from}</span>
-                      <span className="truncate text-2">→ {r.to}</span>
-                    </span>
-                    {r.routeNumber && <span className="px-popular-no">{r.routeNumber}</span>}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </section>
+          {/* ---------------- recent search ---------------- */}
+          {ready && <RecentSearchStrip signedIn={isAuthenticated} style={{ order: 5 }} />}
         </div>
 
         {/* ---------------- local vehicle ---------------- */}

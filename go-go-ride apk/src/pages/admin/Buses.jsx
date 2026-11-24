@@ -76,8 +76,8 @@ export default function Buses() {
       header: 'Bus Number',
       render: (b) => (
         <div className="adm-cell">
-          <span className="adm-cell-main">{b.busNumber}</span>
-          {b.busName && <span className="adm-cell-sub">{b.busName}</span>}
+          <span className="adm-cell-main">{b.busNumber || b.busName}</span>
+          {b.busNumber && b.busName && <span className="adm-cell-sub">{b.busName}</span>}
         </div>
       ),
     },
@@ -112,13 +112,13 @@ export default function Buses() {
       render: (b) => (
         <span className="adm-actions">
           {(b.status === 'PENDING' || b.status === 'UNDER_REVIEW') && <ApprovalActions bus={b} showReview={false} onChanged={afterStatusChange} />}
-          <Link className="adm-act" to={`/admin/buses/${b.id}/edit`} aria-label={`Edit ${b.busNumber}`} title="Edit">
+          <Link className="adm-act" to={`/admin/buses/${b.id}/edit`} aria-label={`Edit ${b.busNumber || b.busName}`} title="Edit">
             <Pencil size={15} />
           </Link>
-          <button type="button" className="adm-act" onClick={() => setViewId(b.id)} aria-label={`View ${b.busNumber}`} title="View details">
+          <button type="button" className="adm-act" onClick={() => setViewId(b.id)} aria-label={`View ${b.busNumber || b.busName}`} title="View details">
             <Eye size={16} />
           </button>
-          <button type="button" className="adm-act danger" onClick={() => setToDelete(b)} aria-label={`Delete ${b.busNumber}`} title="Delete">
+          <button type="button" className="adm-act danger" onClick={() => setToDelete(b)} aria-label={`Delete ${b.busNumber || b.busName}`} title="Delete">
             <Trash2 size={15} />
           </button>
         </span>

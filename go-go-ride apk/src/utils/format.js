@@ -150,7 +150,8 @@ export function initials(name) {
 }
 
 /** Route badge text: routeNumber, falling back to busNumber (owner buses have no route). */
-export const busBadge = (bus) => bus?.routeNumber || bus?.route?.routeNumber || bus?.busNumber || ''
+// Many buses are known only by name (no route or registration number), so the name is the last resort.
+export const busBadge = (bus) => bus?.routeNumber || bus?.route?.routeNumber || bus?.busNumber || bus?.busName || ''
 
 /** serviceDays arrives as "MON,TUE" and is sent as ["MON","TUE"]. */
 export const splitDays = (value) => (Array.isArray(value) ? value : String(value || '').split(',').filter(Boolean))

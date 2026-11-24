@@ -18,6 +18,7 @@ import {
   verifyPassword,
 } from '../auth.js'
 import { userOut } from '../serialize.js'
+import { sendSms, smsReady } from '../services/sms.js'
 import { body, email, ENUMS, name, oneOf, opt, password, phone, z } from '../validate.js'
 
 const router = Router()
@@ -99,10 +100,16 @@ router.post('/auth/otp/request', async (req, res) => {
   const b = body(req, OtpRequestBody)
   const recent = Number((await scalar('SELECT COUNT(id) FROM otp_codes WHERE phone = ? AND created_at >= ?', b.phone, at(Date.now() - 60000))) || 0)
   if (recent >= 3) throw ApiError.tooMany('Please wait a minute before requesting another code')
+  // Forgot password only works for an account that exists.
+  if (b.purpose === 'RESET' && !(await findByPhone(b.phone))) throw ApiError.notFound('No account with this mobile number')
+  // On the live server a code nobody receives is useless, so without the SMS phone the request is refused.
+  if (config.isProd && !smsReady()) {
+    throw new ApiError(503, 'SMS codes are not available yet. Please contact GO-GO Ride support to reset your password.', 'SMS_NOT_READY')
+  }
   const code = generateOtp()
   const expiresAt = Date.now() + config.otpExpiryMinutes * 60000
   await insert('otp_codes', { id: newId(), phone: b.phone, codeHash: hashCode(code), purpose: b.purpose, expiresAt, consumedAt: null, attempts: 0, createdAt: Date.now() })
-  // TODO: send `code` by SMS here (MSG91 / Fast2SMS ...). Until then it is only logged.
+  if (smsReady()) await sendSms(b.phone, `${code} is your GO-GO Ride code. It expires in ${config.otpExpiryMinutes} minutes. Don't share it with anyone.`)
   console.log(`[otp] ${b.phone} -> ${config.echoOtp ? code : '******'} (expires ${new Date(expiresAt).toISOString()})`)
   const data = { phone: b.phone, expiresInSeconds: config.otpExpiryMinutes * 60 }
   if (config.echoOtp) data.devCode = code
@@ -117,20 +124,26 @@ const OtpVerifyBody = z.object({
   role: opt(oneOf(ENUMS.publicRole)),
 })
 
-router.post('/auth/otp/verify', async (req, res) => {
-  const b = body(req, OtpVerifyBody)
+/** The latest unused code for this phone and purpose, if `code` matches; a wrong guess is counted. */
+async function checkCode(phoneNumber, purpose, code) {
   const record = await get(
     'SELECT * FROM otp_codes WHERE phone = ? AND purpose = ? AND consumed_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 1',
-    b.phone,
-    b.purpose,
+    phoneNumber,
+    purpose,
   )
   if (!record) throw ApiError.badRequest('Request a new verification code')
   if (record.expiresAt < Date.now()) throw ApiError.badRequest('This code has expired')
   if (record.attempts >= config.otpMaxAttempts) throw ApiError.tooMany('Too many incorrect attempts, request a new code')
-  if (!verifyCode(b.code, record.codeHash)) {
+  if (!verifyCode(code, record.codeHash)) {
     await run('UPDATE otp_codes SET attempts = attempts + 1 WHERE id = ?', record.id)
     throw ApiError.badRequest('Incorrect verification code')
   }
+  return record
+}
+
+router.post('/auth/otp/verify', async (req, res) => {
+  const b = body(req, OtpVerifyBody)
+  const record = await checkCode(b.phone, b.purpose, b.code)
 
   let isNewUser = false
   const user = await tx(async () => {
@@ -162,6 +175,31 @@ router.post('/auth/otp/verify', async (req, res) => {
   if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
   const session = await issueSession(user, clientContext(req))
   ok(res, { ...session, isNewUser }, isNewUser ? 'Welcome to GO-GO Ride' : 'Logged in successfully')
+})
+
+// ---------------------------------------------------------------- forgot password
+
+const PasswordResetBody = z.object({
+  phone,
+  code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+  newPassword: password,
+})
+
+// The code sent by SMS (purpose RESET) proves the phone. Every other sign-in of the account ends.
+router.post('/auth/password/reset', async (req, res) => {
+  const b = body(req, PasswordResetBody)
+  const user = await findByPhone(b.phone)
+  if (!user) throw ApiError.notFound('No account with this mobile number')
+  const record = await checkCode(b.phone, 'RESET', b.code)
+  const now = Date.now()
+  await tx(async () => {
+    await run('UPDATE otp_codes SET consumed_at = ? WHERE id = ?', at(now), record.id)
+    await update('users', user.id, { password: hashPassword(b.newPassword), phoneVerified: 1, updatedAt: now })
+    await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE revoked_at IS NULL AND user_id = ?', at(now), user.id)
+  })
+  if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
+  const session = await issueSession(await byId('users', user.id), clientContext(req))
+  ok(res, session, 'Password changed. You are signed in.')
 })
 
 // ---------------------------------------------------------------- refresh / logout

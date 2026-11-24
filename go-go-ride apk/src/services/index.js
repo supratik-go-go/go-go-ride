@@ -1,6 +1,6 @@
 export { authService } from './authService'
 export { busService } from './busService'
-export { contributionService, stopService, routeService } from './networkService'
+export { communityService, contributionService, stopService, routeService } from './networkService'
 export { alarmService } from './alarmService'
 export { profileService } from './profileService'
 export { localCarService, rideService, bookingService } from './transportService'

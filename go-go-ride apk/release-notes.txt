@@ -1,1 +1,1 @@
-If a screen ever fails to open, you now get Reload and Go to Home buttons instead of a blank page. Plus behind-the-scenes clean-up.
+A smaller search box, your Recent Searches on Home, bus names in search results, add a bus without its number, and quicker location setup.

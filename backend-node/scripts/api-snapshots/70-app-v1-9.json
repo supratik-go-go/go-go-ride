@@ -1,0 +1,194 @@
+{
+ "bus with a name and no number": {
+  "status": 201,
+  "body": {
+   "data": {
+    "busName": "Test Name Only",
+    "busNumber": null,
+    "category": "NORMAL",
+    "contactEnd": "22:00",
+    "contactNumber": "98********",
+    "contactStart": "06:00",
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "documents": [],
+    "fare": null,
+    "imageUrl": null,
+    "operator": null,
+    "owner": {
+     "avatarUrl": null,
+     "email": "***@gmail.com",
+     "name": "Rakesh Sharma",
+     "phone": "98********"
+    },
+    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "rejectionReason": null,
+    "reviewedAt": null,
+    "reviewedById": null,
+    "route": null,
+    "routeId": null,
+    "serviceDays": "MON,TUE,WED",
+    "status": "PENDING",
+    "stopages": [
+     {
+      "arrivalTime": "08:00",
+      "arrivalTime12h": "08:00 AM",
+      "departureTime": "08:02",
+      "departureTime12h": "08:02 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 1,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     },
+     {
+      "arrivalTime": "08:30",
+      "arrivalTime12h": "08:30 AM",
+      "departureTime": "08:32",
+      "departureTime12h": "08:32 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5653,
+       "longitude": 88.3512,
+       "name": "Esplanade",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     }
+    ],
+    "submittedAt": "2026-09-22T04:30:00.000Z",
+    "totalSeats": 45,
+    "type": "NON_AC",
+    "updatedAt": "2026-09-22T04:30:00.000Z"
+   },
+   "message": "Bus submitted for verification. You will be notified once it is approved.",
+   "success": true
+  }
+ },
+ "bus with neither name nor number": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Value error, Give the bus name (or its registration number)"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "bus with a number and no fare": {
+  "status": 201,
+  "body": {
+   "data": {
+    "busName": null,
+    "busNumber": "WB 70 T 1909",
+    "category": "NORMAL",
+    "contactEnd": "22:00",
+    "contactNumber": "98********",
+    "contactStart": "06:00",
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "documents": [],
+    "fare": null,
+    "imageUrl": null,
+    "operator": null,
+    "owner": {
+     "avatarUrl": null,
+     "email": "***@gmail.com",
+     "name": "Rakesh Sharma",
+     "phone": "98********"
+    },
+    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "rejectionReason": null,
+    "reviewedAt": null,
+    "reviewedById": null,
+    "route": null,
+    "routeId": null,
+    "serviceDays": "MON,TUE,WED",
+    "status": "PENDING",
+    "stopages": [
+     {
+      "arrivalTime": "08:00",
+      "arrivalTime12h": "08:00 AM",
+      "departureTime": "08:02",
+      "departureTime12h": "08:02 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 1,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     },
+     {
+      "arrivalTime": "08:30",
+      "arrivalTime12h": "08:30 AM",
+      "departureTime": "08:32",
+      "departureTime12h": "08:32 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5653,
+       "longitude": 88.3512,
+       "name": "Esplanade",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     }
+    ],
+    "submittedAt": "2026-09-22T04:30:00.000Z",
+    "totalSeats": 45,
+    "type": "NON_AC",
+    "updatedAt": "2026-09-22T04:30:00.000Z"
+   },
+   "message": "Bus submitted for verification. You will be notified once it is approved.",
+   "success": true
+  }
+ },
+ "bus number too short": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "busNumber",
+     "message": "String should have at least 4 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ }
+}

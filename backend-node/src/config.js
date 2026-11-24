@@ -66,6 +66,15 @@ export const config = {
   // Never leak the OTP in production, whatever the flag says.
   echoOtp: bool('OTP_DEV_ECHO', 'true') && environment !== 'production',
 
+  // OTP codes go out as SMS from the owner's own Android phone, running the free "SMS Gateway for
+  // Android" app in cloud mode (https://sms-gate.app). The login is shown in that app's Cloud
+  // Server section; until it is set in hPanel, no SMS is sent.
+  sms: {
+    url: env('SMS_GATEWAY_URL', 'https://api.sms-gate.app/3rdparty/v1/message'),
+    user: env('SMS_GATEWAY_USER', ''),
+    password: env('SMS_GATEWAY_PASSWORD', ''),
+  },
+
   busExceptionMinDays: num('BUS_EXCEPTION_MIN_DAYS', 5),
   cronKey: env('CRON_KEY', ''),
 

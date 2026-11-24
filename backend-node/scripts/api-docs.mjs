@@ -40,6 +40,7 @@ const FILES = [
   ['admin', 'Admin panel'],
   ['contributions', 'Add Bus / Add Route Information from users, admin review'],
   ['games', 'Online games, Ping Ball, leaderboard'],
+  ['community', 'Local police numbers and bus ticket photos from users, admin review'],
 ]
 
 let md = `# GO-GO Ride API

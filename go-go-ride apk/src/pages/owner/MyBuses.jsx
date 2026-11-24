@@ -59,11 +59,11 @@ function BusActions({ bus, onDates, onDocs, onDelete, compact }) {
         <span className="own-count">{bus.documents?.length || 0}</span>
       </Button>
       {bus.status === 'APPROVED' && (
-        <Link to={`/bus/${bus.id}`} className="own-icon-btn" aria-label={`View ${bus.busNumber} as passengers see it`} title="View as passengers see it">
+        <Link to={`/bus/${bus.id}`} className="own-icon-btn" aria-label={`View ${bus.busNumber || bus.busName} as passengers see it`} title="View as passengers see it">
           <Eye size={16} />
         </Link>
       )}
-      <button type="button" className="own-icon-btn danger" onClick={onDelete} aria-label={`Delete ${bus.busNumber}`} title="Delete bus">
+      <button type="button" className="own-icon-btn danger" onClick={onDelete} aria-label={`Delete ${bus.busNumber || bus.busName}`} title="Delete bus">
         <Trash2 size={16} />
       </button>
     </div>
@@ -189,8 +189,8 @@ function MyBusesList({ isAdmin, contributor }) {
                     <BusFront size={20} />
                   </span>
                   <div className="grow" style={{ minWidth: 0 }}>
-                    <div className="fw-700 truncate">{bus.busNumber}</div>
-                    <div className="text-sm text-muted truncate">{bus.busName || bus.operator || 'No bus name'}</div>
+                    <div className="fw-700 truncate">{bus.busNumber || bus.busName}</div>
+                    <div className="text-sm text-muted truncate">{(bus.busNumber && bus.busName) || bus.operator || (bus.busNumber ? 'No bus name' : 'No bus number')}</div>
                   </div>
                   <StatusBadge value={bus.status} group="busStatus" />
                 </div>
@@ -247,7 +247,7 @@ function MyBusesList({ isAdmin, contributor }) {
                   {list.rows.map((bus) => (
                     <tr key={bus.id}>
                       <td>
-                        <div className="fw-700">{bus.busNumber}</div>
+                        <div className="fw-700">{bus.busNumber || bus.busName}</div>
                         <div className="text-xs text-muted">{bus.busName || bus.operator || '—'}</div>
                       </td>
                       <td style={{ maxWidth: 260 }}>
@@ -269,7 +269,7 @@ function MyBusesList({ isAdmin, contributor }) {
                       <td className="nowrap">{formatDate(bus.submittedAt || bus.createdAt)}</td>
                       <td>
                         <div className="own-table-actions">
-                          <Link to={`/owner/buses/${bus.id}/edit`} className="icon-btn" aria-label={`Edit ${bus.busNumber}`} title="Edit">
+                          <Link to={`/owner/buses/${bus.id}/edit`} className="icon-btn" aria-label={`Edit ${bus.busNumber || bus.busName}`} title="Edit">
                             <Pencil size={17} />
                           </Link>
                           <IconButton label="Non-operating dates" onClick={() => setDatesFor(bus)}>

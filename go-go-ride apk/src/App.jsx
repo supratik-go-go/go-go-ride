@@ -17,6 +17,7 @@ const NotFound = p(() => import('./pages/public/NotFound'))
 
 // auth
 const Login = p(() => import('./pages/auth/Login'))
+const ForgotPassword = p(() => import('./pages/auth/ForgotPassword'))
 const DailyNews = p(() => import('./pages/passenger/DailyNews'))
 const Game = p(() => import('./pages/passenger/Game'))
 const OnlineRoom = p(() => import('./pages/passenger/OnlineRoom'))
@@ -27,7 +28,11 @@ const MyBus = p(() => import('./pages/passenger/MyBus'))
 const HowToUse = p(() => import('./pages/passenger/HowToUse'))
 const PingBallGame = p(() => import('./pages/passenger/PingBallGame'))
 const AddRouteInfo = p(() => import('./pages/passenger/AddRouteInfo'))
+const AddBusInfo = p(() => import('./pages/passenger/AddBusInfo'))
+const AddBusTicket = p(() => import('./pages/passenger/AddBusTicket'))
+const TicketPhotos = p(() => import('./pages/admin/TicketPhotos'))
 const RouteRequests = p(() => import('./pages/admin/RouteRequests'))
+const PoliceNumbers = p(() => import('./pages/admin/PoliceNumbers'))
 const Register = p(() => import('./pages/auth/Register'))
 const AdminLogin = p(() => import('./pages/auth/AdminLogin'))
 
@@ -103,6 +108,7 @@ export default function App() {
             <Route element={<GuestOnly />}>
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
             </Route>
             <Route path="admin/login" element={<AdminLogin />} />
           </Route>
@@ -123,6 +129,7 @@ export default function App() {
             <Route path="game" element={<Game />} />
             <Route path="emergency" element={<Emergency />} />
             <Route path="sos" element={<Sos />} />
+            <Route path="add-bus" element={<AddBusInfo />} />
             <Route path="my-location" element={<LiveLocation />} />
             <Route path="how-to-use" element={<HowToUse />} />
             <Route path="news" element={<DailyNews />} />
@@ -131,6 +138,7 @@ export default function App() {
             <Route element={<RequireAuth />}>
               <Route path="bus/:id/alarm" element={<SetAlarm />} />
               <Route path="add-route" element={<AddRouteInfo />} />
+              <Route path="add-bus/ticket" element={<AddBusTicket />} />
               <Route path="my-bus" element={<MyBus />} />
               <Route path="game/room/:id" element={<OnlineRoom />} />
               <Route path="game/pingball" element={<PingBallGame />} />
@@ -161,6 +169,8 @@ export default function App() {
               <Route path="buses/:id/edit" element={<BusForm admin />} />
               <Route path="bus-requests" element={<BusRequests />} />
               <Route path="route-requests" element={<RouteRequests />} />
+              <Route path="police-numbers" element={<PoliceNumbers />} />
+              <Route path="ticket-photos" element={<TicketPhotos />} />
               <Route path="routes" element={<AdminRoutes />} />
               <Route path="stops" element={<AdminStops />} />
               <Route path="tracking" element={<AdminTracking />} />

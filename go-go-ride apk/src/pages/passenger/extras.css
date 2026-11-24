@@ -370,3 +370,33 @@ a.px-x-video:hover { color: var(--text); border-color: var(--primary-100); box-s
 .px-x-sketch-label { flex-shrink: 0; width: 36px; font-size: var(--fs-xs); font-weight: 600; color: var(--muted); }
 .px-x-sketch-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
 .px-x-sketch-foot .px-date-badge { margin: 0; cursor: default; }
+
+/* ---------------- Add Bus Info: form or ticket photo (v1.11) */
+.px-addbus-way {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.px-addbus-way:hover { color: var(--text); border-color: var(--primary-100); box-shadow: var(--shadow-sm); }
+.px-addbus-way.is-easy { border-color: var(--accent-200, var(--border)); }
+.px-addbus-title { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); font-weight: 700; color: var(--primary); }
+.px-addbus-or { align-self: center; font-weight: 600; color: var(--muted); }
+.px-ticket-box { display: flex; flex-direction: column; gap: 14px; padding: 16px; }
+.px-ticket-photo {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.px-ticket-photo img { display: block; width: 100%; max-height: 360px; object-fit: contain; }
+.px-ticket-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; text-align: center; color: var(--muted); }
+.px-ticket-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 520px) { .px-ticket-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.px-ticket-done { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 18px; text-align: center; }

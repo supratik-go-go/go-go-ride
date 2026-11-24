@@ -50,7 +50,7 @@ export function ExceptionsModal({ bus, open, onClose, isAdmin }) {
         const rest = (d.exceptions || []).filter((x) => x.id !== created.id)
         return { ...d, exceptions: [...rest, created] }
       })
-      toast.success(`${bus.busNumber} marked as not running on ${formatDate(date)}`)
+      toast.success(`${bus.busNumber || bus.busName} marked as not running on ${formatDate(date)}`)
       setDate('')
       setReason('')
     } catch (err) {
@@ -77,7 +77,7 @@ export function ExceptionsModal({ bus, open, onClose, isAdmin }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Non-operating dates" subtitle={bus ? `${bus.busNumber}${bus.busName ? ` · ${bus.busName}` : ''}` : undefined}>
+    <Modal open={open} onClose={onClose} title="Non-operating dates" subtitle={bus ? [bus.busNumber, bus.busName].filter(Boolean).join(' · ') : undefined}>
       <div className="stack" style={{ '--gap': '16px' }}>
         <div className="alert alert-warning">
           <CalendarX2 size={16} />
@@ -219,7 +219,7 @@ export function DocumentsModal({ bus, open, onClose, onUploaded }) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Ownership documents" subtitle={bus ? `${bus.busNumber}${bus.busName ? ` · ${bus.busName}` : ''}` : undefined}>
+    <Modal open={open} onClose={onClose} title="Ownership documents" subtitle={bus ? [bus.busNumber, bus.busName].filter(Boolean).join(' · ') : undefined}>
       <div className="stack" style={{ '--gap': '16px' }}>
         {!docs.length ? (
           <EmptyState compact icon={<FileText size={24} />} title="No documents yet" message="Upload an RC book, route permit or insurance so we can verify this bus." />

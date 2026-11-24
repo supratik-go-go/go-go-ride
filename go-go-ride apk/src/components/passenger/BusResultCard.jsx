@@ -35,7 +35,7 @@ export function BusResultCard({ bus, date, onChangeDate, onViewOthers }) {
           <BusFront size={28} />
         </span>
         <Link to={url} className="px-result-title">
-          <span className="px-result-badge">{busBadge(bus)}</span>
+          <span className={`px-result-badge ${bus.routeNumber || bus.route?.routeNumber || bus.busNumber ? '' : 'is-name'}`}>{busBadge(bus)}</span>
           <span className="px-result-route">{bus.routeName}</span>
           {showLeg && (
             <span className="px-result-leg">
@@ -79,12 +79,14 @@ export function BusResultCard({ bus, date, onChangeDate, onViewOthers }) {
           </span>
           <span className="px-stat-label">Duration</span>
         </div>
-        <div className="px-stat">
-          <span className="px-stat-value">
-            <IndianRupee size={15} color="#6d4bd8" /> {Number(bus.fare ?? 0).toLocaleString('en-IN')}
-          </span>
-          <span className="px-stat-label">Fare</span>
-        </div>
+        {bus.fare != null && (
+          <div className="px-stat">
+            <span className="px-stat-value">
+              <IndianRupee size={15} color="#6d4bd8" /> {Number(bus.fare).toLocaleString('en-IN')}
+            </span>
+            <span className="px-stat-label">Fare</span>
+          </div>
+        )}
       </div>
 
       {running ? (

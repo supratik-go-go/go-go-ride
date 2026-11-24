@@ -102,7 +102,7 @@ function SelectedCard({ item, details, onClose }) {
       title={
         <span className="row" style={{ '--gap': '10px' }}>
           <RouteBadge>{busBadge(bus)}</RouteBadge>
-          <span className="truncate">{bus.busNumber}</span>
+          <span className="truncate">{bus.busNumber || bus.busName}</span>
         </span>
       }
       subtitle={routeText(bus)}
@@ -391,7 +391,7 @@ export default function Tracking() {
                       <RouteBadge>{busBadge(bus)}</RouteBadge>
                       <span className="grow" style={{ minWidth: 0 }}>
                         <span className="fw-600 truncate" style={{ display: 'block' }}>
-                          {bus.busNumber}
+                          {bus.busNumber || bus.busName}
                           {bus.busName ? <span className="text-muted fw-500"> · {bus.busName}</span> : null}
                         </span>
                         <span className="text-xs text-muted truncate" style={{ display: 'block' }}>

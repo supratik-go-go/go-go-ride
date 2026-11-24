@@ -17,6 +17,11 @@ export const adminService = {
   setBusStatus: (id, status, reason) => http.patch(`/admin/buses/${id}/status`, { status, reason }),
   routeRequests: (params) => http.page('/admin/route-requests', params),
   reviewRouteRequest: (id, body) => http.patch(`/admin/route-requests/${id}`, body),
+  policeNumbers: (params) => http.page('/admin/police-numbers', params),
+  reviewPoliceNumber: (id, body) => http.patch(`/admin/police-numbers/${id}`, body),
+  deletePoliceNumber: (id) => http.del(`/admin/police-numbers/${id}`),
+  ticketPhotos: (params) => http.page('/admin/ticket-photos', params),
+  reviewTicketPhoto: (id, body) => http.patch(`/admin/ticket-photos/${id}`, body),
   users: (params) => http.page('/admin/users', params),
   user: (id) => http.get(`/admin/users/${id}`),
   /** SUPER_ADMIN only */

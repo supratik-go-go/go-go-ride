@@ -15,6 +15,8 @@ export const authService = {
   requestOtp: (phone, purpose = 'LOGIN') => http.post('/auth/otp/request', { phone, purpose }),
   /** { phone, code, purpose?, name?, role? } -> { user, isNewUser, ... } */
   verifyOtp: (body) => http.post('/auth/otp/verify', body).then(keep),
+  /** Forgot password: { phone, code, newPassword } -> signed in. */
+  resetPassword: (body) => http.post('/auth/password/reset', body).then(keep),
   me: () => http.get('/auth/me'),
   changePassword: (currentPassword, newPassword) =>
     http.post('/auth/change-password', { currentPassword, newPassword }),

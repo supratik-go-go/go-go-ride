@@ -122,7 +122,7 @@ export function UserDrawer({ userId, initial, onClose, footer }) {
                   <li key={b.id}>
                     <Bus size={16} className="text-muted" />
                     <Link to={`/admin/buses?search=${encodeURIComponent(b.busNumber)}`} className="fw-600 grow" onClick={onClose}>
-                      {b.busNumber}
+                      {b.busNumber || b.busName}
                     </Link>
                     <StatusBadge value={b.status} group="busStatus" />
                   </li>

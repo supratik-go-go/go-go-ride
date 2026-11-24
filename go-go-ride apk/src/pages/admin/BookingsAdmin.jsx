@@ -31,7 +31,7 @@ function BookedItem({ b }) {
       <div className="adm-cell">
         <span className="adm-route-cell">
           {b.bus.route?.routeNumber && <RouteBadge size="sm">{b.bus.route.routeNumber}</RouteBadge>}
-          <span className="adm-cell-main">{b.bus.busNumber}</span>
+          <span className="adm-cell-main">{b.bus.busNumber || b.bus.busName}</span>
         </span>
         <span className="adm-cell-sub">{routeLabel(b.bus)}</span>
       </div>

@@ -65,7 +65,7 @@ export default function Dashboard() {
         </div>
       ),
     },
-    { key: 'busNumber', header: 'Bus Number', render: (b) => <span className="fw-600 nowrap">{b.busNumber}</span> },
+    { key: 'busNumber', header: 'Bus Number', render: (b) => <span className="fw-600 nowrap">{b.busNumber || b.busName}</span> },
     { key: 'route', header: 'Route', render: (b) => <span className="nowrap">{routeLabel(b)}</span> },
     { key: 'submittedAt', header: 'Submitted On', render: (b) => <DateTimeCell value={b.submittedAt || b.createdAt} /> },
     { key: 'status', header: 'Status', render: (b) => <StatusBadge value={b.status} group="busStatus" /> },

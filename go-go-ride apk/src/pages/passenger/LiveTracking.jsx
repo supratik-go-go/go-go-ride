@@ -346,7 +346,7 @@ export default function LiveTracking() {
                       <div className="grow">
                         <div className="fw-700 truncate">{routeText(bus)}</div>
                         <div className="text-xs text-muted truncate">
-                          {bus.busNumber}
+                          {bus.busNumber || bus.busName}
                           {bus.busName ? ` · ${bus.busName}` : ''}
                         </div>
                       </div>

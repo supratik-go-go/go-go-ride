@@ -1,7 +1,7 @@
 {
-  "version": "1.8",
-  "versionCode": 9,
-  "notes": "If a screen ever fails to open, you now get Reload and Go to Home buttons instead of a blank page. Plus behind-the-scenes clean-up.",
+  "version": "1.9",
+  "versionCode": 10,
+  "notes": "A smaller search box, your Recent Searches on Home, bus names in search results, add a bus without its number, and quicker location setup.",
   "sizeMB": 5.9,
-  "builtAt": "2026-11-15T22:10:34.659Z"
+  "builtAt": "2026-11-24T23:42:12.182Z"
 }

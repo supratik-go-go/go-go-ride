@@ -44,7 +44,7 @@ export default function BusRequests() {
       header: 'Bus Details',
       render: (b) => (
         <div className="adm-cell">
-          <span className="adm-cell-main">{b.busNumber}</span>
+          <span className="adm-cell-main">{b.busNumber || b.busName}</span>
           <span className="adm-cell-sub" style={{ color: 'var(--text-2)' }}>
             {routeLabel(b)}
           </span>
@@ -91,7 +91,7 @@ export default function BusRequests() {
               e.stopPropagation()
               setReview(b)
             }}
-            aria-label={`Review ${b.busNumber}`}
+            aria-label={`Review ${b.busNumber || b.busName}`}
             title="Review details"
           >
             <Eye size={16} />

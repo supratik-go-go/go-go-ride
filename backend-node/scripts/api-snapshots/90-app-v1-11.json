@@ -1,0 +1,194 @@
+{
+ "reset: code for an unknown number": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "No account with this mobile number",
+   "success": false
+  }
+ },
+ "reset: code for an account": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 300,
+    "phone": "90********"
+   },
+   "message": "Verification code sent",
+   "success": true
+  }
+ },
+ "reset: wrong code": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Incorrect verification code",
+   "success": false
+  }
+ },
+ "reset: short new password": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "newPassword",
+     "message": "String should have at least 6 characters"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "reset: right code signs in": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-20T19:25:59.897Z",
+     "email": null,
+     "id": "cmua7ig2h000cny9i5kx90ffw",
+     "name": "Suvajit Dey",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "DRIVER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Password changed. You are signed in.",
+   "success": true
+  }
+ },
+ "reset: the new password works": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-20T19:25:59.897Z",
+     "email": null,
+     "id": "cmua7ig2h000cny9i5kx90ffw",
+     "name": "Suvajit Dey",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "DRIVER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Logged in successfully",
+   "success": true
+  }
+ },
+ "reset: the code is used up": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Incorrect verification code",
+   "success": false
+  }
+ },
+ "ticket: send signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "ticket: send without a photo": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Choose a photo of the ticket",
+   "success": false
+  }
+ },
+ "ticket: send a non-photo": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Send a photo of the ticket (JPG, PNG or WEBP)",
+   "success": false
+  }
+ },
+ "ticket: send": {
+  "status": 201,
+  "body": {
+   "data": {
+    "bus": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "note": "Howrah to Digha, 7 AM",
+    "reviewedAt": null,
+    "sentBy": {
+     "name": "Ritaban Guchait",
+     "phone": "91********"
+    },
+    "status": "NEW"
+   },
+   "message": "Thank you! Our team will read the ticket and add the bus.",
+   "success": true
+  }
+ },
+ "ticket: admin list as passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN"
+  }
+ },
+ "ticket: admin list": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "bus": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "note": "Howrah to Digha, 7 AM",
+     "reviewedAt": null,
+     "sentBy": {
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "status": "NEW"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "ticket: used to add a bus": {
+  "status": 200,
+  "body": {
+   "data": {
+    "bus": {
+     "busName": "Test Out And Back",
+     "busNumber": null
+    },
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "note": "Howrah to Digha, 7 AM",
+    "reviewedAt": "2026-09-22T04:30:00.000Z",
+    "sentBy": {
+     "name": "Ritaban Guchait",
+     "phone": "91********"
+    },
+    "status": "USED"
+   },
+   "message": "Saved",
+   "success": true
+  }
+ },
+ "ticket: unknown bus": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "That bus does not exist",
+   "success": false
+  }
+ }
+}

@@ -10,8 +10,8 @@
 //
 // A case: { name, method = 'GET', path: string | (ctx) => string, as = 'public' | 'passenger' |
 //           'owner' | 'driver' | 'admin' | 'super', body?, ignore?: [keys], mode?: 'full' | 'status',
-//           file?: { path (from scripts/api-cases), fields? } to upload a file,
-//           prepare?: async (get) => ({ ...values added to ctx }) for ids made by earlier cases }
+//           file?: { path (from scripts/api-cases), type?, fields? } to upload a file,
+//           prepare?: async (get, post) => ({ ...values added to ctx }) for ids made by earlier cases }
 // Cases run in file order against one database copy, so a write case affects later cases.
 // Needs seed/gogoride.db (git-ignored; made by scripts/make-starter.mjs) and the local test MariaDB
 // (data/mysql-test.env, see docs/mysql-plan.md). The copy goes into the database gogoride_check, which
@@ -76,6 +76,8 @@ const cleanUp = () => fs.rmSync(work, { recursive: true, force: true })
   await conn.query(`DROP DATABASE IF EXISTS \`${database}\`; CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; USE \`${database}\``)
   await conn.query(fs.readFileSync(path.join(root, 'mysql', 'schema.sql'), 'utf8'))
   await copySqliteToMysql(seed, conn, { log: () => {} })
+  // After the data, like the live server: upgrades.sql also fills second names of existing stops.
+  await conn.query(fs.readFileSync(path.join(root, 'mysql', 'upgrades.sql'), 'utf8'))
   await conn.end()
 }
 
@@ -247,7 +249,8 @@ try {
       const method = (c.method || 'GET').toUpperCase()
       if (c.prepare) {
         const get = async (q, role = 'public') => (await call('GET', q, role === 'public' ? null : tokens[role].accessToken)).json?.data
-        Object.assign(ctx, await c.prepare(get))
+        const post = async (q, b, role = 'public') => (await call('POST', q, role === 'public' ? null : tokens[role].accessToken, b)).json?.data
+        Object.assign(ctx, await c.prepare(get, post))
       }
       const p = typeof c.path === 'function' ? c.path(ctx) : c.path
       if (p == null || p.includes('undefined')) {
@@ -258,7 +261,7 @@ try {
       if (c.file) {
         body = new FormData()
         for (const [k, v] of Object.entries(c.file.fields || {})) body.append(k, v)
-        body.append('file', new Blob([fs.readFileSync(path.join(caseDir, c.file.path))]), path.basename(c.file.path))
+        body.append('file', new Blob([fs.readFileSync(path.join(caseDir, c.file.path))], { type: c.file.type || '' }), path.basename(c.file.path))
       }
       const role = c.as || 'public'
       const r = await call(method, p, role === 'public' ? null : tokens[role].accessToken, body)

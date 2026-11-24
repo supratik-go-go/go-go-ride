@@ -18,7 +18,7 @@ App version, stats, settings, news, public pages. Code: `backend-node/src/routes
 | GET | `/settings` | anyone |
 | GET | `/internal/run-alarms` | the server timer (needs the CRON_KEY secret) |
 
-## auth (8)
+## auth (9)
 
 Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 
@@ -28,6 +28,7 @@ Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 | POST | `/auth/login` | anyone |
 | POST | `/auth/otp/request` | anyone |
 | POST | `/auth/otp/verify` | anyone |
+| POST | `/auth/password/reset` | anyone |
 | POST | `/auth/refresh` | anyone |
 | POST | `/auth/logout` | signed in |
 | GET | `/auth/me` | signed in |
@@ -70,12 +71,13 @@ Bus search, bus details, reviews, owner bus listings. Code: `backend-node/src/ro
 | GET | `/buses/:busId/reviews` | anyone |
 | POST | `/buses/:busId/reviews` | signed in |
 
-## network (12)
+## network (13)
 
 Routes, stops, nearby stops. Code: `backend-node/src/routes/network.js`
 
 | Method | Path | Who can call it |
 | --- | --- | --- |
+| POST | `/stops/voice-trip` | anyone |
 | GET | `/stops` | anyone |
 | GET | `/stops/nearby` | anyone |
 | GET | `/stops/:stopId` | anyone |
@@ -199,3 +201,18 @@ Online games, Ping Ball, leaderboard. Code: `backend-node/src/routes/games.js`
 | POST | `/games/rooms/:id/leave` | signed in |
 | POST | `/games/:game/quick` | signed in |
 | POST | `/games/:game/private` | signed in |
+
+## community (8)
+
+Local police numbers and bus ticket photos from users, admin review. Code: `backend-node/src/routes/community.js`
+
+| Method | Path | Who can call it |
+| --- | --- | --- |
+| GET | `/police-numbers` | anyone |
+| POST | `/police-numbers` | signed in |
+| GET | `/admin/police-numbers` | signed in |
+| PATCH | `/admin/police-numbers/:id` | signed in |
+| POST | `/ticket-photos` | signed in |
+| GET | `/admin/ticket-photos` | signed in |
+| PATCH | `/admin/ticket-photos/:id` | signed in |
+| DELETE | `/admin/police-numbers/:id` | signed in |

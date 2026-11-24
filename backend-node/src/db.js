@@ -220,23 +220,30 @@ export async function tx(fn) {
 /** Pattern for free-text search. MySQL's LIKE is case-insensitive with the utf8mb4_unicode_ci collation. */
 export const like = (text) => `%${String(text)}%`
 
-/** On start: an empty database gets the tables from mysql/schema.sql (on the live server only when allowed). */
+/** On start: an empty database gets the tables from mysql/schema.sql (on the live server only when allowed); mysql/upgrades.sql always runs. */
 export async function ensureSchema() {
   const [[{ n }]] = await pool.query("SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'users'")
-  if (Number(n) > 0) return false
+  const empty = Number(n) === 0
   // On the live server an empty database means the data was not imported or the settings name the
   // wrong database: stop with a clear message rather than start empty, as the old SQLite setup once did.
-  if (config.isProd && process.env.ALLOW_EMPTY_DATABASE !== 'yes') {
+  if (empty && config.isProd && process.env.ALLOW_EMPTY_DATABASE !== 'yes') {
     throw new Error(`MySQL database ${config.mysql.database} has no tables: import the data first (or set ALLOW_EMPTY_DATABASE=yes for a brand-new start)`)
   }
   const conn = await mysql.createConnection({ ...config.mysql, host: activeHost, charset: 'utf8mb4', multipleStatements: true })
   try {
-    await conn.query(fs.readFileSync(path.join(ROOT, 'mysql', 'schema.sql'), 'utf8'))
+    if (empty) await conn.query(fs.readFileSync(path.join(ROOT, 'mysql', 'schema.sql'), 'utf8'))
+    // Tables added since: every statement there is safe to run again. If one fails, only the new
+    // features miss out; the app keeps running, and the reason is in the logs.
+    try {
+      await conn.query(fs.readFileSync(path.join(ROOT, 'mysql', 'upgrades.sql'), 'utf8'))
+    } catch (err) {
+      console.error('[db] mysql/upgrades.sql failed:', err.message)
+    }
   } finally {
     await conn.end()
   }
-  console.log(`[db] created the tables in ${config.mysql.database}`)
-  return true
+  if (empty) console.log(`[db] created the tables in ${config.mysql.database}`)
+  return empty
 }
 
 export const close = () => pool.end()

@@ -1,19 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMap } from 'react-leaflet'
 import {
   Copy,
   Crosshair,
   Footprints,
-  Globe,
   LocateFixed,
-  Lock,
   MapPin,
   MapPinOff,
   MessageCircle,
   RefreshCw,
   ShieldCheck,
-  Smartphone,
+  Settings,
   TriangleAlert,
 } from 'lucide-react'
 import { locationService, stopService } from '../../services'
@@ -25,6 +23,7 @@ import { FollowPoint, MapView, StopMarker, UserMarker } from '../../components/m
 import { StopRow } from '../../components/tracking/StopRow'
 import { secondsAgo } from '../../components/tracking/trackingUtils'
 import { formatTime } from '../../utils/format'
+import { hasDeviceSettings, locationSwitchedOn, openAppSettings, openLocationSettings } from '../../native/device'
 import '../../components/tracking/tracking.css'
 import './passenger.css'
 import './extras.css'
@@ -132,6 +131,8 @@ export default function LiveLocation() {
   const [updatedAt, setUpdatedAt] = useState(null)
   const [locError, setLocError] = useState(null)
   const [anchor, setAnchor] = useState(null) // where nearby stops were last fetched
+  // Set while the phone's settings are open, so coming back starts the location again by itself.
+  const fromSettings = useRef(false)
 
   useEffect(() => {
     let alive = true
@@ -157,20 +158,46 @@ export default function LiveLocation() {
       },
       (err) => {
         if (err?.code === 1) {
+          // Refused: straight to GO-GO Ride's permission page in the phone's settings, no instructions.
           setPerm('denied')
           setTracking(false)
+          openAppSettings().then((opened) => {
+            if (opened) fromSettings.current = true
+          })
         } else {
           setLocError(err?.code === 3 ? 'Finding your location is taking longer than usual.' : 'Your location could not be found. Check that Location (GPS) is turned on.')
+          locationSwitchedOn().then(async (on) => {
+            if (!on && (await openLocationSettings())) fromSettings.current = true
+          })
         }
       },
     )
   }, [tracking, attempt])
 
-  const start = useCallback(() => {
+  const start = useCallback(async () => {
     setLocError(null)
+    // The phone's Location switch is off: open it directly instead of explaining how.
+    if (!(await locationSwitchedOn()) && (await openLocationSettings())) {
+      fromSettings.current = true
+      return
+    }
     setTracking(true)
     setAttempt((n) => n + 1)
   }, [])
+
+  // Back from the phone's settings: look again and carry on.
+  useEffect(() => {
+    const back = () => {
+      if (document.visibilityState !== 'visible' || !fromSettings.current) return
+      fromSettings.current = false
+      locationService.permissionState().then((state) => {
+        setPerm(state === 'denied' ? 'denied' : 'prompt')
+        if (state !== 'denied') start()
+      })
+    }
+    document.addEventListener('visibilitychange', back)
+    return () => document.removeEventListener('visibilitychange', back)
+  }, [start])
 
   const nearby = useAsync(() => (anchor ? stopService.nearby(anchor.lat, anchor.lng, 3, 5) : Promise.resolve(null)), [anchor?.lat, anchor?.lng])
 
@@ -298,31 +325,24 @@ export default function LiveLocation() {
               <MapPinOff size={30} />
             </span>
           </div>
-          <h3>Location access is turned off</h3>
-          <p className="text-sm text-2">GO-GO Ride can&apos;t see where you are, so the map can&apos;t follow you. You can turn it back on at any time:</p>
-          <div className="trk-steps-box">
-            <h4>
-              <Smartphone size={16} className="text-primary" /> In the GO-GO Ride Android app
-            </h4>
-            <ol className="trk-steps">
-              <li>Open your phone&apos;s Settings → Apps → GO-GO Ride.</li>
-              <li>Tap Permissions → Location and choose “Allow only while using the app”.</li>
-              <li>Make sure Location (GPS) is switched on in quick settings.</li>
-            </ol>
-          </div>
-          <div className="trk-steps-box">
-            <h4>
-              <Globe size={16} className="text-primary" /> In your browser
-            </h4>
-            <ol className="trk-steps">
-              <li>
-                Tap the <Lock size={13} style={{ verticalAlign: '-2px' }} /> lock or site-settings icon next to the address bar.
-              </li>
-              <li>Open Permissions (or Site settings) and set Location to Allow.</li>
-              <li>Come back here and tap “Try again”.</li>
-            </ol>
-          </div>
-          <Button block icon={<RefreshCw size={17} />} onClick={start}>
+          <h3>Location is off for GO-GO Ride</h3>
+          <p className="text-sm text-2">
+            {hasDeviceSettings()
+              ? 'In Location, choose "Allow only while using the app", then come back.'
+              : 'Allow location for this site in your browser, then tap Try again.'}
+          </p>
+          {hasDeviceSettings() && (
+            <Button
+              block
+              icon={<Settings size={17} />}
+              onClick={async () => {
+                if (await openAppSettings()) fromSettings.current = true
+              }}
+            >
+              Open settings
+            </Button>
+          )}
+          <Button block variant={hasDeviceSettings() ? 'soft' : undefined} icon={<RefreshCw size={17} />} onClick={start}>
             Try again
           </Button>
         </div>

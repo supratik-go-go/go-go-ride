@@ -86,7 +86,7 @@ function TripDetails({ b }) {
             <strong>{bus.busName || bus.busNumber}</strong>
             <p className="text-sm text-muted">{bus.route?.name || 'Route not linked yet'}</p>
             <div className="row wrap" style={{ '--gap': '6px', marginTop: 6 }}>
-              <Badge tone="neutral">{bus.busNumber}</Badge>
+              {bus.busNumber && <Badge tone="neutral">{bus.busNumber}</Badge>}
               {bus.type && <Badge tone="info">{label('busType', bus.type)}</Badge>}
               {bus.category && <Badge tone="primary">{label('busCategory', bus.category)}</Badge>}
               {bus.operator && <Badge tone="neutral">{bus.operator}</Badge>}

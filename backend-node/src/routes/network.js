@@ -8,6 +8,7 @@ import { newId } from '../ids.js'
 import { routeStopOut, stopById, stopOut } from '../serialize.js'
 import { busCountsByRoute, countBusesOnRoute } from '../services/buses.js'
 import { logActivity } from '../services/common.js'
+import { understandTrip } from '../services/voiceSearch.js'
 import {
   enumOf,
   float,
@@ -27,6 +28,9 @@ import {
 import { ENUMS } from '../validate.js'
 
 const router = Router()
+
+// Voice search: what the phone heard (its best guesses, most likely first), in English, Hindi or Bengali.
+const VoiceTripBody = model({ heard: list(str({ min: 1, max: 200 }), { min: 1 }) })
 
 // ---------------------------------------------------------------- request bodies (schemas/requests.py)
 
@@ -164,6 +168,11 @@ async function writeChanges(table, row, values) {
 const provided = (body, keys) => Object.fromEntries(keys.filter((k) => body.$provided.has(k)).map((k) => [k, body[k]]))
 
 // ---------------------------------------------------------------- stops
+
+router.post('/stops/voice-trip', async (req, res) => {
+  const b = parseBody(req, VoiceTripBody)
+  ok(res, await understandTrip(b.heard))
+})
 
 router.get('/stops', async (req, res) => {
   const d = []

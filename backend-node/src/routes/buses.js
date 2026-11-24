@@ -51,21 +51,26 @@ const StopageBody = model(
   { after: (v) => (!v.stopId && !v.stopName ? 'Each stopage needs either stopId or stopName' : null) },
 )
 
-const BusCreateBody = model({
-  busNumber: str({ min: 4, max: 20, upper: true }),
+// Many buses are known only by name, so the registration number is optional; a bus needs one or the
+// other. A fare left out is "not known" (null), not 0.
+const BusCreateBody = model(
+  {
+  busNumber: optional(str({ min: 4, max: 20, upper: true })),
   busName: optional(str({ min: 2, max: 80 })),
   type: enumOf(ENUMS.busType),
   category: enumOf(ENUMS.busCategory),
   operator: optional(str({ max: 80 })),
   totalSeats: withDefault(int({ ge: 1, le: 120 }), 45),
-  fare: withDefault(float({ ge: 0 }), 0),
+  fare: optional(float({ ge: 0 })),
   contactNumber: str({ min: 6, max: 20 }),
   contactStart: withDefault(hhmm, '06:00'),
   contactEnd: withDefault(hhmm, '22:00'),
   serviceDays: list(enumOf(ENUMS.day), { min: 1 }),
   routeId: optional(str()),
   stopages: list(StopageBody, { min: 2 }),
-})
+  },
+  { after: (v) => (!v.busNumber && !v.busName ? 'Give the bus name (or its registration number)' : null) },
+)
 
 const BusUpdateBody = model({
   busName: optional(str()),
@@ -236,7 +241,7 @@ router.post('/buses', requireUser, async (req, res) => {
     const waiting = Number((await scalar('SELECT COUNT(id) FROM buses WHERE owner_id = ? AND status = ?', user.id, 'PENDING')) || 0)
     if (waiting >= MAX_PENDING_PER_CONTRIBUTOR) throw ApiError.badRequest('You have too many buses waiting for review. Please wait for them to be checked.')
   }
-  if (await get('SELECT id FROM buses WHERE bus_number = ?', b.busNumber)) {
+  if (b.busNumber && (await get('SELECT id FROM buses WHERE bus_number = ?', b.busNumber))) {
     throw ApiError.conflict('This bus number is already registered')
   }
 
@@ -246,7 +251,7 @@ router.post('/buses', requireUser, async (req, res) => {
     const now = Date.now()
     const bus = await insert('buses', {
       id: newId(),
-      busNumber: b.busNumber,
+      busNumber: b.busNumber ?? null,
       busName: b.busName,
       ownerId: user.id,
       routeId: b.routeId,
@@ -254,7 +259,7 @@ router.post('/buses', requireUser, async (req, res) => {
       category: b.category,
       operator: b.operator,
       totalSeats: b.totalSeats,
-      fare: b.fare,
+      fare: b.fare ?? null,
       contactNumber: b.contactNumber,
       callFrom: b.contactStart,
       callUntil: b.contactEnd,

@@ -1,0 +1,407 @@
+{
+ "voice: English": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": {
+     "name": "Howrah Station"
+    },
+    "fromOptions": [
+     {
+      "name": "Howrah Station"
+     },
+     {
+      "name": "Howrah Bridge"
+     },
+     {
+      "name": "New Town"
+     }
+    ],
+    "fromText": "Howrah Station",
+    "heard": "Howrah Station to Esplanade",
+    "to": {
+     "name": "Esplanade"
+    },
+    "toOptions": [
+     {
+      "name": "Esplanade"
+     },
+     {
+      "name": "Sealdah"
+     },
+     {
+      "name": "Behala"
+     }
+    ],
+    "toText": "Esplanade"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: Bengali": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": {
+     "name": "Howrah Station"
+    },
+    "fromOptions": [
+     {
+      "name": "Howrah Station"
+     },
+     {
+      "name": "Howrah Bridge"
+     },
+     {
+      "name": "Behala"
+     }
+    ],
+    "fromText": "হাওড়া",
+    "heard": "হাওড়া থেকে এসপ্ল্যানেড যাব",
+    "to": {
+     "name": "Esplanade"
+    },
+    "toOptions": [
+     {
+      "name": "Esplanade"
+     },
+     {
+      "name": "Sealdah"
+     },
+     {
+      "name": "Tollygunge"
+     }
+    ],
+    "toText": "এসপ্ল্যানেড"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: Hindi": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": {
+     "name": "Howrah Station"
+    },
+    "fromOptions": [
+     {
+      "name": "Howrah Station"
+     },
+     {
+      "name": "Howrah Bridge"
+     },
+     {
+      "name": "Behala"
+     }
+    ],
+    "fromText": "हावड़ा",
+    "heard": "हावड़ा से एस्प्लेनेड जाना है",
+    "to": {
+     "name": "Esplanade"
+    },
+    "toOptions": [
+     {
+      "name": "Esplanade"
+     },
+     {
+      "name": "Sealdah"
+     },
+     {
+      "name": "Test Bazar"
+     }
+    ],
+    "toText": "एस्प्लेनेड"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: only a destination": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": null,
+    "fromOptions": [],
+    "fromText": null,
+    "heard": "I want to go to Sealdah",
+    "to": {
+     "name": "Sealdah"
+    },
+    "toOptions": [
+     {
+      "name": "Sealdah"
+     },
+     {
+      "name": "Behala"
+     },
+     {
+      "name": "Esplanade"
+     }
+    ],
+    "toText": "Sealdah"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: best of several guesses": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": {
+     "name": "Howrah Station"
+    },
+    "fromOptions": [
+     {
+      "name": "Howrah Station"
+     },
+     {
+      "name": "Howrah Bridge"
+     },
+     {
+      "name": "New Town"
+     }
+    ],
+    "fromText": "Howrah station",
+    "heard": "Howrah station to Esplanade",
+    "to": {
+     "name": "Esplanade"
+    },
+    "toOptions": [
+     {
+      "name": "Esplanade"
+     },
+     {
+      "name": "Sealdah"
+     },
+     {
+      "name": "Behala"
+     }
+    ],
+    "toText": "Esplanade"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: nothing like a stop": {
+  "status": 200,
+  "body": {
+   "data": {
+    "from": null,
+    "fromOptions": [],
+    "fromText": null,
+    "heard": "xyz qwerty",
+    "to": null,
+    "toOptions": [
+     {
+      "name": "Airport"
+     },
+     {
+      "name": "Park Street"
+     },
+     {
+      "name": "Shibpur"
+     }
+    ],
+    "toText": "xyz qwerty"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "voice: nothing heard": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "heard",
+     "message": "List should have at least 1 item after validation, not 0"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "police: list (empty)": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "police: send signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "police: send": {
+  "status": 201,
+  "body": {
+   "data": {
+    "area": "Howrah",
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "phone": "03326384500",
+    "reviewedAt": null,
+    "sentBy": {
+     "name": "Ritaban Guchait",
+     "phone": "91********"
+    },
+    "stationName": "Howrah Police Station",
+    "status": "PENDING"
+   },
+   "message": "Thank you! It will show once our team checks it.",
+   "success": true
+  }
+ },
+ "police: same number again": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "This number is already listed or waiting for review",
+   "success": false
+  }
+ },
+ "police: bad phone": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "body",
+     "message": "Value error, Enter the police station phone number"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "police: not shown before approval": {
+  "status": 200,
+  "body": {
+   "data": [],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 0,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "police: admin list as passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN"
+  }
+ },
+ "police: admin list": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah",
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "phone": "03326384500",
+     "reviewedAt": null,
+     "sentBy": {
+      "name": "Ritaban Guchait",
+      "phone": "91********"
+     },
+     "stationName": "Howrah Police Station",
+     "status": "PENDING"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "police: approve with a corrected area": {
+  "status": 200,
+  "body": {
+   "data": {
+    "area": "Howrah Maidan",
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "phone": "03326384500",
+    "reviewedAt": "2026-09-22T04:30:00.000Z",
+    "sentBy": {
+     "name": "Ritaban Guchait",
+     "phone": "91********"
+    },
+    "stationName": "Howrah Police Station",
+    "status": "APPROVED"
+   },
+   "message": "Approved",
+   "success": true
+  }
+ },
+ "police: shown after approval": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah Maidan",
+     "phone": "03326384500",
+     "stationName": "Howrah Police Station"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "police: search by area": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah Maidan",
+     "phone": "03326384500",
+     "stationName": "Howrah Police Station"
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "police: unknown id": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Police number not found",
+   "success": false
+  }
+ }
+}

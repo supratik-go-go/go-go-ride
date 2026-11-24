@@ -347,15 +347,9 @@ export default function Login() {
           />
           <div className="auth-row-between">
             <span />
-            {OTP_ENABLED ? (
-              <button type="button" className="link-btn" onClick={() => switchMode('otp')}>
-                Forgot password? Sign in with OTP
-              </button>
-            ) : (
-              <Link to="/contact" className="link-btn">
-                Forgot password? Contact support
-              </Link>
-            )}
+            <Link to="/forgot-password" className="link-btn">
+              Forgot password?
+            </Link>
           </div>
           <Button type="submit" size="lg" block loading={busy === 'password'} iconRight={<ArrowRight size={18} />}>
             Sign in

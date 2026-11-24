@@ -97,6 +97,7 @@
 .px-result-title:hover { color: inherit; }
 .px-result-title:hover .px-result-badge { text-decoration: underline; text-underline-offset: 3px; }
 .px-result-badge { font-size: 1.45rem; font-weight: 700; color: var(--primary); line-height: 1.15; letter-spacing: 0.2px; }
+.px-result-badge.is-name { font-size: 1.15rem; }
 .px-result-route { color: var(--text-2); font-size: var(--fs-sm); }
 .px-result-leg { display: block; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
 .px-result-leg svg { display: inline-block; vertical-align: -2px; margin: 0 2px; }
@@ -105,7 +106,8 @@
 .px-result-rating-count { font-size: var(--fs-xs); color: var(--muted); }
 .px-result-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr); /* 3 or 4 stats: the fare is left out when it isn't known */
   border-top: 1px solid var(--border);
   padding-top: 12px;
 }
