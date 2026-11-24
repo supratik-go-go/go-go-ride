@@ -1,9 +1,8 @@
-// Shared response shapes - field for field the same as app/schemas/responses.py.
+// Shared response shapes: the JSON the app has always received, built from the MySQL rows.
 //
-// Every function takes a raw database row (camelCase columns, ms datetimes,
-// 0/1 booleans) and returns the JSON object the API sends. Nested relations are
-// loaded here with small indexed queries; at this app's scale that is simpler
-// and fast enough (node:sqlite is synchronous and in-process).
+// Every function takes a row as db.js returns it (camelCase of the new column names, dates in
+// milliseconds, 0/1 for yes/no) and returns the old API field names, so installed phones keep
+// working. Nested relations are loaded with small indexed queries, so most functions are async.
 import { all, byId, get } from './db.js'
 import { isoZ, to12h, toHHMM, toMinutes } from './time.js'
 
@@ -19,7 +18,7 @@ export const userOut = (u) =>
     phone: u.phone,
     email: u.email ?? null,
     role: u.role,
-    avatarUrl: u.avatarUrl ?? null,
+    avatarUrl: u.pictureUrl ?? null,
     status: u.status,
     phoneVerified: bool(u.phoneVerified),
     createdAt: isoZ(u.createdAt),
@@ -27,9 +26,9 @@ export const userOut = (u) =>
   }
 
 export const userBrief = (u) =>
-  u ? { id: u.id, name: u.name, phone: u.phone ?? null, email: u.email ?? null, avatarUrl: u.avatarUrl ?? null } : null
+  u ? { id: u.id, name: u.name, phone: u.phone ?? null, email: u.email ?? null, avatarUrl: u.pictureUrl ?? null } : null
 
-export const userBriefById = (id) => userBrief(byId('User', id))
+export const userBriefById = async (id) => userBrief(await byId('users', id))
 
 // ---------------------------------------------------------------- stops & routes
 
@@ -48,72 +47,80 @@ export const stopOut = (s) =>
       }
     : null
 
-export const stopById = (id) => stopOut(byId('BusStop', id))
+export const stopById = async (id) => stopOut(await byId('bus_stops', id))
 
 export const routeBrief = (r) =>
   r ? { id: r.id, name: r.name, routeNumber: r.routeNumber, distanceKm: num(r.distanceKm) ?? null } : null
 
-export const routeStopOut = (rs) => ({
+export const routeStopOut = async (rs) => ({
   id: rs.id,
   routeId: rs.routeId ?? null,
   stopId: rs.stopId ?? null,
-  sequence: rs.sequence,
+  sequence: rs.stopOrder,
   distanceFromStartKm: num(rs.distanceFromStartKm),
-  stop: stopById(rs.stopId),
+  stop: await stopById(rs.stopId),
 })
 
 // ---------------------------------------------------------------- buses
 
-/** StopageOut from a BusStopage row (as loaded with the bus: busId/stopId set, isStart/isEnd false). */
-export const stopageOut = (s) => ({
+/** StopageOut from a bus_timetable row (as loaded with the bus: busId/stopId set, isStart/isEnd false). */
+export const stopageOut = async (s) => ({
   id: s.id,
   busId: s.busId ?? null,
   stopId: s.stopId ?? null,
-  sequence: s.sequence,
-  stop: stopById(s.stopId),
+  sequence: s.stopOrder,
+  stop: await stopById(s.stopId),
   arrivalTime: s.arrivalTime,
   departureTime: s.departureTime,
-  distanceKm: num(s.distanceKm),
+  distanceKm: num(s.distanceFromStartKm),
   isStart: false,
   isEnd: false,
   arrivalTime12h: to12h(s.arrivalTime),
   departureTime12h: to12h(s.departureTime),
 })
 
-export const busStopages = (busId) => all('SELECT * FROM "BusStopage" WHERE "busId" = ? ORDER BY sequence', busId)
+/** The timetable of a bus's first trip, in stop order (the app shows one trip per bus until the trips update). */
+export const busStopages = (busId) =>
+  all(
+    `SELECT * FROM bus_timetable WHERE trip_id = (SELECT id FROM bus_trips WHERE bus_id = ? AND is_active = 1 ORDER BY trip_number LIMIT 1)
+     ORDER BY stop_order`,
+    busId,
+  )
 
 /**
  * The timetable shape used on Bus Details: like stopageOut but with busId/stopId
  * null and isStart/isEnd marking the first/last stop (matches timetable_rows()).
  */
 export function timetableRows(stopageRows) {
-  const firstSeq = stopageRows.length ? stopageRows[0].sequence : null
-  const lastSeq = stopageRows.length ? stopageRows[stopageRows.length - 1].sequence : null
-  return stopageRows.map((s) => ({
-    id: s.id,
-    busId: null,
-    stopId: null,
-    sequence: s.sequence,
-    stop: stopById(s.stopId),
-    arrivalTime: s.arrivalTime,
-    departureTime: s.departureTime,
-    distanceKm: num(s.distanceKm),
-    isStart: s.sequence === firstSeq,
-    isEnd: s.sequence === lastSeq,
-    arrivalTime12h: to12h(s.arrivalTime),
-    departureTime12h: to12h(s.departureTime),
-  }))
+  const firstSeq = stopageRows.length ? stopageRows[0].stopOrder : null
+  const lastSeq = stopageRows.length ? stopageRows[stopageRows.length - 1].stopOrder : null
+  return Promise.all(
+    stopageRows.map(async (s) => ({
+      id: s.id,
+      busId: null,
+      stopId: null,
+      sequence: s.stopOrder,
+      stop: await stopById(s.stopId),
+      arrivalTime: s.arrivalTime,
+      departureTime: s.departureTime,
+      distanceKm: num(s.distanceFromStartKm),
+      isStart: s.stopOrder === firstSeq,
+      isEnd: s.stopOrder === lastSeq,
+      arrivalTime12h: to12h(s.arrivalTime),
+      departureTime12h: to12h(s.departureTime),
+    })),
+  )
 }
 
 export const busDocumentOut = (d) => ({
   id: d.id,
-  docType: d.docType,
+  docType: d.documentType,
   fileUrl: d.fileUrl,
-  originalName: d.originalName ?? null,
+  originalName: d.originalFileName ?? null,
   uploadedAt: isoZ(d.uploadedAt),
 })
 
-export const busExceptionOut = (e) => ({ id: e.id, busId: e.busId, date: isoZ(e.date), reason: e.reason ?? null })
+export const busExceptionOut = (e) => ({ id: e.id, busId: e.busId, date: isoZ(e.offDate), reason: e.reason ?? null })
 
 /** The scalar columns of BusOut (no relations). */
 export const busColumns = (b) => ({
@@ -122,75 +129,82 @@ export const busColumns = (b) => ({
   busName: b.busName ?? null,
   ownerId: b.ownerId,
   routeId: b.routeId ?? null,
-  type: b.type,
+  type: b.isAc ? 'AC' : 'NON_AC',
   category: b.category,
   operator: b.operator ?? null,
   totalSeats: b.totalSeats,
   fare: num(b.fare),
   contactNumber: b.contactNumber ?? null,
-  contactStart: b.contactStart,
-  contactEnd: b.contactEnd,
-  serviceDays: b.serviceDays,
+  contactStart: b.callFrom,
+  contactEnd: b.callUntil,
+  serviceDays: b.runsOn,
   status: b.status,
   rejectionReason: b.rejectionReason ?? null,
-  ratingAvg: num(b.ratingAvg),
+  ratingAvg: num(b.ratingAverage),
   ratingCount: b.ratingCount,
-  imageUrl: b.imageUrl ?? null,
+  imageUrl: b.pictureUrl ?? null,
   submittedAt: isoZ(b.submittedAt),
   reviewedAt: isoZ(b.reviewedAt),
-  reviewedById: b.reviewedById ?? null,
+  reviewedById: b.reviewedBy ?? null,
   createdAt: isoZ(b.createdAt),
   updatedAt: isoZ(b.updatedAt),
 })
 
-/** BusOut: columns + owner, route, stopages (by sequence), documents. */
-export function busOut(b) {
+/** BusOut: columns + owner, route, stopages (by stop order), documents. */
+export async function busOut(b) {
   if (!b) return null
+  const [owner, route, stopages, documents] = await Promise.all([
+    userBriefById(b.ownerId),
+    byId('bus_routes', b.routeId),
+    busStopages(b.id),
+    all('SELECT * FROM bus_documents WHERE bus_id = ? ORDER BY uploaded_at, id', b.id),
+  ])
   return {
     ...busColumns(b),
-    owner: userBriefById(b.ownerId),
-    route: routeBrief(byId('Route', b.routeId)),
-    stopages: busStopages(b.id).map(stopageOut),
-    documents: all('SELECT * FROM "BusDocument" WHERE "busId" = ? ORDER BY rowid', b.id).map(busDocumentOut),
+    owner,
+    route: routeBrief(route),
+    stopages: await Promise.all(stopages.map(stopageOut)),
+    documents: documents.map(busDocumentOut),
   }
 }
 
-export const busById = (id) => busOut(byId('Bus', id))
+export const busById = async (id) => busOut(await byId('buses', id))
 
 // ---------------------------------------------------------------- reviews
 
-export const reviewOut = (r) => ({
+export const reviewOut = async (r) => ({
   id: r.id,
   rating: r.rating,
   comment: r.comment ?? null,
   createdAt: isoZ(r.createdAt),
-  user: userBriefById(r.userId),
+  user: await userBriefById(r.userId),
 })
 
 // ---------------------------------------------------------------- alarms
 
-export function alarmOut(a) {
-  const notifyAt = toHHMM(toMinutes(a.expectedArrival) - a.remindBeforeMin)
+export async function alarmOut(a) {
+  const notifyAt = toHHMM(toMinutes(a.busArrivesAt) - a.remindMinutesBefore)
+  const [bus, boardingStop, arrivalStop] = await Promise.all([busById(a.busId), stopById(a.getOnStopId), stopById(a.getOffStopId)])
   return {
     id: a.id,
     userId: a.userId,
     busId: a.busId,
-    alarmDate: isoZ(a.alarmDate),
-    expectedArrival: a.expectedArrival,
-    remindBeforeMin: a.remindBeforeMin,
+    alarmDate: isoZ(a.travelDate),
+    expectedArrival: a.busArrivesAt,
+    remindBeforeMin: a.remindMinutesBefore,
     status: a.status,
-    notifiedAt: isoZ(a.notifiedAt),
+    notifiedAt: isoZ(a.rangAt),
     createdAt: isoZ(a.createdAt),
-    bus: busById(a.busId),
-    boardingStop: stopById(a.boardingStopId),
-    arrivalStop: stopById(a.arrivalStopId),
-    expectedArrival12h: to12h(a.expectedArrival),
+    bus,
+    boardingStop,
+    arrivalStop,
+    expectedArrival12h: to12h(a.busArrivesAt),
     notifyAt,
     notifyAt12h: to12h(notifyAt),
   }
 }
 
-// ---------------------------------------------------------------- local cars & rides
+// ---------------------------------------------------------------- local vehicles & rides
 
 export const localCarOut = (c) =>
   c
@@ -201,59 +215,73 @@ export const localCarOut = (c) =>
         phone: c.phone,
         area: c.area,
         vehicleType: c.vehicleType ?? 'CAR',
-        carModel: c.carModel ?? null,
-        carNumber: c.carNumber ?? null,
-        photoUrl: c.photoUrl ?? null,
+        carModel: c.vehicleModel ?? null,
+        carNumber: c.vehicleNumber ?? null,
+        photoUrl: c.pictureUrl ?? null,
         availableFrom: c.availableFrom,
-        availableTo: c.availableTo,
-        ratingAvg: num(c.ratingAvg),
+        availableTo: c.availableUntil,
+        ratingAvg: num(c.ratingAverage),
         ratingCount: c.ratingCount,
-        verified: bool(c.verified),
+        verified: bool(c.isVerified),
         status: c.status,
         createdAt: isoZ(c.createdAt),
         updatedAt: isoZ(c.updatedAt),
-        availabilityLabel: `${to12h(c.availableFrom)} - ${to12h(c.availableTo)}`,
+        availabilityLabel: `${to12h(c.availableFrom)} - ${to12h(c.availableUntil)}`,
       }
     : null
 
-export const rideOut = (r) =>
-  r
-    ? {
-        id: r.id,
-        routeId: r.routeId ?? null,
-        vehicleType: r.vehicleType,
-        departureAt: isoZ(r.departureAt),
-        totalSeats: r.totalSeats,
-        availableSeats: r.availableSeats,
-        farePerSeat: num(r.farePerSeat),
-        status: r.status,
-        fromStop: stopById(r.fromStopId),
-        toStop: stopById(r.toStopId),
-        route: routeBrief(byId('Route', r.routeId)),
-        driver: userBriefById(r.driverId),
-      }
-    : null
+export async function rideOut(r) {
+  if (!r) return null
+  const [fromStop, toStop, route, driver] = await Promise.all([
+    stopById(r.fromStopId),
+    stopById(r.toStopId),
+    byId('bus_routes', r.routeId),
+    userBriefById(r.driverId),
+  ])
+  return {
+    id: r.id,
+    routeId: r.routeId ?? null,
+    vehicleType: r.vehicleType,
+    departureAt: isoZ(r.departsAt),
+    totalSeats: r.totalSeats,
+    availableSeats: r.seatsLeft,
+    farePerSeat: num(r.farePerSeat),
+    status: r.status,
+    fromStop,
+    toStop,
+    route: routeBrief(route),
+    driver,
+  }
+}
 
 // ---------------------------------------------------------------- bookings
 
-export const bookingOut = (b) => ({
-  id: b.id,
-  bookingRef: b.bookingRef,
-  userId: b.userId,
-  type: b.type,
-  travelDate: isoZ(b.travelDate),
-  seats: b.seats,
-  amount: num(b.amount),
-  paymentMode: b.paymentMode,
-  paymentStatus: b.paymentStatus,
-  status: b.status,
-  cancelReason: b.cancelReason ?? null,
-  createdAt: isoZ(b.createdAt),
-  user: userBriefById(b.userId),
-  bus: b.busId ? busById(b.busId) : null,
-  ride: b.rideId ? rideOut(byId('Ride', b.rideId)) : null,
-  localCar: b.localCarId ? localCarOut(byId('LocalCar', b.localCarId)) : null,
-})
+export async function bookingOut(b) {
+  const [user, bus, ride, localCar] = await Promise.all([
+    userBriefById(b.userId),
+    b.busId ? busById(b.busId) : null,
+    b.sharedRideId ? byId('shared_rides', b.sharedRideId).then(rideOut) : null,
+    b.localVehicleId ? byId('local_vehicles', b.localVehicleId).then(localCarOut) : null,
+  ])
+  return {
+    id: b.id,
+    bookingRef: b.bookingNumber,
+    userId: b.userId,
+    type: b.type,
+    travelDate: isoZ(b.travelDate),
+    seats: b.seats,
+    amount: num(b.amount),
+    paymentMode: b.paymentMethod,
+    paymentStatus: b.paymentStatus,
+    status: b.status,
+    cancelReason: b.cancelReason ?? null,
+    createdAt: isoZ(b.createdAt),
+    user,
+    bus,
+    ride,
+    localCar,
+  }
+}
 
 // ---------------------------------------------------------------- messaging, admin, profile
 
@@ -263,37 +291,46 @@ export const notificationOut = (n) => ({
   title: n.title,
   message: n.message,
   type: n.type,
-  link: n.link ?? null,
+  link: n.openScreen ?? null,
   isRead: bool(n.isRead),
   readAt: isoZ(n.readAt),
   createdAt: isoZ(n.createdAt),
 })
 
-export const supportTicketOut = (t) => ({
-  id: t.id,
-  ticketRef: t.ticketRef,
-  userId: t.userId ?? null,
-  name: t.name,
-  phone: t.phone,
-  email: t.email ?? null,
-  category: t.category,
-  subject: t.subject,
-  message: t.message,
-  status: t.status,
-  priority: t.priority,
-  response: t.response ?? null,
-  createdAt: isoZ(t.createdAt),
-  user: userBriefById(t.userId),
-})
+/** The team's latest reply on a ticket (the old single "response" field). */
+export const ticketResponse = (ticketId) =>
+  get('SELECT message FROM support_ticket_messages WHERE ticket_id = ? AND is_from_team = 1 ORDER BY created_at DESC, id DESC LIMIT 1', ticketId).then(
+    (m) => m?.message ?? null,
+  )
 
-export const activityLogOut = (a) => ({
+export const supportTicketOut = async (t) => {
+  const [response, user] = await Promise.all([ticketResponse(t.id), userBriefById(t.userId)])
+  return {
+    id: t.id,
+    ticketRef: t.ticketNumber,
+    userId: t.userId ?? null,
+    name: t.name,
+    phone: t.phone,
+    email: t.email ?? null,
+    category: t.category,
+    subject: t.subject,
+    message: t.message,
+    status: t.status,
+    priority: t.priority,
+    response,
+    createdAt: isoZ(t.createdAt),
+    user,
+  }
+}
+
+export const activityLogOut = async (a) => ({
   id: a.id,
   action: a.action,
-  entityType: a.entityType ?? null,
-  entityId: a.entityId ?? null,
+  entityType: a.itemType ?? null,
+  entityId: a.itemId ?? null,
   message: a.message,
   createdAt: isoZ(a.createdAt),
-  actor: userBriefById(a.actorId),
+  actor: await userBriefById(a.doneBy),
 })
 
 export const loginActivityOut = (l) => ({
@@ -305,17 +342,17 @@ export const loginActivityOut = (l) => ({
   createdAt: isoZ(l.createdAt),
 })
 
+// The app never used these four, so they are no longer stored; replies keep their old values.
+export const FIXED_SETTINGS = { timezone: 'Asia/Kolkata', currency: 'INR', dateFormat: 'DD MMM YYYY', timeFormat: '12h' }
+
 export const settingsOut = (s) =>
   s && {
     id: s.id,
-    platformName: s.platformName,
-    platformEmail: s.platformEmail,
+    platformName: s.appName,
+    platformEmail: s.supportEmail,
     contactNumber: s.contactNumber,
     address: s.address,
-    timezone: s.timezone,
-    currency: s.currency,
-    dateFormat: s.dateFormat,
-    timeFormat: s.timeFormat,
+    ...FIXED_SETTINGS,
   }
 
 export const recentSearchOut = (r) => ({
@@ -323,9 +360,9 @@ export const recentSearchOut = (r) => ({
   searchType: r.searchType,
   fromText: r.fromText ?? null,
   toText: r.toText ?? null,
-  query: r.query ?? null,
+  query: r.searchText ?? null,
   searchedAt: isoZ(r.searchedAt),
 })
 
 /** The single settings row (id "global"). */
-export const loadSettings = () => get('SELECT * FROM "Setting" WHERE id = ?', 'global')
+export const loadSettings = () => get('SELECT * FROM app_settings WHERE id = ?', 'global')

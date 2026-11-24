@@ -1,13 +1,15 @@
 // Buses from the owner's Excel sheet (docs/bus-import-template.xlsx): one row per bus, all its
 // stops and times in one cell. Rows are checked first and shown to the admin, then imported.
+// The bigger sheet with Buses and Stops tabs (and two trips per bus) is read by busTripImport.js.
 import readXlsxFile from 'read-excel-file/node'
-import { get, insert, run, tx, update } from '../db.js'
+import { at, get, insert, run, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { newId } from '../ids.js'
 import { haversineKm } from '../routes/network.js'
 import { getSettingsRow } from '../routes/platform.js'
 import { logActivity } from './common.js'
 import { insertStopages } from './buses.js'
+import { applyTripImport, planTripImport, readTripSheets } from './busTripImport.js'
 
 const MAX_ROWS = 500
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
@@ -23,9 +25,9 @@ const COLUMNS = {
   stops: /stops?/i,
 }
 
-const text = (v) => (v === null || v === undefined ? '' : String(v).trim())
+export const text = (v) => (v === null || v === undefined ? '' : String(v).trim())
 
-function readDays(raw) {
+export function readDays(raw) {
   const value = text(raw).toUpperCase().replace(/\s+/g, '')
   if (!value || value === 'DAILY' || value === 'EVERYDAY') return DAYS
   const days = []
@@ -63,10 +65,14 @@ function readStops(raw) {
   return { stops }
 }
 
+// The collation compares without case, so "esplanade" finds "Esplanade".
 const findStop = (name) =>
-  get(`SELECT id, name, latitude, longitude FROM "BusStop" WHERE lower(name) = lower(?) ORDER BY status = 'ACTIVE' DESC LIMIT 1`, name)
+  get(`SELECT id, name, latitude, longitude FROM bus_stops WHERE name = ? ORDER BY status = 'ACTIVE' DESC, created_at, id LIMIT 1`, name)
 
-/** Read the uploaded workbook into one object per filled row, keeping the Excel row number. */
+/**
+ * Read the uploaded workbook into one object per filled row, keeping the Excel row number.
+ * The bigger sheet (Buses and Stops tabs) comes back as { trips: true, buses, stops }.
+ */
 export async function readSheet(buffer) {
   let sheets
   try {
@@ -74,6 +80,8 @@ export async function readSheet(buffer) {
   } catch {
     throw ApiError.badRequest('That file could not be read. Save it as an Excel .xlsx file and try again.')
   }
+  const tripSheet = readTripSheets(sheets)
+  if (tripSheet) return tripSheet
   // The bus table may not be the first tab, so use whichever tab has a Bus Number header.
   const hasHeader = (r) => r.some((c) => COLUMNS.busNumber.test(text(c)))
   const rows = sheets.find((s) => s.data.some(hasHeader))?.data
@@ -91,16 +99,18 @@ export async function readSheet(buffer) {
 }
 
 /** What would happen to each row. Nothing is written. */
-export function planImport(rows) {
+export async function planImport(rows) {
+  if (rows.trips) return planTripImport(rows)
   const seen = new Set()
-  return rows.map((r) => {
+  const plan = []
+  for (const r of rows) {
     const errors = []
     const busNumber = text(r.busNumber).toUpperCase().replace(/\s+/g, ' ')
     if (!/^[A-Z0-9 -]{4,20}$/.test(busNumber)) errors.push(busNumber ? 'Bus number should be 4 to 20 letters and numbers' : 'Bus number is missing')
     else if (seen.has(busNumber)) errors.push('This bus number is already on an earlier row')
     seen.add(busNumber)
 
-    const existing = busNumber ? get('SELECT id, "busName", fare, "contactNumber" FROM "Bus" WHERE "busNumber" = ?', busNumber) : null
+    const existing = busNumber ? await get('SELECT id, bus_name, fare, contact_number FROM buses WHERE bus_number = ?', busNumber) : null
 
     const fareText = text(r.fare).replace(/^(rs\.?|₹)\s*/i, '')
     const fare = fareText === '' ? null : Number(fareText)
@@ -115,13 +125,14 @@ export function planImport(rows) {
 
     const parsed = readStops(r.stops)
     if (parsed.error) errors.push(parsed.error)
-    const stops = (parsed.stops || []).map((s) => {
-      const known = findStop(s.name)
-      return { ...s, name: known?.name ?? s.name, stopId: known?.id ?? null, point: known && known.latitude != null ? known : null }
-    })
+    const stops = []
+    for (const s of parsed.stops || []) {
+      const known = await findStop(s.name)
+      stops.push({ ...s, name: known?.name ?? s.name, stopId: known?.id ?? null, point: known && known.latitude != null ? known : null })
+    }
 
     const busName = text(r.busName)
-    return {
+    plan.push({
       row: r.row,
       busNumber,
       busName: busName || null,
@@ -133,8 +144,9 @@ export function planImport(rows) {
       action: errors.length ? 'error' : existing ? 'update' : 'create',
       existingId: existing?.id ?? null,
       errors,
-    }
-  })
+    })
+  }
+  return plan
 }
 
 /** Route length so far, from stop coordinates where both ends have them. */
@@ -147,70 +159,74 @@ function distances(stops) {
   })
 }
 
-function stopIdFor(stop) {
-  const known = findStop(stop.name)
+async function stopIdFor(stop) {
+  const known = await findStop(stop.name)
   if (known) {
     // An admin importing it confirms the stop, even one a passenger typed earlier.
-    run(`UPDATE "BusStop" SET status = 'ACTIVE', "updatedAt" = ? WHERE id = ? AND status != 'ACTIVE'`, Date.now(), known.id)
+    await run(`UPDATE bus_stops SET status = 'ACTIVE', updated_at = ? WHERE id = ? AND status != 'ACTIVE'`, at(Date.now()), known.id)
     return known.id
   }
   const now = Date.now()
-  return insert('BusStop', { id: newId(), name: stop.name, area: null, city: 'Kolkata', latitude: null, longitude: null, status: 'ACTIVE', createdAt: now, updatedAt: now }).id
+  return (await insert('bus_stops', { id: newId(), name: stop.name, area: null, city: 'Kolkata', latitude: null, longitude: null, status: 'ACTIVE', createdAt: now, updatedAt: now })).id
 }
 
 /** Write every row without errors. `publish` makes new buses live straight away. */
-export function applyImport(plan, admin, { publish }) {
+export async function applyImport(plan, admin, { publish }) {
   const ready = plan.filter((p) => p.action !== 'error')
-  const contactFallback = getSettingsRow().contactNumber
+  if (plan.some((p) => p.trips)) return { ...(await applyTripImport(ready, admin, { publish })), skipped: plan.length - ready.length }
+  const contactFallback = (await getSettingsRow()).contactNumber
   let created = 0
   let updated = 0
-  tx(() => {
+  await tx(async () => {
     for (const p of ready) {
       const km = distances(p.stops)
       const stopages = p.stops.map((s, i) => ({ arrivalTime: s.time, departureTime: s.time, distanceKm: km[i] }))
-      const stopIds = p.stops.map(stopIdFor)
+      const stopIds = []
+      for (const s of p.stops) stopIds.push(await stopIdFor(s))
       const now = Date.now()
       if (p.action === 'update') {
-        const changes = { type: p.ac ? 'AC' : 'NON_AC', serviceDays: p.days.join(','), updatedAt: now }
+        const changes = { isAc: p.ac ? 1 : 0, runsOn: p.days.join(','), updatedAt: now }
         if (p.busName) changes.busName = p.busName
         if (p.fare !== null) changes.fare = p.fare
         if (p.contact) changes.contactNumber = p.contact
-        update('Bus', p.existingId, changes)
-        run('DELETE FROM "BusStopage" WHERE "busId" = ?', p.existingId)
-        insertStopages(p.existingId, stopages, stopIds)
+        await update('buses', p.existingId, changes)
+        await run('DELETE FROM bus_timetable WHERE bus_id = ?', p.existingId)
+        // This sheet gives one trip per bus, so any later trips are switched off.
+        await run('UPDATE bus_trips SET is_active = 0, updated_at = ? WHERE bus_id = ? AND trip_number > 1', at(now), p.existingId)
+        await insertStopages(p.existingId, stopages, stopIds)
         updated += 1
       } else {
-        const bus = insert('Bus', {
+        const bus = await insert('buses', {
           id: newId(),
           busNumber: p.busNumber,
           busName: p.busName,
           ownerId: admin.id,
           routeId: null,
-          type: p.ac ? 'AC' : 'NON_AC',
+          isAc: p.ac ? 1 : 0,
           category: 'NORMAL',
           operator: null,
           totalSeats: 45,
           fare: p.fare,
           contactNumber: p.contact || contactFallback,
-          contactStart: '06:00',
-          contactEnd: '22:00',
-          serviceDays: p.days.join(','),
-          imageUrl: null,
+          callFrom: '06:00',
+          callUntil: '22:00',
+          runsOn: p.days.join(','),
+          pictureUrl: null,
           status: publish ? 'APPROVED' : 'PENDING',
           rejectionReason: null,
-          ratingAvg: 0,
+          ratingAverage: 0,
           ratingCount: 0,
           submittedAt: now,
           reviewedAt: publish ? now : null,
-          reviewedById: publish ? admin.id : null,
+          reviewedBy: publish ? admin.id : null,
           createdAt: now,
           updatedAt: now,
         })
-        insertStopages(bus.id, stopages, stopIds)
+        await insertStopages(bus.id, stopages, stopIds)
         created += 1
       }
     }
-    logActivity({
+    await logActivity({
       actorId: admin.id,
       action: 'BUSES_IMPORTED',
       entityType: 'BUS',

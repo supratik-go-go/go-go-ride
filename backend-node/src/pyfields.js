@@ -295,7 +295,7 @@ export function startOfDayStrict(value) {
  * value really changed. Writes the changed columns of `patch` (booleans as 0/1);
  * returns true when something was written.
  */
-export function saveChanges(update, table, row, patch, { touch = true } = {}) {
+export async function saveChanges(update, table, row, patch, { touch = true } = {}) {
   const changed = {}
   for (const [key, value] of Object.entries(patch)) {
     const v = value === true ? 1 : value === false ? 0 : value
@@ -303,7 +303,7 @@ export function saveChanges(update, table, row, patch, { touch = true } = {}) {
   }
   if (!Object.keys(changed).length) return false
   if (touch) changed.updatedAt = Date.now()
-  update(table, row.id, changed)
+  await update(table, row.id, changed)
   return true
 }
 

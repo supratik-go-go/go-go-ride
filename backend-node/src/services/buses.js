@@ -5,7 +5,7 @@
 // the result so the app can render the "Not Running" card rather than silently
 // hiding them.
 import { config } from '../config.js'
-import { all, byId, get, insert, like, placeholders, run, scalar, update } from '../db.js'
+import { all, byId, day, get, insert, like, placeholders, run, scalar, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { newId } from '../ids.js'
 import { busColumns, busDocumentOut, busExceptionOut, busStopages, reviewOut, routeBrief, timetableRows, userBriefById } from '../serialize.js'
@@ -40,9 +40,46 @@ export function parseDay(value, fieldName = 'date') {
 
 // ---------------------------------------------------------------- legs
 
-/** Stopages of a bus (by sequence) with their stop rows attached. */
-function loadStopages(busId) {
-  return busStopages(busId).map((s) => ({ ...s, stop: byId('BusStop', s.stopId) }))
+/**
+ * Timetables of many buses at once: for each bus its trips (first trip first), each trip in stop
+ * order with its stops attached. Two queries instead of one per bus and one per stop, so search
+ * stays fast with a thousand buses. A bus that goes out and back has two trips.
+ */
+async function loadTripsFor(busIds) {
+  const byBus = new Map(busIds.map((id) => [id, []]))
+  if (!busIds.length) return byBus
+  const rows = await all(
+    `SELECT t.* FROM bus_timetable t JOIN bus_trips r ON r.id = t.trip_id
+     WHERE t.bus_id IN (${placeholders(busIds)}) AND r.is_active = 1 ORDER BY t.bus_id, r.trip_number, t.stop_order`,
+    ...busIds,
+  )
+  const stopIds = [...new Set(rows.map((r) => r.stopId))]
+  const stops = new Map((stopIds.length ? await all(`SELECT * FROM bus_stops WHERE id IN (${placeholders(stopIds)})`, ...stopIds) : []).map((s) => [s.id, s]))
+  for (const r of rows) {
+    const trips = byBus.get(r.busId)
+    if (trips.at(-1)?.[0].tripId !== r.tripId) trips.push([])
+    trips.at(-1).push({ ...r, stop: stops.get(r.stopId) })
+  }
+  return byBus
+}
+
+/** One bus's trips, each in stop order (without the stops attached). */
+export async function tripsOf(busId) {
+  const trips = []
+  const rows = await all(
+    'SELECT t.* FROM bus_timetable t JOIN bus_trips r ON r.id = t.trip_id WHERE t.bus_id = ? AND r.is_active = 1 ORDER BY r.trip_number, t.stop_order',
+    busId,
+  )
+  for (const r of rows) {
+    if (trips.at(-1)?.[0].tripId !== r.tripId) trips.push([])
+    trips.at(-1).push(r)
+  }
+  return trips
+}
+
+/** The first trip that goes from one stop to the other (stop ids; a missing one matches any). */
+export function tripBetween(trips, fromStopId, toStopId) {
+  return trips.find((t) => findLeg(t, fromStopId, toStopId)) ?? null
 }
 
 /** The portion of a timetable between two stops; null when the bus does not serve that pair in that direction. */
@@ -51,7 +88,7 @@ export function findLeg(stopages, fromStopId, toStopId) {
   const origin = fromStopId ? stopages.find((s) => s.stopId === fromStopId) : stopages[0]
   const destination = toStopId ? stopages.find((s) => s.stopId === toStopId) : stopages[stopages.length - 1]
   if (!origin || !destination) return null
-  if (origin.sequence >= destination.sequence) return null // wrong direction
+  if (origin.stopOrder >= destination.stopOrder) return null // wrong direction
   return {
     fromStop: origin.stop,
     toStop: destination.stop,
@@ -63,7 +100,7 @@ export function findLeg(stopages, fromStopId, toStopId) {
 
 /** True when the via stop lies between the passenger's boarding and alighting stops. */
 function passesThrough(stopages, viaStopId, fromStopId, toStopId) {
-  const sequenceOf = (id) => stopages.find((s) => s.stopId === id)?.sequence
+  const sequenceOf = (id) => stopages.find((s) => s.stopId === id)?.stopOrder
   const via = sequenceOf(viaStopId)
   if (via === undefined) return false
   const from = fromStopId ? sequenceOf(fromStopId) : -Infinity
@@ -73,24 +110,25 @@ function passesThrough(stopages, viaStopId, fromStopId, toStopId) {
 
 // ---------------------------------------------------------------- stops
 
-export function resolveStopIdByName(name) {
+export async function resolveStopIdByName(name) {
   if (!name) return null
-  const stop = get('SELECT id FROM "BusStop" WHERE name LIKE ? ORDER BY name LIMIT 1', like(name))
+  // The second-language name counts too, so "হাওড়া" finds Howrah Station.
+  const stop = await get('SELECT id FROM bus_stops WHERE name LIKE ? OR other_name LIKE ? ORDER BY name, id LIMIT 1', like(name), like(name))
   return stop ? stop.id : null
 }
 
 /** Find an existing stop by name, or create it - owners type new stopages. */
-export function resolveStopId({ stopId, stopName }, status = 'ACTIVE') {
+export async function resolveStopId({ stopId, stopName }, status = 'ACTIVE') {
   if (stopId) {
-    const stop = byId('BusStop', stopId)
+    const stop = await byId('bus_stops', stopId)
     if (!stop) throw ApiError.badRequest(`Bus stop ${stopId} does not exist`)
     return stop.id
   }
   const name = (stopName || '').trim()
-  const existing = get('SELECT id FROM "BusStop" WHERE name = ? LIMIT 1', name)
+  const existing = await get('SELECT id FROM bus_stops WHERE name = ? ORDER BY created_at, id LIMIT 1', name)
   if (existing) return existing.id
   const now = Date.now()
-  const created = insert('BusStop', {
+  const created = await insert('bus_stops', {
     id: newId(),
     name,
     area: null,
@@ -110,14 +148,14 @@ const stopRef = (stop) => (stop ? { id: stop.id, name: stop.name ?? null } : nul
 
 const SORTERS = {
   departure: (r) => r.departureTime,
-  fare: (r) => r.fare,
+  fare: (r) => r.fare ?? Infinity, // fare not known: last
   duration: (r) => r.durationMinutes,
   rating: (r) => -r.rating.average,
 }
 
 const cmp = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 
-export function searchBuses({
+export async function searchBuses({
   fromText = null,
   toText = null,
   viaText = null,
@@ -138,9 +176,9 @@ export function searchBuses({
   const travelDate = date ? parseDay(date) : today
   const isToday = travelDate === today
 
-  const fromId = fromStopId || resolveStopIdByName(fromText)
-  const toId = toStopId || resolveStopIdByName(toText)
-  const viaId = searchType === 'ROUTE' ? viaStopId || resolveStopIdByName(viaText) : null
+  const fromId = fromStopId || (await resolveStopIdByName(fromText))
+  const toId = toStopId || (await resolveStopIdByName(toText))
+  const viaId = searchType === 'ROUTE' ? viaStopId || (await resolveStopIdByName(viaText)) : null
 
   if (searchType === 'ROUTE') {
     if ((fromText || fromStopId) && !fromId) throw ApiError.notFound(`No bus stop found matching "${fromText}"`)
@@ -148,27 +186,27 @@ export function searchBuses({
     if ((viaText || viaStopId) && !viaId) throw ApiError.notFound(`No bus stop found matching "${viaText}"`)
   }
 
-  const where = ['"Bus".status = ?']
+  const where = ['b.status = ?']
   const params = ['APPROVED']
   if (busType) {
-    where.push('"Bus".type = ?')
-    params.push(busType)
+    where.push('b.is_ac = ?')
+    params.push(busType === 'AC' ? 1 : 0)
   }
   if (category) {
-    where.push('"Bus".category = ?')
+    where.push('b.category = ?')
     params.push(category)
   }
   if (maxFare !== null && maxFare !== undefined) {
-    where.push('"Bus".fare <= ?')
+    where.push('b.fare <= ?')
     params.push(maxFare)
   }
-  const servesStop = '(EXISTS (SELECT 1 FROM "BusStopage" WHERE "Bus".id = "BusStopage"."busId" AND "BusStopage"."stopId" = ?))'
+  const servesStop = '(EXISTS (SELECT 1 FROM bus_timetable t WHERE t.bus_id = b.id AND t.stop_id = ?))'
   if (searchType === 'BUS_NUMBER' && q) {
-    where.push('"Bus"."busNumber" LIKE ?')
+    where.push('b.bus_number LIKE ?')
     params.push(like(q.toUpperCase()))
   } else if (searchType === 'BUS_NAME' && q) {
-    where.push('"Bus"."busName" LIKE ?')
-    params.push(like(q))
+    where.push('(b.bus_name LIKE ? OR b.other_name LIKE ?)')
+    params.push(like(q), like(q))
   } else if (fromId && toId) {
     where.push(servesStop, servesStop)
     params.push(fromId, toId)
@@ -177,25 +215,31 @@ export function searchBuses({
     params.push(fromId)
   }
 
-  const buses = all(`SELECT * FROM "Bus" WHERE ${where.join(' AND ')}`, ...params)
+  const buses = await all(`SELECT b.* FROM buses b WHERE ${where.join(' AND ')} ORDER BY b.created_at, b.id`, ...params)
 
-  // One query for the exceptions falling on the travel date.
+  // One query for the off days falling on the travel date, one for all timetables, one for the routes.
   const excepted = new Map()
-  if (buses.length) {
-    const ids = buses.map((b) => b.id)
-    for (const row of all(`SELECT * FROM "BusException" WHERE "busId" IN (${placeholders(ids)}) AND date = ?`, ...ids, travelDate)) {
+  const ids = buses.map((b) => b.id)
+  if (ids.length) {
+    for (const row of await all(`SELECT * FROM bus_off_days WHERE bus_id IN (${placeholders(ids)}) AND off_date = ?`, ...ids, day(travelDate))) {
       excepted.set(row.busId, row)
     }
   }
+  const timetables = await loadTripsFor(ids)
+  const routeIds = [...new Set(buses.map((b) => b.routeId).filter(Boolean))]
+  const routes = new Map((routeIds.length ? await all(`SELECT * FROM bus_routes WHERE id IN (${placeholders(routeIds)})`, ...routeIds) : []).map((r) => [r.id, r]))
 
   let results = []
   for (const bus of buses) {
-    const stopages = loadStopages(bus.id)
+    const trips = timetables.get(bus.id)
+    // A bus that goes out and back shows the trip in the passenger's direction (else its first trip).
+    const stopages =
+      trips.find((t) => findLeg(t, fromId, toId) && (!viaId || passesThrough(t, viaId, fromId, toId))) ?? trips[0] ?? []
     const leg = findLeg(stopages, fromId, toId)
     if (!leg && searchType === 'ROUTE' && fromId && toId) continue
     if (viaId && !passesThrough(stopages, viaId, fromId, toId)) continue
 
-    const scheduled = runsOnDay(bus.serviceDays, travelDate)
+    const scheduled = runsOnDay(bus.runsOn, travelDate)
     const exception = excepted.get(bus.id)
     const isRunning = scheduled && !exception
 
@@ -211,7 +255,7 @@ export function searchBuses({
 
     const startName = first ? first.stop.name : ''
     const endName = last ? last.stop.name : ''
-    const route = byId('Route', bus.routeId)
+    const route = routes.get(bus.routeId)
 
     results.push({
       id: bus.id,
@@ -219,12 +263,12 @@ export function searchBuses({
       busName: bus.busName ?? null,
       routeName: route ? route.name : `${startName} - ${endName}`,
       routeNumber: route ? route.routeNumber : null,
-      type: bus.type,
+      type: bus.isAc ? 'AC' : 'NON_AC',
       category: bus.category,
       operator: bus.operator ?? null,
-      fare: Number(bus.fare),
+      fare: bus.fare === null ? null : Number(bus.fare),
       totalSeats: bus.totalSeats,
-      rating: { average: Number(bus.ratingAvg), count: bus.ratingCount },
+      rating: { average: Number(bus.ratingAverage), count: bus.ratingCount },
       from: leg ? stopRef(leg.fromStop) : null,
       to: leg ? stopRef(leg.toStop) : null,
       departureTime: departure,
@@ -260,17 +304,17 @@ export function searchBuses({
 // ---------------------------------------------------------------- details
 
 /** BusDetails payload: BusOut columns + timetable, journey, availability, upcoming exceptions, latest reviews. */
-export function busDetails(busId, date = null) {
-  const bus = byId('Bus', busId)
+export async function busDetails(busId, date = null) {
+  const bus = await byId('buses', busId)
   if (!bus) throw ApiError.notFound('Bus not found')
 
   const today = todayMs()
   const travelDate = date ? parseDay(date) : today
-  const upcoming = all('SELECT * FROM "BusException" WHERE "busId" = ? AND date >= ? ORDER BY date', bus.id, today)
-  const exception = upcoming.find((e) => e.date === travelDate)
-  const scheduled = runsOnDay(bus.serviceDays, travelDate)
+  const upcoming = await all('SELECT * FROM bus_off_days WHERE bus_id = ? AND off_date >= ? ORDER BY off_date', bus.id, day(today))
+  const exception = upcoming.find((e) => e.offDate === travelDate)
+  const scheduled = runsOnDay(bus.runsOn, travelDate)
 
-  const stopageRows = busStopages(bus.id)
+  const stopageRows = await busStopages(bus.id)
   const first = stopageRows[0]
   const last = stopageRows[stopageRows.length - 1]
   const duration = first && last ? durationMinutes(first.departureTime, last.arrivalTime) : 0
@@ -279,24 +323,30 @@ export function busDetails(busId, date = null) {
   if (!scheduled) reason = 'This bus does not operate on this day of the week'
   else if (exception) reason = exception.reason || 'The owner has reported no service on this date'
 
-  // bus.reviews (loaded in table order), newest first, top 10 - a stable sort like Python's sorted().
-  const reviews = all('SELECT * FROM "Review" WHERE "busId" = ? ORDER BY rowid', bus.id)
+  // Newest first, top 10 - a stable sort like Python's sorted(). Reviews an admin hid are left out.
+  const reviews = (await all('SELECT * FROM reviews WHERE bus_id = ? AND is_hidden = 0 ORDER BY created_at, id', bus.id))
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 10)
+  const [owner, route, documents, timetable] = await Promise.all([
+    userBriefById(bus.ownerId),
+    byId('bus_routes', bus.routeId),
+    all('SELECT * FROM bus_documents WHERE bus_id = ? ORDER BY uploaded_at, id', bus.id),
+    timetableRows(stopageRows),
+  ])
 
   return {
     ...busColumns(bus),
-    owner: userBriefById(bus.ownerId),
-    route: routeBrief(byId('Route', bus.routeId)),
-    stopages: timetableRows(stopageRows),
-    documents: all('SELECT * FROM "BusDocument" WHERE "busId" = ? ORDER BY rowid', bus.id).map(busDocumentOut),
-    timetable: timetableRows(stopageRows),
+    owner,
+    route: routeBrief(route),
+    stopages: timetable,
+    documents: documents.map(busDocumentOut),
+    timetable,
     journey: {
       departureTime: first ? first.departureTime : null,
       arrivalTime: last ? last.arrivalTime : null,
       durationMinutes: duration,
       durationLabel: formatDuration(duration),
-      totalDistanceKm: last ? Number(last.distanceKm) : 0,
+      totalDistanceKm: last ? Number(last.distanceFromStartKm) : 0,
     },
     availability: {
       date: dateOnly(travelDate),
@@ -304,64 +354,84 @@ export function busDetails(busId, date = null) {
       reason,
     },
     exceptions: upcoming.map(busExceptionOut),
-    reviews: reviews.map(reviewOut),
+    reviews: await Promise.all(reviews.map(reviewOut)),
   }
 }
 
 // ---------------------------------------------------------------- writes
 
-/** Insert a bus timetable, in order (sequence 1..n). */
-export function insertStopages(busId, stopages, stopIds) {
-  stopages.forEach((s, index) => {
-    insert('BusStopage', {
-      id: newId(),
-      busId,
-      stopId: stopIds[index],
-      sequence: index + 1,
-      arrivalTime: s.arrivalTime,
-      departureTime: s.departureTime,
-      distanceKm: s.distanceKm,
-    })
-  })
+/**
+ * The bus's first trip (every bus has exactly one until the trips update), created when missing.
+ * Its from / to stop and departure time follow the timetable.
+ */
+async function firstTrip(busId, stopIds, stopages) {
+  const id = `t_${busId}`
+  const now = Date.now()
+  const shape = {
+    fromStopId: stopIds[0] ?? null,
+    toStopId: stopIds[stopIds.length - 1] ?? null,
+    departsAt: stopages[0]?.departureTime ?? null,
+  }
+  if (await byId('bus_trips', id)) await update('bus_trips', id, { ...shape, updatedAt: now })
+  else await insert('bus_trips', { id, busId, tripNumber: 1, ...shape, isActive: 1, createdAt: now, updatedAt: now })
+  return id
 }
 
-/** Rewrites a bus timetable in order. */
-export function replaceStopages(busId, stopages, stopStatus = 'ACTIVE') {
-  const stopIds = stopages.map((s) => resolveStopId(s, stopStatus))
-  run('DELETE FROM "BusStopage" WHERE "busId" = ?', busId)
-  insertStopages(busId, stopages, stopIds)
+/** Insert a bus timetable, in order (stop order 1..n), as the bus's first trip. */
+export async function insertStopages(busId, stopages, stopIds) {
+  const tripId = await firstTrip(busId, stopIds, stopages)
+  for (const [index, s] of stopages.entries()) {
+    await insert('bus_timetable', {
+      id: newId(),
+      tripId,
+      busId,
+      stopId: stopIds[index],
+      stopOrder: index + 1,
+      arrivalTime: s.arrivalTime,
+      departureTime: s.departureTime,
+      distanceFromStartKm: s.distanceKm,
+    })
+  }
+}
+
+/** Rewrites the timetable of a bus's first trip in order (its other trips stay as they are). */
+export async function replaceStopages(busId, stopages, stopStatus = 'ACTIVE') {
+  const stopIds = []
+  for (const s of stopages) stopIds.push(await resolveStopId(s, stopStatus))
+  await run('DELETE FROM bus_timetable WHERE trip_id = ?', `t_${busId}`)
+  await insertStopages(busId, stopages, stopIds)
 }
 
 /** Owners must give the configured notice; admins may override it. Returns the BusException row. */
-export function addException(busId, { date, reason, enforceNotice }) {
-  const day = parseDay(date)
-  const daysAhead = Math.floor((day - todayMs()) / DAY_MS)
+export async function addException(busId, { date, reason, enforceNotice }) {
+  const offDay = parseDay(date)
+  const daysAhead = Math.floor((offDay - todayMs()) / DAY_MS)
 
   if (daysAhead < 0) throw ApiError.badRequest('Pick a future date')
   if (enforceNotice && daysAhead < config.busExceptionMinDays) {
     throw ApiError.badRequest(`Non-operating dates must be reported at least ${config.busExceptionMinDays} days in advance`)
   }
 
-  const existing = get('SELECT * FROM "BusException" WHERE "busId" = ? AND date = ?', busId, day)
+  const existing = await get('SELECT * FROM bus_off_days WHERE bus_id = ? AND off_date = ?', busId, day(offDay))
   if (existing) {
-    update('BusException', existing.id, { reason })
-    return byId('BusException', existing.id)
+    await update('bus_off_days', existing.id, { reason })
+    return byId('bus_off_days', existing.id)
   }
-  return insert('BusException', { id: newId(), busId, date: day, reason, createdAt: Date.now() })
+  return insert('bus_off_days', { id: newId(), busId, offDate: offDay, reason, createdAt: Date.now() })
 }
 
 /** Average + count of a bus's reviews onto the bus row (updatedAt moves only when they change). */
-export function recomputeRating(bus) {
-  const row = get('SELECT AVG(rating) AS avg, COUNT(id) AS count FROM "Review" WHERE "busId" = ?', bus.id)
-  const ratingAvg = pyRound2(Number(row?.avg || 0))
+export async function recomputeRating(bus) {
+  const row = await get('SELECT AVG(rating) AS avg, COUNT(id) AS count FROM reviews WHERE bus_id = ?', bus.id)
+  const ratingAverage = pyRound2(Number(row?.avg || 0))
   const ratingCount = Number(row?.count || 0)
-  if (ratingAvg !== Number(bus.ratingAvg) || ratingCount !== bus.ratingCount) {
-    update('Bus', bus.id, { ratingAvg, ratingCount, updatedAt: Date.now() })
+  if (ratingAverage !== Number(bus.ratingAverage) || ratingCount !== bus.ratingCount) {
+    await update('buses', bus.id, { ratingAverage, ratingCount, updatedAt: Date.now() })
   }
 }
 
-export function assertOwnership(busId, userId) {
-  const bus = byId('Bus', busId)
+export async function assertOwnership(busId, userId) {
+  const bus = await byId('buses', busId)
   if (!bus) throw ApiError.notFound('Bus not found')
   if (bus.ownerId !== userId) throw ApiError.forbidden('You can only manage your own buses')
   return bus
@@ -370,17 +440,17 @@ export function assertOwnership(busId, userId) {
 /** Free-text filter shared by the bus list endpoints: [sql, params]. */
 export function searchFilter(term) {
   return [
-    '("Bus"."busNumber" LIKE ? OR "Bus"."busName" LIKE ? OR "Bus".operator LIKE ?)',
+    '(buses.bus_number LIKE ? OR buses.bus_name LIKE ? OR buses.operator LIKE ?)',
     [like(term.toUpperCase()), like(term), like(term)],
   ]
 }
 
 /** Number of buses per route id (any status). */
-export function busCountsByRoute(routeIds) {
+export async function busCountsByRoute(routeIds) {
   const out = new Map()
   if (!routeIds.length) return out
-  for (const row of all(
-    `SELECT "routeId" AS id, COUNT(id) AS n FROM "Bus" WHERE "routeId" IN (${placeholders(routeIds)}) GROUP BY "routeId"`,
+  for (const row of await all(
+    `SELECT route_id AS id, COUNT(id) AS n FROM buses WHERE route_id IN (${placeholders(routeIds)}) GROUP BY route_id`,
     ...routeIds,
   )) {
     out.set(row.id, Number(row.n))
@@ -388,5 +458,5 @@ export function busCountsByRoute(routeIds) {
   return out
 }
 
-export const countBusesOnRoute = (routeId) => Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE "routeId" = ?', routeId) || 0)
+export const countBusesOnRoute = async (routeId) => Number((await scalar('SELECT COUNT(id) FROM buses WHERE route_id = ?', routeId)) || 0)
 

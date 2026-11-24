@@ -4,46 +4,51 @@
 // Runs once a minute inside the API process. Times are compared in Asia/Kolkata,
 // so it works the same on a UTC server. GET /api/internal/run-alarms?key=CRON_KEY
 // runs the same job, as a backup from an hPanel cron job.
-import { all, byId, run, tx } from './db.js'
+import { all, at, byId, day, run, tx } from './db.js'
+import { cleanUpHourly } from './services/cleanup.js'
 import { notify } from './services/common.js'
 import { kolkataNow, startOfDay, to12h, toMinutes } from './time.js'
 
-export function processDueAlarms(at = new Date()) {
-  const now = kolkataNow(at)
+export async function processDueAlarms(when = new Date()) {
+  const now = kolkataNow(when)
   const today = startOfDay(now.date)
   let fired = 0
 
-  tx(() => {
-    const alarms = all('SELECT * FROM "Alarm" WHERE status = ? AND "alarmDate" = ?', 'ACTIVE', today)
+  await tx(async () => {
+    const alarms = await all('SELECT * FROM alarms WHERE status = ? AND travel_date = ?', 'ACTIVE', day(today))
     for (const alarm of alarms) {
-      const notifyMinutes = toMinutes(alarm.expectedArrival) - alarm.remindBeforeMin
+      const notifyMinutes = toMinutes(alarm.busArrivesAt) - alarm.remindMinutesBefore
       // Fire within a one-minute window so a late tick still delivers.
       if (!(notifyMinutes <= now.minutes && now.minutes <= notifyMinutes + 1)) continue
-      const bus = byId('Bus', alarm.busId)
-      const stop = byId('BusStop', alarm.boardingStopId)
+      const bus = await byId('buses', alarm.busId)
+      const stop = await byId('bus_stops', alarm.getOnStopId)
       if (!bus || !stop) continue
-      const when = alarm.remindBeforeMin === 0 ? 'is arriving now' : `arrives in ${alarm.remindBeforeMin} minutes`
-      notify({
+      // Many buses are known only by name (the bus number is optional).
+      const label = bus.busNumber || bus.busName || 'Your bus'
+      const soon = alarm.remindMinutesBefore === 0 ? 'is arriving now' : `arrives in ${alarm.remindMinutesBefore} minutes`
+      await notify({
         userId: alarm.userId,
-        title: `Bus ${bus.busNumber} ${when}`,
-        message: `${bus.busNumber} reaches ${stop.name} at ${to12h(alarm.expectedArrival)}.`,
+        title: `Bus ${label} ${soon}`,
+        message: `${label} reaches ${stop.name} at ${to12h(alarm.busArrivesAt)}.`,
         type: 'ALARM',
         link: `/buses/${alarm.busId}`,
       })
-      run('UPDATE "Alarm" SET status = ?, "notifiedAt" = ? WHERE id = ?', 'TRIGGERED', at.getTime(), alarm.id)
+      await run('UPDATE alarms SET status = ?, rang_at = ? WHERE id = ?', 'TRIGGERED', at(when.getTime()), alarm.id)
       fired += 1
     }
     // Retire earlier days' leftovers so "My Alarms" stays clean.
-    run('UPDATE "Alarm" SET status = ? WHERE status = ? AND "alarmDate" < ?', 'EXPIRED', 'ACTIVE', today)
+    await run('UPDATE alarms SET status = ? WHERE status = ? AND travel_date < ?', 'EXPIRED', 'ACTIVE', day(today))
   })
   return fired
 }
 
 export function startScheduler() {
-  const tick = () => {
+  const tick = async () => {
     try {
-      const n = processDueAlarms()
+      const n = await processDueAlarms()
       if (n) console.log(`[alarms] sent ${n} reminder(s)`)
+      const removed = await cleanUpHourly()
+      if (removed) console.log('[cleanup]', JSON.stringify(removed))
     } catch (err) {
       console.error('[alarms] tick failed', err)
     }

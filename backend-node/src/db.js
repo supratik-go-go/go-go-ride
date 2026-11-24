@@ -1,158 +1,124 @@
-// SQLite through Node's built-in driver (no native modules to compile on the host).
+// MySQL through mysql2: Hostinger's MySQL in production, a local MariaDB in tests.
 //
-// The schema is the one the original Prisma service created and the Python
-// service shares: PascalCase tables, camelCase columns, datetimes stored as
-// INTEGER milliseconds since the epoch (UTC), booleans as 0/1.
+// The database uses lowercase names with underscores (bus_number) and stores dates in India time.
+// This layer lets the rest of the code work with plain values:
+//   - rows come back with camelCase keys (bus_number -> busNumber),
+//   - DATETIME columns as milliseconds, DATE columns as milliseconds at midnight UTC (as the old
+//     SQLite database stored them), TIME columns as 'HH:MM', money and yes/no as numbers,
+//   - insert() and update() take camelCase keys and the same plain values, and convert them.
+// Raw SQL is written with the real column names; pass dates with at() / day() (see below).
+import { AsyncLocalStorage } from 'node:async_hooks'
 import fs from 'node:fs'
 import path from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
+import mysql from 'mysql2/promise'
 import { config, ROOT } from './config.js'
 
-// Added after launch, so these are created on start for databases that already exist.
-const ADDED_TABLES = `
-CREATE TABLE IF NOT EXISTS "RouteSubmission" (
-  id VARCHAR NOT NULL PRIMARY KEY,
-  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
-  name VARCHAR NOT NULL,
-  "routeNumber" VARCHAR,
-  notes VARCHAR,
-  stops TEXT NOT NULL,
-  status VARCHAR NOT NULL,
-  "rejectionReason" VARCHAR,
-  "routeId" VARCHAR REFERENCES "Route" (id) ON DELETE SET NULL,
-  "reviewedById" VARCHAR REFERENCES "User" (id) ON DELETE SET NULL,
-  "reviewedAt" BIGINT,
-  "createdAt" BIGINT NOT NULL,
-  "updatedAt" BIGINT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS "GameRoom" (
-  id VARCHAR NOT NULL PRIMARY KEY,
-  game VARCHAR NOT NULL,
-  code VARCHAR,
-  "isPublic" INTEGER NOT NULL,
-  status VARCHAR NOT NULL,
-  state TEXT NOT NULL,
-  "turnDeadline" BIGINT,
-  version INTEGER NOT NULL,
-  result TEXT,
-  "createdAt" BIGINT NOT NULL,
-  "updatedAt" BIGINT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS "ix_GameRoom_status" ON "GameRoom" (game, status);
-CREATE TABLE IF NOT EXISTS "GamePlayer" (
-  id VARCHAR NOT NULL PRIMARY KEY,
-  "roomId" VARCHAR NOT NULL REFERENCES "GameRoom" (id) ON DELETE CASCADE,
-  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
-  seat INTEGER NOT NULL,
-  "pointsEarned" INTEGER NOT NULL,
-  UNIQUE ("roomId", seat),
-  UNIQUE ("roomId", "userId")
-);
-CREATE INDEX IF NOT EXISTS "ix_GamePlayer_userId" ON "GamePlayer" ("userId");
-CREATE TABLE IF NOT EXISTS "GameScore" (
-  "userId" VARCHAR NOT NULL PRIMARY KEY REFERENCES "User" (id) ON DELETE CASCADE,
-  points INTEGER NOT NULL,
-  wins INTEGER NOT NULL,
-  draws INTEGER NOT NULL,
-  played INTEGER NOT NULL,
-  "updatedAt" BIGINT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS "ix_GameScore_points" ON "GameScore" (points DESC);
-CREATE TABLE IF NOT EXISTS "ArcadeRun" (
-  id VARCHAR NOT NULL PRIMARY KEY,
-  "userId" VARCHAR NOT NULL REFERENCES "User" (id) ON DELETE CASCADE,
-  game VARCHAR NOT NULL,
-  score INTEGER NOT NULL,
-  points INTEGER NOT NULL,
-  "createdAt" BIGINT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS "ix_ArcadeRun_userId_game_createdAt" ON "ArcadeRun" ("userId", game, "createdAt");
-`
+const IST_MS = 5.5 * 3600 * 1000
 
-// Columns added after launch: [table, column, definition]. Existing rows get the default.
-const ADDED_COLUMNS = [['LocalCar', 'vehicleType', `VARCHAR NOT NULL DEFAULT 'CAR'`]]
+export const toCamel = (name) => name.replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase())
+export const toSnake = (name) => name.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)
 
-function openDatabase() {
-  const file = config.databasePath
-  fs.mkdirSync(path.dirname(file), { recursive: true })
-  if (!fs.existsSync(file)) {
-    if (fs.existsSync(config.starterDatabase)) {
-      fs.copyFileSync(config.starterDatabase, file)
-      console.log(`[db] created ${file} from ${config.starterDatabase}`)
-    } else {
-      const fresh = new DatabaseSync(file)
-      fresh.exec(fs.readFileSync(path.join(ROOT, 'schema.sql'), 'utf8'))
-      fresh.close()
-      console.log(`[db] created empty database ${file}`)
+/** Milliseconds -> 'YYYY-MM-DD HH:MM:SS.mmm' in India time, for DATETIME columns and comparisons. */
+export const at = (ms) => (ms === null || ms === undefined ? null : new Date(Number(ms) + IST_MS).toISOString().replace('T', ' ').slice(0, 23))
+/** Midnight-UTC milliseconds (a calendar date) -> 'YYYY-MM-DD', for DATE columns. */
+export const day = (ms) => (ms === null || ms === undefined ? null : new Date(Number(ms)).toISOString().slice(0, 10))
+
+function typeCast(field, next) {
+  switch (field.type) {
+    case 'DATETIME':
+    case 'TIMESTAMP': {
+      const s = field.string()
+      return s === null ? null : Date.parse(`${s.replace(' ', 'T')}+05:30`)
     }
+    case 'DATE': {
+      const s = field.string()
+      return s === null ? null : Date.parse(`${s}T00:00:00Z`)
+    }
+    case 'TIME': {
+      const s = field.string()
+      return s === null ? null : s.slice(0, 5)
+    }
+    case 'NEWDECIMAL': {
+      const s = field.string()
+      return s === null ? null : Number(s)
+    }
+    case 'JSON':
+      return field.string()
+    default:
+      return next()
   }
-  const db = new DatabaseSync(file)
-  db.exec('PRAGMA foreign_keys = ON')
-  db.exec('PRAGMA busy_timeout = 5000')
-  db.exec(ADDED_TABLES)
-  for (const [table, column, definition] of ADDED_COLUMNS) {
-    const has = db.prepare(`PRAGMA table_info("${table}")`).all().some((c) => c.name === column)
-    if (!has) db.exec(`ALTER TABLE "${table}" ADD COLUMN "${column}" ${definition}`)
-  }
-  // The demo accounts from the starter database had their passwords published, so on the live
-  // server they can never sign in. They are deleted when the data moves to MySQL.
-  if (config.isProd) {
-    const ids = DEMO_USER_IDS.map(() => '?').join(', ')
-    db.prepare(`UPDATE "User" SET status = 'BLOCKED', "updatedAt" = ? WHERE status != 'BLOCKED' AND id IN (${ids})`).run(Date.now(), ...DEMO_USER_IDS)
-    db.prepare(`DELETE FROM "RefreshToken" WHERE "userId" IN (${ids})`).run(...DEMO_USER_IDS)
-  }
-  return db
 }
 
-/** The 14 demo accounts that came with the starter database (seed/gogoride.db). */
-const DEMO_USER_IDS = [
-  'cmua7ig2h00022qtjqg7pglpb',
-  'cmua7ig2h000795zwi3b9r3f2',
-  'cmua7ig2h0005cfxuwboi328e',
-  'cmua7ig2h00030d5ia9e9j3el',
-  'cmua7ig2h00069vaw2wu2otum',
-  'cmua7ig2h00048d0r8drcpfl6',
-  'cmua7ig2h000djv5ejr1983md',
-  'cmua7ig2h000cny9i5kx90ffw',
-  'cmua7ig2h0009bwu7ytsbe46m',
-  'cmua7ig2h000b1pqoxik1f2di',
-  'cmua7j6mi0005vvgmex8dlkq6',
-  'cmua7ig2h000ay5ju49mm798z',
-  'cmua7ig2h0008af67g99rwmsv',
-  'cmua7ig2h00015xwt9nft5jh8',
-]
+const makePool = (host) =>
+  mysql.createPool({
+    ...config.mysql,
+    host,
+    charset: 'utf8mb4',
+    timezone: '+05:30',
+    connectionLimit: 5,
+    supportBigNumbers: true,
+    multipleStatements: false,
+    typeCast,
+  })
+export let pool = makePool(config.mysql.host)
+let activeHost = config.mysql.host
 
-export const db = openDatabase()
+const SHUT_OUT = new Set(['ENOTFOUND', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'ER_ACCESS_DENIED_ERROR', 'ER_HOST_NOT_PRIVILEGED', 'ER_DBACCESS_DENIED_ERROR'])
 
-/** SQLite only binds null / number / bigint / string / bytes. */
+/**
+ * On start: makes sure the database answers and returns the host in use. hPanel names the MySQL
+ * server (srv838.hstgr.io), but an app on the same server may only be let in through localhost,
+ * so that is tried when the named host turns the app away.
+ */
+export async function connect() {
+  try {
+    await pool.query('SELECT 1')
+  } catch (err) {
+    if (activeHost === 'localhost' || !SHUT_OUT.has(err.code)) throw err
+    console.warn(`[db] ${activeHost} did not let the app in (${err.code}); trying localhost`)
+    const local = makePool('localhost')
+    await local.query('SELECT 1')
+    pool.end().catch(() => {})
+    pool = local
+    activeHost = 'localhost'
+  }
+  return activeHost
+}
+
+// Queries inside tx() run on the transaction's connection, found through this store.
+const txConnection = new AsyncLocalStorage()
+const runner = () => txConnection.getStore() ?? pool
+
 function bindable(value) {
   if (value === undefined) return null
   if (value === true) return 1
   if (value === false) return 0
-  if (value instanceof Date) return value.getTime()
   return value
 }
-const prep = (params) => params.map(bindable)
 
-const stmtCache = new Map()
-function stmt(sql) {
-  let s = stmtCache.get(sql)
-  if (!s) {
-    s = db.prepare(sql)
-    stmtCache.set(sql, s)
-  }
-  return s
+const camelRow = (row) => {
+  const out = {}
+  for (const k of Object.keys(row)) out[toCamel(k)] = row[k]
+  return out
 }
 
 /** All rows. */
-export const all = (sql, ...params) => stmt(sql).all(...prep(params))
+export async function all(sql, ...params) {
+  const [rows] = await runner().query(sql, params.map(bindable))
+  return rows.map(camelRow)
+}
 /** First row or undefined. */
-export const get = (sql, ...params) => stmt(sql).get(...prep(params))
-/** { changes, lastInsertRowid } */
-export const run = (sql, ...params) => stmt(sql).run(...prep(params))
-/** Single scalar (first column of the first row), or the fallback. */
-export function scalar(sql, ...params) {
-  const row = get(sql, ...params)
+export async function get(sql, ...params) {
+  return (await all(sql, ...params))[0]
+}
+/** { changes, insertId } */
+export async function run(sql, ...params) {
+  const [result] = await runner().query(sql, params.map(bindable))
+  return { changes: result.affectedRows, insertId: result.insertId }
+}
+/** First column of the first row, or null. */
+export async function scalar(sql, ...params) {
+  const row = await get(sql, ...params)
   if (!row) return null
   return Object.values(row)[0]
 }
@@ -160,48 +126,111 @@ export function scalar(sql, ...params) {
 /** "?, ?, ?" for an IN (...) list. */
 export const placeholders = (list) => list.map(() => '?').join(', ')
 
-const q = (name) => `"${name}"`
+// ---------------------------------------------------------------- column types, for insert / update
 
-/** INSERT the object's own keys into `table`; returns the object. */
-export function insert(table, obj) {
-  const keys = Object.keys(obj).filter((k) => obj[k] !== undefined)
-  run(
-    `INSERT INTO ${q(table)} (${keys.map(q).join(', ')}) VALUES (${placeholders(keys)})`,
-    ...keys.map((k) => obj[k]),
-  )
+const columnCache = new Map()
+async function columnsOf(table) {
+  if (!columnCache.has(table)) {
+    columnCache.set(
+      table,
+      pool
+        .query('SELECT column_name AS name, data_type AS type FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ?', [table])
+        .then(([rows]) => new Map(rows.map((r) => [r.name, String(r.type).toLowerCase()]))),
+    )
+  }
+  return columnCache.get(table)
+}
+
+async function toColumns(table, obj) {
+  const types = await columnsOf(table)
+  const cols = []
+  const values = []
+  for (const key of Object.keys(obj)) {
+    const value = obj[key]
+    if (value === undefined) continue
+    const col = toSnake(key)
+    const type = types.get(col)
+    if (!type) throw new Error(`Column ${table}.${col} does not exist`)
+    cols.push(col)
+    if (type === 'datetime' || type === 'timestamp') values.push(typeof value === 'number' ? at(value) : value)
+    else if (type === 'date') values.push(typeof value === 'number' ? day(value) : value)
+    else values.push(bindable(value))
+  }
+  return { cols, values }
+}
+
+/** INSERT the object's own keys (camelCase) into `table`; returns the object. */
+export async function insert(table, obj) {
+  const { cols, values } = await toColumns(table, obj)
+  await run(`INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders(cols)})`, ...values)
   return obj
 }
 
-/** UPDATE the given columns of one row by id. Ignores undefined values. */
-export function update(table, id, patch) {
-  const keys = Object.keys(patch).filter((k) => patch[k] !== undefined)
-  if (!keys.length) return 0
-  return run(`UPDATE ${q(table)} SET ${keys.map((k) => `${q(k)} = ?`).join(', ')} WHERE id = ?`, ...keys.map((k) => patch[k]), id)
-    .changes
-}
-
-export const byId = (table, id) => (id ? get(`SELECT * FROM ${q(table)} WHERE id = ?`, id) : undefined)
-
-let depth = 0
-/** Run fn inside a transaction (nested calls join the outer one). */
-export function tx(fn) {
-  if (depth > 0) return fn()
-  depth += 1
-  db.exec('BEGIN')
-  try {
-    const result = fn()
-    db.exec('COMMIT')
-    return result
-  } catch (err) {
-    db.exec('ROLLBACK')
-    throw err
-  } finally {
-    depth -= 1
+/**
+ * INSERT many objects with the same keys, 500 rows per statement (the Excel import adds thousands).
+ * `refresh` lists snake_case columns to overwrite when a row with the same id is already there.
+ */
+export async function insertMany(table, objs, { refresh = [] } = {}) {
+  const onDuplicate = refresh.length ? ` ON DUPLICATE KEY UPDATE ${refresh.map((c) => `${c} = VALUES(${c})`).join(', ')}` : ''
+  for (let i = 0; i < objs.length; i += 500) {
+    const chunk = []
+    let cols
+    for (const obj of objs.slice(i, i + 500)) {
+      const c = await toColumns(table, obj)
+      cols ??= c.cols
+      chunk.push(c.values)
+    }
+    const row = `(${placeholders(cols)})`
+    await run(`INSERT INTO ${table} (${cols.join(', ')}) VALUES ${chunk.map(() => row).join(', ')}${onDuplicate}`, ...chunk.flat())
   }
 }
 
-/**
- * Pattern for free-text search. SQLite's LIKE is case-insensitive for ASCII,
- * which matches the Python service's ilike (also unescaped).
- */
+/** UPDATE the given columns (camelCase keys) of one row by id. Ignores undefined values. */
+export async function update(table, id, patch) {
+  const { cols, values } = await toColumns(table, patch)
+  if (!cols.length) return 0
+  return (await run(`UPDATE ${table} SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`, ...values, id)).changes
+}
+
+export const byId = async (table, id) => (id ? get(`SELECT * FROM ${table} WHERE id = ?`, id) : undefined)
+
+/** Run fn inside a transaction (nested calls join the outer one). */
+export async function tx(fn) {
+  if (txConnection.getStore()) return fn()
+  const conn = await pool.getConnection()
+  try {
+    await conn.beginTransaction()
+    const result = await txConnection.run(conn, fn)
+    await conn.commit()
+    return result
+  } catch (err) {
+    await conn.rollback()
+    throw err
+  } finally {
+    conn.release()
+  }
+}
+
+/** Pattern for free-text search. MySQL's LIKE is case-insensitive with the utf8mb4_unicode_ci collation. */
 export const like = (text) => `%${String(text)}%`
+
+/** On start: an empty database gets the tables from mysql/schema.sql (on the live server only when allowed). */
+export async function ensureSchema() {
+  const [[{ n }]] = await pool.query("SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'users'")
+  if (Number(n) > 0) return false
+  // On the live server an empty database means the data was not imported or the settings name the
+  // wrong database: stop with a clear message rather than start empty, as the old SQLite setup once did.
+  if (config.isProd && process.env.ALLOW_EMPTY_DATABASE !== 'yes') {
+    throw new Error(`MySQL database ${config.mysql.database} has no tables: import the data first (or set ALLOW_EMPTY_DATABASE=yes for a brand-new start)`)
+  }
+  const conn = await mysql.createConnection({ ...config.mysql, host: activeHost, charset: 'utf8mb4', multipleStatements: true })
+  try {
+    await conn.query(fs.readFileSync(path.join(ROOT, 'mysql', 'schema.sql'), 'utf8'))
+  } finally {
+    await conn.end()
+  }
+  console.log(`[db] created the tables in ${config.mysql.database}`)
+  return true
+}
+
+export const close = () => pool.end()
