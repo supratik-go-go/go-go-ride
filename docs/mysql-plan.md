@@ -194,8 +194,20 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 - [x] Every route and service moved to the new names (25 files). The server makes the tables itself on start (`ensureSchema()`) and stops if the MYSQL_* settings are missing
 - [x] Automatic clean-ups in `src/services/cleanup.js`, run by the hourly timer: sign-ins 30 days, searches 10 per person, notifications 15 days, game moves 3 days after the game ends, activity log 1 year
 - [x] All 727 checks pass against MySQL (`node scripts/api-check.mjs` builds a fresh `gogoride_check` database from the seed on every run). Lists sorted by time keep the old order for items made at the same moment
-- [ ] CLAUDE.md, README and docs/API.md updated for MySQL
-- [ ] Owner creates the MySQL database in hPanel; night-time switch; user count checked
+- [x] CLAUDE.md, README and docs/API.md updated for MySQL
+- [x] Owner created the MySQL database in hPanel (2026-11-25): `u189123021_gogoride` on `srv838.hstgr.io`; login in `deploy-hostinger-cloud/production-secrets.txt`
+- [x] Demo accounts blocked on the live SQLite server (2026-11-25, release-20261124205616); demo passwords out of git (`backend-node/seed/demo-logins.txt`, git-ignored)
+- [x] Switch tool `backend-node/scripts/prepare-switch.mjs`, rehearsed end to end on a stand-in live file: demo data out, owner made super admin, 1,092 Excel buses in, import file 0.4 MB, live-mode server on it, demo login refused
+- [ ] Night-time switch (steps below); user count checked
+
+### Switch night
+
+1. Before: the owner has an account in the app (their own phone and password) and the five `MYSQL_*` environment variables are in hPanel (the old server ignores them).
+2. Owner: hPanel > File Manager > `gogoride-data` > download `gogoride.db` into `D:\Go-Go-Ride\backend-node\data\`.
+3. Claude (MariaDB running): `node scripts/prepare-switch.mjs data/gogoride.db <owner phone> "C:\Users\Administrator\Downloads\bus-import-ready.xlsx"`. It copies, removes the demo data (and anything that pointed at it), makes the owner super admin, loads the Excel buses and writes `data/gogoride-switch.sql.gz`. Check its list of removed accounts before going on.
+4. Owner: hPanel > Databases > phpMyAdmin for `u189123021_gogoride` > Import > that file > Import.
+5. Claude: merge `mysql-move` into `main`, restore point, push. Check https://go-goride.com/api/stats (real users only, 1,092 buses) and a search.
+6. If anything is wrong: `rollback.bat` (the SQLite file on Hostinger is untouched). The server tries `MYSQL_HOST` and then `localhost`, and on the live server it refuses to start on an empty database instead of starting empty.
 
 ### Porting rules (for every route and service)
 

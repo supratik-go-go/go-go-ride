@@ -49,15 +49,41 @@ function typeCast(field, next) {
   }
 }
 
-export const pool = mysql.createPool({
-  ...config.mysql,
-  charset: 'utf8mb4',
-  timezone: '+05:30',
-  connectionLimit: 5,
-  supportBigNumbers: true,
-  multipleStatements: false,
-  typeCast,
-})
+const makePool = (host) =>
+  mysql.createPool({
+    ...config.mysql,
+    host,
+    charset: 'utf8mb4',
+    timezone: '+05:30',
+    connectionLimit: 5,
+    supportBigNumbers: true,
+    multipleStatements: false,
+    typeCast,
+  })
+export let pool = makePool(config.mysql.host)
+let activeHost = config.mysql.host
+
+const SHUT_OUT = new Set(['ENOTFOUND', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'ER_ACCESS_DENIED_ERROR', 'ER_HOST_NOT_PRIVILEGED', 'ER_DBACCESS_DENIED_ERROR'])
+
+/**
+ * On start: makes sure the database answers and returns the host in use. hPanel names the MySQL
+ * server (srv838.hstgr.io), but an app on the same server may only be let in through localhost,
+ * so that is tried when the named host turns the app away.
+ */
+export async function connect() {
+  try {
+    await pool.query('SELECT 1')
+  } catch (err) {
+    if (activeHost === 'localhost' || !SHUT_OUT.has(err.code)) throw err
+    console.warn(`[db] ${activeHost} did not let the app in (${err.code}); trying localhost`)
+    const local = makePool('localhost')
+    await local.query('SELECT 1')
+    pool.end().catch(() => {})
+    pool = local
+    activeHost = 'localhost'
+  }
+  return activeHost
+}
 
 // Queries inside tx() run on the transaction's connection, found through this store.
 const txConnection = new AsyncLocalStorage()
@@ -188,11 +214,16 @@ export async function tx(fn) {
 /** Pattern for free-text search. MySQL's LIKE is case-insensitive with the utf8mb4_unicode_ci collation. */
 export const like = (text) => `%${String(text)}%`
 
-/** On start: an empty database gets the tables from mysql/schema.sql. */
+/** On start: an empty database gets the tables from mysql/schema.sql (on the live server only when allowed). */
 export async function ensureSchema() {
   const [[{ n }]] = await pool.query("SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'users'")
   if (Number(n) > 0) return false
-  const conn = await mysql.createConnection({ ...config.mysql, charset: 'utf8mb4', multipleStatements: true })
+  // On the live server an empty database means the data was not imported or the settings name the
+  // wrong database: stop with a clear message rather than start empty, as the old SQLite setup once did.
+  if (config.isProd && process.env.ALLOW_EMPTY_DATABASE !== 'yes') {
+    throw new Error(`MySQL database ${config.mysql.database} has no tables: import the data first (or set ALLOW_EMPTY_DATABASE=yes for a brand-new start)`)
+  }
+  const conn = await mysql.createConnection({ ...config.mysql, host: activeHost, charset: 'utf8mb4', multipleStatements: true })
   try {
     await conn.query(fs.readFileSync(path.join(ROOT, 'mysql', 'schema.sql'), 'utf8'))
   } finally {

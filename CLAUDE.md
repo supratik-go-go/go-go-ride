@@ -51,7 +51,8 @@ The signing key (`go-go-ride apk/android/keystore/`, `android/keystore.propertie
 - Settings is a menu with sub-pages under `/settings/*` (`src/pages/account/settings/`). Theme: Light / Dark / Auto in `src/utils/theme.js`; all dark CSS lives in `src/styles/dark.css`; admin pages always stay light. Language: English only, Bengali shown as coming soon. Server settings are hidden from ordinary users of the live app.
 - Online games, turn based and polled every 2.5 seconds: chess, ludo (2 players), callbreak (4), twentynine (4, two teams), carrom (2). Ping Ball is a score game only. Points: win 10, draw 3, loss 1; leaving earns 0; a pair only earns from 5 games together a day.
 - Next: see `TASKS.md`. Pending owner decision: computer players for empty seats in Call Break and 29.
-- MySQL move (`docs/mysql-plan.md`): the server runs on MySQL on the local branch `mysql-move` (never pushed; Hostinger deploys only `main`), and all 727 checks pass. Next: the owner's Excel bus data, then the demo-data clean-up and the night-time switch, then the phase B features one release at a time.
+- MySQL move (`docs/mysql-plan.md`): the server runs on MySQL on the local branch `mysql-move` (never pushed; Hostinger deploys only `main`); 739 checks pass. The hPanel database exists. Next: the night-time switch (steps in the plan, tool `scripts/prepare-switch.mjs`), then app v1.9 with the owner's changes, then phase B one release at a time.
+- Demo accounts: blocked on the live server, deleted at the switch. Their passwords are only in `backend-node/seed/demo-logins.txt` (git-ignored; api-check and start-gogo-ride.bat read it). Never put passwords in tracked files: both GitHub repos are public.
 
 ## Code
 

@@ -110,12 +110,8 @@ echo   App        %URL%
 echo   Admin      %URL%/admin/login
 echo   API list   docs\API.md
 echo  -----------------------------------------------
-echo   Demo logins - phone / password (this PC only)
-echo   Passenger    9123456789 / Rider@123
-echo   Bus owner    9876543210 / Owner@123
-echo   Driver       9000011223 / Driver@123
-echo   Admin        9876500002 / Admin@123
-echo   Super admin  9876500001 / Admin@123
+echo   Demo logins - role, phone, password (this PC only)
+if exist "%API%\seed\demo-logins.txt" (findstr /v /b "#" "%API%\seed\demo-logins.txt") else (echo   See backend-node\seed\demo-logins.txt)
 echo  -----------------------------------------------
 if /i "%~1"=="phone" call :phone_info
 echo   Edits to the app code show up instantly.

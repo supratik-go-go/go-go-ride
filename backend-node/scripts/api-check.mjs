@@ -92,13 +92,21 @@ const BASE = `http://127.0.0.1:${server.address().port}/api`
 
 // ---------------------------------------------------------------- requests
 
-const ACCOUNTS = {
-  passenger: ['9123456789', 'Rider@123'],
-  owner: ['9876543210', 'Owner@123'],
-  driver: ['9000011223', 'Driver@123'],
-  admin: ['9876500002', 'Admin@123'],
-  super: ['9876500001', 'Admin@123'],
+// The demo logins of the seed database, from seed/demo-logins.txt (not in git: lines of
+// "role phone password", e.g. "passenger 9123456789 <password>").
+const loginsFile = path.join(root, 'seed', 'demo-logins.txt')
+if (!fs.existsSync(loginsFile)) {
+  console.error(`Missing ${loginsFile}: one line per demo account, "role phone password".`)
+  process.exit(1)
 }
+const ACCOUNTS = Object.fromEntries(
+  fs
+    .readFileSync(loginsFile, 'utf8')
+    .split(/\r?\n/)
+    .map((l) => l.trim().split(/\s+/))
+    .filter((w) => w.length === 3 && !w[0].startsWith('#'))
+    .map(([role, phone, password]) => [role, [phone, password]]),
+)
 
 async function call(method, p, token, body, retry = true) {
   const form = body instanceof FormData

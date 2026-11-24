@@ -47,6 +47,7 @@ Thumbs.db
 # Node API: local data, starter database (contains user accounts), local settings
 backend-node/data/
 backend-node/seed/*.db
+backend-node/seed/demo-logins.txt
 backend-node/seed/uploads/
 deploy-hostinger-cloud/production-secrets.txt
 deploy-hostinger-cloud/gogoride-api.zip
