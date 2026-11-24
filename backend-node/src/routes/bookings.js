@@ -91,7 +91,7 @@ router.get('/bookings', requireUser, async (req, res) => {
   }
   const sqlWhere = where.length ? ` WHERE ${where.join(' AND ')}` : ''
   const total = Number((await scalar(`SELECT count(id) FROM bookings${sqlWhere}`, ...params)) || 0)
-  const rows = await all(`SELECT * FROM bookings${sqlWhere} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  const rows = await all(`SELECT * FROM bookings${sqlWhere} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
   okPage(res, await Promise.all(rows.map((b) => view(b, req.user))), total, page)
 })
 

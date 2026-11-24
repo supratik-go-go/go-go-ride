@@ -101,7 +101,7 @@ router.get('/local-cars/mine/list', requireUser, async (req, res) => {
 
 router.get('/local-cars/:id', async (req, res) => {
   const car = await carOr404(req.params.id)
-  const reviews = await all('SELECT * FROM reviews WHERE local_vehicle_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id DESC LIMIT 10', car.id)
+  const reviews = await all('SELECT * FROM reviews WHERE local_vehicle_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id LIMIT 10', car.id)
   ok(res, await withReviews(car, reviews))
 })
 

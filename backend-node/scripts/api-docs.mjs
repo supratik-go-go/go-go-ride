@@ -9,10 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const out = path.join(root, '..', 'docs', 'API.md')
 
-// Importing the routes opens the database, so point it at a throwaway file.
+// Importing the routes sets up the database pool (it does not connect until a query runs).
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'gogo-api-docs-'))
-process.env.DATABASE_PATH = path.join(work, 'docs.db')
-process.env.STARTER_DATABASE = path.join(work, 'none.db')
 process.env.UPLOAD_DIR = path.join(work, 'uploads')
 const realLog = console.log
 console.log = () => {}
@@ -69,8 +67,8 @@ for (const [file, about] of FILES) {
 
 fs.mkdirSync(path.dirname(out), { recursive: true })
 fs.writeFileSync(out, md.replace(/\n+$/, '\n'))
-const { db } = await load('src/db.js')
-db.close()
+const { close } = await load('src/db.js')
+await close()
 fs.rmSync(work, { recursive: true, force: true })
 realLog(`Wrote ${path.relative(path.join(root, '..'), out)}: ${total} addresses`)
 process.exit(0)

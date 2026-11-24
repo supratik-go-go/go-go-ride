@@ -39,6 +39,7 @@ router.get('/notifications', requireUser, async (req, res) => {
   const total = Number((await scalar(`SELECT count(id) AS c FROM notifications WHERE ${clause}`, ...params)) || 0)
   const unread = await unreadCount(req.user.id)
   const items = await all(
+    // Same-moment notifications newest-id first, as the old SQLite index returned them.
     `SELECT * FROM notifications WHERE ${clause} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`,
     ...params,
     page.limit,
@@ -159,7 +160,7 @@ router.get('/support/tickets', requireUser, async (req, res) => {
   const clause = where.length ? `WHERE ${where.join(' AND ')}` : ''
 
   const total = Number((await scalar(`SELECT count(id) AS c FROM support_tickets ${clause}`, ...params)) || 0)
-  const items = await all(`SELECT * FROM support_tickets ${clause} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  const items = await all(`SELECT * FROM support_tickets ${clause} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
   res.json({ success: true, message: 'Success', data: await Promise.all(items.map(supportTicketOut)), meta: meta(total, page) })
 })
 

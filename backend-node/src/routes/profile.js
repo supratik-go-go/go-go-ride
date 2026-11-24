@@ -117,7 +117,7 @@ router.get('/users/me/login-activity', requireUser, async (req, res) => {
   const userId = req.user.id
   const total = Number((await scalar('SELECT count(id) AS c FROM login_history WHERE user_id = ?', userId)) || 0)
   const items = await all(
-    'SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?',
+    'SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?',
     userId,
     p.limit,
     p.skip,
@@ -133,7 +133,7 @@ const FAVORITE_KINDS = ['BUS', 'ROUTE', 'STOP', 'LOCAL_CAR']
 const fetchByIds = async (table, keys) => (keys.length ? all(`SELECT * FROM ${table} WHERE id IN (${placeholders(keys)})`, ...keys) : [])
 
 router.get('/users/me/favorites', requireUser, async (req, res) => {
-  const favorites = await all('SELECT * FROM favorites WHERE user_id = ? ORDER BY created_at DESC, id DESC', req.user.id)
+  const favorites = await all('SELECT * FROM favorites WHERE user_id = ? ORDER BY created_at DESC, id', req.user.id)
   const ids = Object.fromEntries(FAVORITE_KINDS.map((kind) => [kind, favorites.filter((f) => f.itemType === kind).map((f) => f.itemId)]))
 
   const buses = await Promise.all(
@@ -204,7 +204,7 @@ router.get('/users/me/recent-searches', requireUser, async (req, res) => {
   const limit = q.int('limit', 10, { min: 1, max: 50 })
   q.done()
   const items = await all(
-    'SELECT * FROM recent_searches WHERE user_id = ? ORDER BY searched_at DESC, id DESC LIMIT ?',
+    'SELECT * FROM recent_searches WHERE user_id = ? ORDER BY searched_at DESC, id LIMIT ?',
     req.user.id,
     limit,
   )

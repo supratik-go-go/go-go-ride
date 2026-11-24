@@ -8,6 +8,7 @@ import { insert, scalar } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok } from '../http.js'
 import { processDueAlarms } from '../scheduler.js'
+import { cleanUpHourly } from '../services/cleanup.js'
 import { latestNews } from '../services/news.js'
 import { loadSettings, settingsOut } from '../serialize.js'
 
@@ -65,7 +66,9 @@ router.get('/settings', async (req, res) => ok(res, settingsOut(await getSetting
 // Backup trigger for the alarm job (e.g. an hPanel cron job hitting this every minute).
 router.get('/internal/run-alarms', async (req, res) => {
   if (!config.cronKey || req.query.key !== config.cronKey) throw ApiError.notFound('Not Found')
-  ok(res, { fired: await processDueAlarms() })
+  const fired = await processDueAlarms()
+  await cleanUpHourly()
+  ok(res, { fired })
 })
 
 export default router

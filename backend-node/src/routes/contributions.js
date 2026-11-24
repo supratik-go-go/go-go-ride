@@ -103,7 +103,7 @@ router.get('/route-submissions/mine', requireUser, async (req, res) => {
   const page = pageParams(d, req.query)
   raise(d)
   const total = Number((await scalar('SELECT COUNT(id) FROM bus_route_requests WHERE sent_by = ?', req.user.id)) || 0)
-  const rows = await all('SELECT * FROM bus_route_requests WHERE sent_by = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?', req.user.id, page.limit, page.skip)
+  const rows = await all('SELECT * FROM bus_route_requests WHERE sent_by = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?', req.user.id, page.limit, page.skip)
   okPage(res, await Promise.all(rows.map((r) => submissionOut(r))), total, page)
 })
 
@@ -127,7 +127,7 @@ router.get('/admin/route-requests', requireAdmin, async (req, res) => {
   }
   const clause = where.length ? ` WHERE ${where.join(' AND ')}` : ''
   const total = Number((await scalar(`SELECT COUNT(id) FROM bus_route_requests${clause}`, ...params)) || 0)
-  const rows = await all(`SELECT * FROM bus_route_requests${clause} ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  const rows = await all(`SELECT * FROM bus_route_requests${clause} ORDER BY created_at DESC, id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
   okPage(res, await Promise.all(rows.map((r) => submissionOut(r, { withUser: true }))), total, page)
 })
 

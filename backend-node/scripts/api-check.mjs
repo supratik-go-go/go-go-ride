@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// API safety net. Starts the API in this process on a fresh copy of seed/gogoride.db with the
+// API safety net. Starts the API in this process on a fresh MySQL copy of seed/gogoride.db with the
 // clock frozen, sends every case in scripts/api-cases/*.mjs and compares each answer with the
 // snapshot saved in scripts/api-snapshots/. Run it before and after changing server code:
 // any difference is either a bug or an intended change (then save it with --update).
@@ -11,7 +11,9 @@
 // A case: { name, method = 'GET', path: string | (ctx) => string, as = 'public' | 'passenger' |
 //           'owner' | 'driver' | 'admin' | 'super', body?, ignore?: [keys], mode?: 'full' | 'status' }
 // Cases run in file order against one database copy, so a write case affects later cases.
-// Needs seed/gogoride.db (git-ignored; made by scripts/make-starter.mjs). Live data is never used.
+// Needs seed/gogoride.db (git-ignored; made by scripts/make-starter.mjs) and the local test MariaDB
+// (data/mysql-test.env, see docs/mysql-plan.md). The copy goes into the database gogoride_check, which
+// is wiped and refilled on every run. Live data is never used.
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -56,16 +58,29 @@ globalThis.Date = class extends RealDate {
 }
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'gogo-api-check-'))
-fs.copyFileSync(seed, path.join(work, 'gogoride.db'))
 process.env.ENVIRONMENT = 'development'
-process.env.DATABASE_PATH = path.join(work, 'gogoride.db')
 process.env.UPLOAD_DIR = path.join(work, 'uploads')
+process.env.MYSQL_ENV_FILE = process.env.MYSQL_ENV_FILE || 'data/mysql-test.env'
+process.env.MYSQL_DATABASE = 'gogoride_check'
 const cleanUp = () => fs.rmSync(work, { recursive: true, force: true })
+
+// A fresh copy of the seed in MySQL, through the same copy script the real switch uses.
+{
+  const { config: dbConfig } = await import(pathToFileURL(path.join(root, 'src', 'config.js')).href)
+  const { copySqliteToMysql } = await import(pathToFileURL(path.join(here, 'sqlite-to-mysql.mjs')).href)
+  const mysql = (await import('mysql2/promise')).default
+  const { database, ...server } = dbConfig.mysql
+  const conn = await mysql.createConnection({ ...server, multipleStatements: true, charset: 'utf8mb4' })
+  await conn.query(`DROP DATABASE IF EXISTS \`${database}\`; CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; USE \`${database}\``)
+  await conn.query(fs.readFileSync(path.join(root, 'mysql', 'schema.sql'), 'utf8'))
+  await copySqliteToMysql(seed, conn, { log: () => {} })
+  await conn.end()
+}
 
 const realLog = console.log
 console.log = (...a) => (/^\[(uploads|db)\]/.test(String(a[0])) ? undefined : realLog(...a))
 const { app } = await import(pathToFileURL(path.join(root, 'src', 'app.js')).href)
-const { db } = await import(pathToFileURL(path.join(root, 'src', 'db.js')).href)
+const { close: closeDb } = await import(pathToFileURL(path.join(root, 'src', 'db.js')).href)
 const server = app.listen(0, '127.0.0.1')
 await new Promise((resolve) => server.once('listening', resolve))
 // Node closes idle connections after 5 s; on a busy PC a request can race that close.
@@ -249,7 +264,7 @@ try {
   }
 } finally {
   server.close()
-  db.close()
+  await closeDb()
   cleanUp()
 }
 

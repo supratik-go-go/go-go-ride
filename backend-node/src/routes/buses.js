@@ -195,7 +195,7 @@ router.get('/buses', optionalUser, async (req, res) => {
   const clause = where.length ? ` WHERE ${where.join(' AND ')}` : ''
 
   const total = Number((await scalar(`SELECT COUNT(buses.id) FROM buses${clause}`, ...params)) || 0)
-  const rows = await all(`SELECT * FROM buses${clause} ORDER BY buses.created_at DESC, buses.id DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  const rows = await all(`SELECT * FROM buses${clause} ORDER BY buses.created_at DESC, buses.id LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
   let items = await Promise.all(rows.map(busOut))
   // Owners' personal contact details and ownership documents are not public.
   if (!admin) items = items.map(publicBus)
@@ -207,7 +207,7 @@ router.get('/buses/mine/list', requireUser, async (req, res) => {
   const page = pageParams(d, req.query)
   raise(d)
   const total = Number((await scalar('SELECT COUNT(id) FROM buses WHERE owner_id = ?', req.user.id)) || 0)
-  const rows = await all('SELECT * FROM buses WHERE owner_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?', req.user.id, page.limit, page.skip)
+  const rows = await all('SELECT * FROM buses WHERE owner_id = ? ORDER BY created_at DESC, id LIMIT ? OFFSET ?', req.user.id, page.limit, page.skip)
   const items = await Promise.all(rows.map(busOut))
   okPage(res, items, total, page)
 })
@@ -405,7 +405,7 @@ router.get('/buses/:busId/reviews', async (req, res) => {
   const busId = req.params.busId
   const total = Number((await scalar('SELECT COUNT(id) FROM reviews WHERE bus_id = ? AND is_hidden = 0', busId)) || 0)
   const items = await all(
-    'SELECT * FROM reviews WHERE bus_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?',
+    'SELECT * FROM reviews WHERE bus_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id LIMIT ? OFFSET ?',
     busId,
     page.limit,
     page.skip,

@@ -3,10 +3,10 @@
 // converting as it goes: readable India-time dates, real dates and times, AC as Yes / No, one trip
 // per bus, support replies as messages. Every row is checked: the copy fails if any count differs.
 //
-//   node scripts/sqlite-to-mysql.mjs <sqlite file> <mysql database> [--env data/mysql-test.env] [--replace]
+//   node scripts/sqlite-to-mysql.mjs <sqlite file> <mysql database> [--env data/mysql-test.env] [--replace | --if-empty]
 //
 // The MySQL database is created from mysql/schema.sql. An existing database with tables is only
-// replaced with --replace, so the live database can never be wiped by mistake.
+// replaced with --replace, so the live database can never be wiped by mistake (--if-empty leaves it as is).
 import fs from 'node:fs'
 import path from 'node:path'
 import { DatabaseSync } from 'node:sqlite'
@@ -234,6 +234,8 @@ async function main() {
   })
   try {
     const [[{ n }]] = await conn.query('SELECT COUNT(*) AS n FROM information_schema.tables WHERE table_schema = ?', [database])
+    // start-gogo-ride.bat fills the local database on the first run only.
+    if (Number(n) > 0 && flag('if-empty')) return console.log(`Database ${database} is already filled; keeping it.`)
     if (Number(n) > 0 && !flag('replace')) throw new Error(`Database ${database} already has ${n} tables. Add --replace to wipe and refill it.`)
     await conn.query(`DROP DATABASE IF EXISTS \`${database}\`; CREATE DATABASE \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; USE \`${database}\``)
     await conn.query(fs.readFileSync(path.join(root, 'mysql', 'schema.sql'), 'utf8'))

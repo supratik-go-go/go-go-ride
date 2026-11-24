@@ -163,7 +163,7 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 - Kept for easy reading and so today's code keeps working: `bus_id` next to `trip_id` in `bus_timetable`, `alarms` and `bookings`. Favorites keep the stored value `LOCAL_CAR`.
 - Support: the opening question stays in `support_tickets.message`; replies (today's `response`) go to `support_ticket_messages`.
 - Dates and times are stored in India time (`DATETIME(3)`, millisecond precision); date-only values as `DATE`; times of day as `TIME`.
-- Local test database on this PC: MariaDB 11.4 in `C:\GoGoTools\mariadb`, data in `C:\GoGoTools\mariadb-data`, port 3307, local only. Start it in the Terminal panel with `& 'C:\GoGoTools\mariadbin\mariadbd.exe' --defaults-file='C:\GoGoTools\mariadb-data\my.ini' --console`. Its password is in `backend-node/data/mysql-test.env` (git-ignored).
+- Local test database on this PC: MariaDB 11.4 in `C:\GoGoTools\mariadb`, data in `C:\GoGoTools\mariadb-data`, port 3307, local only. Start it in the Terminal panel with `& 'C:\GoGoTools\mariadb\bin\mariadbd.exe' --defaults-file='C:\GoGoTools\mariadb-data\my.ini' --console`. Its password is in `backend-node/data/mysql-test.env` (git-ignored).
 - Server package: `mysql2`.
 
 ### Owner's order (2026-11-24)
@@ -177,12 +177,10 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 - [x] Design written and loaded into the test database (32 tables, 301 columns, 53 links; Bengali works)
 - [x] Copy script `backend-node/scripts/sqlite-to-mysql.mjs`: every conversion, every row count checked (demo copy 679 rows, fuller test copy 844 rows). Phone columns are 64 long because deleted accounts keep `deleted-<id>` (33 characters)
 - [x] Server data layer for MySQL (`src/db.js`, async, camelCase rows, India-time dates); `config.mysql` from MYSQL_* settings
-- [ ] Every route and service moved to the new names (about 390 places in 25 files)
-  - Done: `db.js`, `config.js`, `errors.js` (MySQL error codes), `serialize.js`, `auth.js` (sign-in checks), `services/common.js`, `pyfields.js` (saveChanges), `routes/platform.js`, `routes/auth.js`, `routes/profile.js`, `routes/network.js`, `services/buses.js` (search loads timetables in one batch), `routes/buses.js`, `routes/alarms.js`, `routes/cars.js`, `routes/bookings.js`, `routes/messaging.js` (support replies in support_ticket_messages)
-  - To do: `routes/contributions.js`, `routes/admin.js` + `services/reports.js`, `routes/games.js` + `services/games.js` + `services/pingball.js`, `services/busImport.js`, `scheduler.js`, `app.js` / `server.js` (call `ensureSchema()` on start), `scripts/api-check.mjs` (fresh MySQL copy per run) and `scripts/api-docs.mjs`
-  - Callers to update when their file is ported: `getSettingsRow()` and `platformCounters()` are async now
-- [ ] Automatic clean-ups (sign-ins 30 days, searches 10, notifications 15 days, game moves 3 days, activity log 1 year)
-- [ ] All 727 checks pass against MySQL
+- [x] Every route and service moved to the new names (25 files). The server makes the tables itself on start (`ensureSchema()`) and stops if the MYSQL_* settings are missing
+- [x] Automatic clean-ups in `src/services/cleanup.js`, run by the hourly timer: sign-ins 30 days, searches 10 per person, notifications 15 days, game moves 3 days after the game ends, activity log 1 year
+- [x] All 727 checks pass against MySQL (`node scripts/api-check.mjs` builds a fresh `gogoride_check` database from the seed on every run). Lists sorted by time keep the old order for items made at the same moment
+- [ ] CLAUDE.md, README and docs/API.md updated for MySQL
 - [ ] Owner creates the MySQL database in hPanel; night-time switch; user count checked
 
 ### Porting rules (for every route and service)
