@@ -79,8 +79,13 @@ export const stopageOut = async (s) => ({
   departureTime12h: to12h(s.departureTime),
 })
 
-/** A bus's timetable, in stop order. Until the trips update every bus has one trip. */
-export const busStopages = (busId) => all('SELECT * FROM bus_timetable WHERE bus_id = ? ORDER BY stop_order', busId)
+/** The timetable of a bus's first trip, in stop order (the app shows one trip per bus until the trips update). */
+export const busStopages = (busId) =>
+  all(
+    `SELECT * FROM bus_timetable WHERE trip_id = (SELECT id FROM bus_trips WHERE bus_id = ? AND is_active = 1 ORDER BY trip_number LIMIT 1)
+     ORDER BY stop_order`,
+    busId,
+  )
 
 /**
  * The timetable shape used on Bus Details: like stopageOut but with busId/stopId

@@ -41,17 +41,45 @@ export function parseDay(value, fieldName = 'date') {
 // ---------------------------------------------------------------- legs
 
 /**
- * Timetables of many buses at once, in stop order, each row with its stop attached: two queries
- * instead of one per bus and one per stop, so search stays fast with a thousand buses.
+ * Timetables of many buses at once: for each bus its trips (first trip first), each trip in stop
+ * order with its stops attached. Two queries instead of one per bus and one per stop, so search
+ * stays fast with a thousand buses. A bus that goes out and back has two trips.
  */
-async function loadStopagesFor(busIds) {
+async function loadTripsFor(busIds) {
   const byBus = new Map(busIds.map((id) => [id, []]))
   if (!busIds.length) return byBus
-  const rows = await all(`SELECT * FROM bus_timetable WHERE bus_id IN (${placeholders(busIds)}) ORDER BY bus_id, stop_order`, ...busIds)
+  const rows = await all(
+    `SELECT t.* FROM bus_timetable t JOIN bus_trips r ON r.id = t.trip_id
+     WHERE t.bus_id IN (${placeholders(busIds)}) AND r.is_active = 1 ORDER BY t.bus_id, r.trip_number, t.stop_order`,
+    ...busIds,
+  )
   const stopIds = [...new Set(rows.map((r) => r.stopId))]
   const stops = new Map((stopIds.length ? await all(`SELECT * FROM bus_stops WHERE id IN (${placeholders(stopIds)})`, ...stopIds) : []).map((s) => [s.id, s]))
-  for (const r of rows) byBus.get(r.busId).push({ ...r, stop: stops.get(r.stopId) })
+  for (const r of rows) {
+    const trips = byBus.get(r.busId)
+    if (trips.at(-1)?.[0].tripId !== r.tripId) trips.push([])
+    trips.at(-1).push({ ...r, stop: stops.get(r.stopId) })
+  }
   return byBus
+}
+
+/** One bus's trips, each in stop order (without the stops attached). */
+export async function tripsOf(busId) {
+  const trips = []
+  const rows = await all(
+    'SELECT t.* FROM bus_timetable t JOIN bus_trips r ON r.id = t.trip_id WHERE t.bus_id = ? AND r.is_active = 1 ORDER BY r.trip_number, t.stop_order',
+    busId,
+  )
+  for (const r of rows) {
+    if (trips.at(-1)?.[0].tripId !== r.tripId) trips.push([])
+    trips.at(-1).push(r)
+  }
+  return trips
+}
+
+/** The first trip that goes from one stop to the other (stop ids; a missing one matches any). */
+export function tripBetween(trips, fromStopId, toStopId) {
+  return trips.find((t) => findLeg(t, fromStopId, toStopId)) ?? null
 }
 
 /** The portion of a timetable between two stops; null when the bus does not serve that pair in that direction. */
@@ -120,7 +148,7 @@ const stopRef = (stop) => (stop ? { id: stop.id, name: stop.name ?? null } : nul
 
 const SORTERS = {
   departure: (r) => r.departureTime,
-  fare: (r) => r.fare,
+  fare: (r) => r.fare ?? Infinity, // fare not known: last
   duration: (r) => r.durationMinutes,
   rating: (r) => -r.rating.average,
 }
@@ -197,13 +225,16 @@ export async function searchBuses({
       excepted.set(row.busId, row)
     }
   }
-  const timetables = await loadStopagesFor(ids)
+  const timetables = await loadTripsFor(ids)
   const routeIds = [...new Set(buses.map((b) => b.routeId).filter(Boolean))]
   const routes = new Map((routeIds.length ? await all(`SELECT * FROM bus_routes WHERE id IN (${placeholders(routeIds)})`, ...routeIds) : []).map((r) => [r.id, r]))
 
   let results = []
   for (const bus of buses) {
-    const stopages = timetables.get(bus.id)
+    const trips = timetables.get(bus.id)
+    // A bus that goes out and back shows the trip in the passenger's direction (else its first trip).
+    const stopages =
+      trips.find((t) => findLeg(t, fromId, toId) && (!viaId || passesThrough(t, viaId, fromId, toId))) ?? trips[0] ?? []
     const leg = findLeg(stopages, fromId, toId)
     if (!leg && searchType === 'ROUTE' && fromId && toId) continue
     if (viaId && !passesThrough(stopages, viaId, fromId, toId)) continue
@@ -235,7 +266,7 @@ export async function searchBuses({
       type: bus.isAc ? 'AC' : 'NON_AC',
       category: bus.category,
       operator: bus.operator ?? null,
-      fare: Number(bus.fare),
+      fare: bus.fare === null ? null : Number(bus.fare),
       totalSeats: bus.totalSeats,
       rating: { average: Number(bus.ratingAverage), count: bus.ratingCount },
       from: leg ? stopRef(leg.fromStop) : null,
@@ -363,11 +394,11 @@ export async function insertStopages(busId, stopages, stopIds) {
   }
 }
 
-/** Rewrites a bus timetable in order. */
+/** Rewrites the timetable of a bus's first trip in order (its other trips stay as they are). */
 export async function replaceStopages(busId, stopages, stopStatus = 'ACTIVE') {
   const stopIds = []
   for (const s of stopages) stopIds.push(await resolveStopId(s, stopStatus))
-  await run('DELETE FROM bus_timetable WHERE bus_id = ?', busId)
+  await run('DELETE FROM bus_timetable WHERE trip_id = ?', `t_${busId}`)
   await insertStopages(busId, stopages, stopIds)
 }
 

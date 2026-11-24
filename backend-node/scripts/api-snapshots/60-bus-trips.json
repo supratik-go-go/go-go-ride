@@ -1,0 +1,1149 @@
+{
+ "one-row sheet still reads": {
+  "status": 200,
+  "body": {
+   "data": {
+    "applied": null,
+    "rows": [
+     {
+      "ac": false,
+      "action": "create",
+      "busName": "Esplanade Express",
+      "busNumber": "WB 04 F 1234",
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [],
+      "estimatedTimes": 0,
+      "fare": 20,
+      "row": 2,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "07:00"
+       },
+       {
+        "isNew": false,
+        "name": "Howrah Bridge",
+        "time": "07:10"
+       },
+       {
+        "isNew": false,
+        "name": "Esplanade",
+        "time": "07:35"
+       }
+      ],
+      "trips": 1,
+      "warnings": []
+     },
+     {
+      "ac": true,
+      "action": "create",
+      "busName": "Sector V Shuttle",
+      "busNumber": "WB 19 K 5678",
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT"
+      ],
+      "errors": [],
+      "estimatedTimes": 0,
+      "fare": 45,
+      "row": 3,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Sealdah",
+        "time": "08:00"
+       },
+       {
+        "isNew": false,
+        "name": "Salt Lake Sector V",
+        "time": "08:40"
+       }
+      ],
+      "trips": 1,
+      "warnings": []
+     }
+    ],
+    "summary": {
+     "create": 2,
+     "error": 0,
+     "update": 0
+    }
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "two-tab sheet: check": {
+  "status": 200,
+  "body": {
+   "data": {
+    "applied": null,
+    "rows": [
+     {
+      "ac": false,
+      "action": "create",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [],
+      "estimatedTimes": 2,
+      "fare": null,
+      "row": 2,
+      "stops": [
+       {
+        "isNew": true,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "06:45"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 2,
+      "warnings": [
+       "Trip 1: 1 of 3 times worked out",
+       "Trip 2: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": true,
+      "action": "create",
+      "busName": "Test Express",
+      "busNumber": "WB 99 T 1234",
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT"
+      ],
+      "errors": [],
+      "estimatedTimes": 1,
+      "fare": 35,
+      "row": 3,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "08:02"
+       },
+       {
+        "isNew": false,
+        "name": "Esplanade",
+        "time": "08:35"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "09:15"
+       }
+      ],
+      "trips": 1,
+      "warnings": [
+       "Trip 1: Esplanade 08:30 PM is out of order, worked it out again",
+       "Trip 1: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test One Stop",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "No trip has at least 2 stops and a known time"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 4,
+      "stops": [],
+      "trips": 0,
+      "warnings": [
+       "Trip 1 has only one stop, left out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "Same bus as row 2 (same name, first stop and time)"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 5,
+      "stops": [
+       {
+        "isNew": true,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 1,
+      "warnings": []
+     }
+    ],
+    "summary": {
+     "create": 2,
+     "error": 2,
+     "update": 0
+    }
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "two-tab sheet as a passenger": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN"
+  }
+ },
+ "two-tab sheet: import": {
+  "status": 200,
+  "body": {
+   "data": {
+    "applied": {
+     "created": 2,
+     "skipped": 2,
+     "updated": 0
+    },
+    "rows": [
+     {
+      "ac": false,
+      "action": "create",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [],
+      "estimatedTimes": 2,
+      "fare": null,
+      "row": 2,
+      "stops": [
+       {
+        "isNew": true,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "06:45"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 2,
+      "warnings": [
+       "Trip 1: 1 of 3 times worked out",
+       "Trip 2: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": true,
+      "action": "create",
+      "busName": "Test Express",
+      "busNumber": "WB 99 T 1234",
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT"
+      ],
+      "errors": [],
+      "estimatedTimes": 1,
+      "fare": 35,
+      "row": 3,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "08:02"
+       },
+       {
+        "isNew": false,
+        "name": "Esplanade",
+        "time": "08:35"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "09:15"
+       }
+      ],
+      "trips": 1,
+      "warnings": [
+       "Trip 1: Esplanade 08:30 PM is out of order, worked it out again",
+       "Trip 1: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test One Stop",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "No trip has at least 2 stops and a known time"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 4,
+      "stops": [],
+      "trips": 0,
+      "warnings": [
+       "Trip 1 has only one stop, left out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "Same bus as row 2 (same name, first stop and time)"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 5,
+      "stops": [
+       {
+        "isNew": true,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": true,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 1,
+      "warnings": []
+     }
+    ],
+    "summary": {
+     "create": 2,
+     "error": 2,
+     "update": 0
+    }
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "two-tab sheet again: updates, no copies": {
+  "status": 200,
+  "body": {
+   "data": {
+    "applied": null,
+    "rows": [
+     {
+      "ac": false,
+      "action": "update",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [],
+      "estimatedTimes": 2,
+      "fare": null,
+      "row": 2,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "06:45"
+       },
+       {
+        "isNew": false,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 2,
+      "warnings": [
+       "Trip 1: 1 of 3 times worked out",
+       "Trip 2: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": true,
+      "action": "update",
+      "busName": "Test Express",
+      "busNumber": "WB 99 T 1234",
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT"
+      ],
+      "errors": [],
+      "estimatedTimes": 1,
+      "fare": 35,
+      "row": 3,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Howrah Station",
+        "time": "08:02"
+       },
+       {
+        "isNew": false,
+        "name": "Esplanade",
+        "time": "08:35"
+       },
+       {
+        "isNew": false,
+        "name": "Test Ghat",
+        "time": "09:15"
+       }
+      ],
+      "trips": 1,
+      "warnings": [
+       "Trip 1: Esplanade 08:30 PM is out of order, worked it out again",
+       "Trip 1: 1 of 3 times worked out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test One Stop",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "No trip has at least 2 stops and a known time"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 4,
+      "stops": [],
+      "trips": 0,
+      "warnings": [
+       "Trip 1 has only one stop, left out"
+      ]
+     },
+     {
+      "ac": false,
+      "action": "error",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "days": [
+       "MON",
+       "TUE",
+       "WED",
+       "THU",
+       "FRI",
+       "SAT",
+       "SUN"
+      ],
+      "errors": [
+       "Same bus as row 2 (same name, first stop and time)"
+      ],
+      "estimatedTimes": 0,
+      "fare": null,
+      "row": 5,
+      "stops": [
+       {
+        "isNew": false,
+        "name": "Test Bazar",
+        "time": "06:02"
+       },
+       {
+        "isNew": false,
+        "name": "Test Ghat",
+        "time": "07:32"
+       }
+      ],
+      "trips": 1,
+      "warnings": []
+     }
+    ],
+    "summary": {
+     "create": 0,
+     "error": 2,
+     "update": 2
+    }
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "search out: first trip": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "category": "NORMAL",
+      "departureTime": "06:02",
+      "departureTime12h": "06:02 AM",
+      "durationLabel": "1h 28m",
+      "durationMinutes": 88,
+      "fare": null,
+      "from": {
+       "name": "Test Bazar"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": null,
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Test Bazar - Test Ghat",
+      "routeNumber": null,
+      "to": {
+       "name": "Test Ghat"
+      },
+      "totalSeats": 0,
+      "type": "NON_AC"
+     }
+    ],
+    "date": "2026-09-22",
+    "from": {
+     "name": "Test Bazar"
+    },
+    "to": {
+     "name": "Test Ghat"
+    },
+    "total": 1
+   },
+   "message": "1 buses found",
+   "success": true
+  }
+ },
+ "search back: second trip": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "arrivalTime": "19:10",
+      "arrivalTime12h": "07:10 PM",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "category": "NORMAL",
+      "departureTime": "17:02",
+      "departureTime12h": "05:02 PM",
+      "durationLabel": "2h 8m",
+      "durationMinutes": 128,
+      "fare": null,
+      "from": {
+       "name": "Test Ghat"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": 422,
+      "notRunningReason": null,
+      "operator": null,
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Test Ghat - Test Bazar",
+      "routeNumber": null,
+      "to": {
+       "name": "Test Bazar"
+      },
+      "totalSeats": 0,
+      "type": "NON_AC"
+     }
+    ],
+    "date": "2026-09-22",
+    "from": {
+     "name": "Test Ghat"
+    },
+    "to": {
+     "name": "Test Bazar"
+    },
+    "total": 1
+   },
+   "message": "1 buses found",
+   "success": true
+  }
+ },
+ "search by fare: unknown fare last": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "arrivalTime": "09:10",
+      "arrivalTime12h": "09:10 AM",
+      "busName": "Test Express",
+      "busNumber": "WB 99 T 1234",
+      "category": "EXPRESS",
+      "departureTime": "08:02",
+      "departureTime12h": "08:02 AM",
+      "durationLabel": "1h 8m",
+      "durationMinutes": 68,
+      "fare": 35,
+      "from": {
+       "name": "Howrah Station"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "Test Travels",
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Howrah Station - Test Ghat",
+      "routeNumber": null,
+      "to": {
+       "name": "Test Ghat"
+      },
+      "totalSeats": 40,
+      "type": "AC"
+     },
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "category": "NORMAL",
+      "departureTime": "06:45",
+      "departureTime12h": "06:45 AM",
+      "durationLabel": "45m",
+      "durationMinutes": 45,
+      "fare": null,
+      "from": {
+       "name": "Howrah Station"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": null,
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Test Bazar - Test Ghat",
+      "routeNumber": null,
+      "to": {
+       "name": "Test Ghat"
+      },
+      "totalSeats": 0,
+      "type": "NON_AC"
+     }
+    ],
+    "date": "2026-09-22",
+    "from": {
+     "name": "Howrah Station"
+    },
+    "to": {
+     "name": "Test Ghat"
+    },
+    "total": 2
+   },
+   "message": "2 buses found",
+   "success": true
+  }
+ },
+ "search by bus name": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "busName": "Test Out And Back",
+      "busNumber": null,
+      "category": "NORMAL",
+      "departureTime": "06:02",
+      "departureTime12h": "06:02 AM",
+      "durationLabel": "1h 28m",
+      "durationMinutes": 88,
+      "fare": null,
+      "from": {
+       "name": "Test Bazar"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": null,
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Test Bazar - Test Ghat",
+      "routeNumber": null,
+      "to": {
+       "name": "Test Ghat"
+      },
+      "totalSeats": 0,
+      "type": "NON_AC"
+     }
+    ],
+    "date": "2026-09-22",
+    "from": null,
+    "to": null,
+    "total": 1
+   },
+   "message": "1 buses found",
+   "success": true
+  }
+ },
+ "stops: a bus out and back counts once": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": null,
+     "busesAvailable": 1,
+     "city": "Kolkata",
+     "createdAt": null,
+     "latitude": null,
+     "longitude": null,
+     "name": "Test Bazar",
+     "routes": 0,
+     "status": "ACTIVE",
+     "updatedAt": null
+    },
+    {
+     "area": null,
+     "busesAvailable": 2,
+     "city": "Kolkata",
+     "createdAt": null,
+     "latitude": null,
+     "longitude": null,
+     "name": "Test Ghat",
+     "routes": 0,
+     "status": "ACTIVE",
+     "updatedAt": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 2,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "bus details: first trip": {
+  "status": 200,
+  "body": {
+   "data": {
+    "availability": {
+     "date": "2026-09-22",
+     "isRunning": true,
+     "reason": null
+    },
+    "busName": "Test Out And Back",
+    "busNumber": null,
+    "category": "NORMAL",
+    "contactEnd": "21:00",
+    "contactNumber": "98********",
+    "contactStart": "07:00",
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "documents": [],
+    "exceptions": [],
+    "fare": null,
+    "imageUrl": null,
+    "journey": {
+     "arrivalTime": "07:30",
+     "departureTime": "06:02",
+     "durationLabel": "1h 28m",
+     "durationMinutes": 88,
+     "totalDistanceKm": 0
+    },
+    "operator": null,
+    "owner": {
+     "avatarUrl": null,
+     "email": null,
+     "name": "Operations Admin",
+     "phone": null
+    },
+    "ownerId": "cmua7ig2h00022qtjqg7pglpb",
+    "ratingAvg": 0,
+    "ratingCount": 0,
+    "rejectionReason": null,
+    "reviewedAt": "2026-09-22T04:30:00.000Z",
+    "reviewedById": "cmua7ig2h00022qtjqg7pglpb",
+    "reviews": [],
+    "route": null,
+    "routeId": null,
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "APPROVED",
+    "stopages": [
+     {
+      "arrivalTime": "06:00",
+      "arrivalTime12h": "06:00 AM",
+      "departureTime": "06:02",
+      "departureTime12h": "06:02 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": true,
+      "sequence": 1,
+      "stop": {
+       "area": null,
+       "city": "Kolkata",
+       "createdAt": "2026-09-22T04:30:00.000Z",
+       "latitude": null,
+       "longitude": null,
+       "name": "Test Bazar",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-22T04:30:00.000Z"
+      }
+     },
+     {
+      "arrivalTime": "06:45",
+      "arrivalTime12h": "06:45 AM",
+      "departureTime": "06:45",
+      "departureTime12h": "06:45 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     },
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "departureTime": "07:32",
+      "departureTime12h": "07:32 AM",
+      "distanceKm": 0,
+      "isEnd": true,
+      "isStart": false,
+      "sequence": 3,
+      "stop": {
+       "area": null,
+       "city": "Kolkata",
+       "createdAt": "2026-09-22T04:30:00.000Z",
+       "latitude": null,
+       "longitude": null,
+       "name": "Test Ghat",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-22T04:30:00.000Z"
+      }
+     }
+    ],
+    "submittedAt": "2026-09-22T04:30:00.000Z",
+    "timetable": [
+     {
+      "arrivalTime": "06:00",
+      "arrivalTime12h": "06:00 AM",
+      "departureTime": "06:02",
+      "departureTime12h": "06:02 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": true,
+      "sequence": 1,
+      "stop": {
+       "area": null,
+       "city": "Kolkata",
+       "createdAt": "2026-09-22T04:30:00.000Z",
+       "latitude": null,
+       "longitude": null,
+       "name": "Test Bazar",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-22T04:30:00.000Z"
+      }
+     },
+     {
+      "arrivalTime": "06:45",
+      "arrivalTime12h": "06:45 AM",
+      "departureTime": "06:45",
+      "departureTime12h": "06:45 AM",
+      "distanceKm": 0,
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      }
+     },
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "departureTime": "07:32",
+      "departureTime12h": "07:32 AM",
+      "distanceKm": 0,
+      "isEnd": true,
+      "isStart": false,
+      "sequence": 3,
+      "stop": {
+       "area": null,
+       "city": "Kolkata",
+       "createdAt": "2026-09-22T04:30:00.000Z",
+       "latitude": null,
+       "longitude": null,
+       "name": "Test Ghat",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-22T04:30:00.000Z"
+      }
+     }
+    ],
+    "totalSeats": 0,
+    "type": "NON_AC",
+    "updatedAt": "2026-09-22T04:30:00.000Z"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "alarm on the way back uses the second trip": {
+  "status": 201,
+  "body": {
+   "data": {
+    "alarmDate": "2026-09-22T00:00:00.000Z",
+    "arrivalStop": {
+     "area": null,
+     "city": "Kolkata",
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "latitude": null,
+     "longitude": null,
+     "name": "Test Bazar",
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-22T04:30:00.000Z"
+    },
+    "boardingStop": {
+     "area": null,
+     "city": "Kolkata",
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "latitude": null,
+     "longitude": null,
+     "name": "Test Ghat",
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-22T04:30:00.000Z"
+    },
+    "bus": {
+     "busName": "Test Out And Back",
+     "busNumber": null,
+     "category": "NORMAL",
+     "contactEnd": "21:00",
+     "contactNumber": "98********",
+     "contactStart": "07:00",
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "documents": [],
+     "fare": null,
+     "imageUrl": null,
+     "operator": null,
+     "owner": {
+      "avatarUrl": null,
+      "email": null,
+      "name": "Operations Admin",
+      "phone": null
+     },
+     "ownerId": "cmua7ig2h00022qtjqg7pglpb",
+     "ratingAvg": 0,
+     "ratingCount": 0,
+     "rejectionReason": null,
+     "reviewedAt": "2026-09-22T04:30:00.000Z",
+     "reviewedById": "cmua7ig2h00022qtjqg7pglpb",
+     "route": null,
+     "routeId": null,
+     "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+     "status": "APPROVED",
+     "stopages": [
+      {
+       "arrivalTime": "06:00",
+       "arrivalTime12h": "06:00 AM",
+       "departureTime": "06:02",
+       "departureTime12h": "06:02 AM",
+       "distanceKm": 0,
+       "isEnd": false,
+       "isStart": false,
+       "sequence": 1,
+       "stop": {
+        "area": null,
+        "city": "Kolkata",
+        "createdAt": "2026-09-22T04:30:00.000Z",
+        "latitude": null,
+        "longitude": null,
+        "name": "Test Bazar",
+        "status": "ACTIVE",
+        "updatedAt": "2026-09-22T04:30:00.000Z"
+       }
+      },
+      {
+       "arrivalTime": "06:45",
+       "arrivalTime12h": "06:45 AM",
+       "departureTime": "06:45",
+       "departureTime12h": "06:45 AM",
+       "distanceKm": 0,
+       "isEnd": false,
+       "isStart": false,
+       "sequence": 2,
+       "stop": {
+        "area": "Howrah",
+        "city": "Kolkata",
+        "createdAt": "2026-09-20T19:26:01.605Z",
+        "latitude": 22.5839,
+        "longitude": 88.3425,
+        "name": "Howrah Station",
+        "status": "ACTIVE",
+        "updatedAt": "2026-09-20T19:26:01.605Z"
+       }
+      },
+      {
+       "arrivalTime": "07:30",
+       "arrivalTime12h": "07:30 AM",
+       "departureTime": "07:32",
+       "departureTime12h": "07:32 AM",
+       "distanceKm": 0,
+       "isEnd": false,
+       "isStart": false,
+       "sequence": 3,
+       "stop": {
+        "area": null,
+        "city": "Kolkata",
+        "createdAt": "2026-09-22T04:30:00.000Z",
+        "latitude": null,
+        "longitude": null,
+        "name": "Test Ghat",
+        "status": "ACTIVE",
+        "updatedAt": "2026-09-22T04:30:00.000Z"
+       }
+      }
+     ],
+     "submittedAt": "2026-09-22T04:30:00.000Z",
+     "totalSeats": 0,
+     "type": "NON_AC",
+     "updatedAt": "2026-09-22T04:30:00.000Z"
+    },
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "expectedArrival": "17:00",
+    "expectedArrival12h": "05:00 PM",
+    "notifiedAt": null,
+    "notifyAt": "16:45",
+    "notifyAt12h": "04:45 PM",
+    "remindBeforeMin": 15,
+    "status": "ACTIVE",
+    "userId": "cmua7ig2h0008af67g99rwmsv"
+   },
+   "message": "Alarm saved. We will remind you before your bus arrives.",
+   "success": true
+  }
+ }
+}

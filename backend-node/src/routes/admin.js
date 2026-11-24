@@ -510,6 +510,9 @@ router.post('/admin/buses/import', requireAdmin, singleFile, async (req, res) =>
       fare: p.fare,
       days: p.days,
       stops: p.stops.map((s) => ({ name: s.name, time: s.time, isNew: !s.stopId })),
+      trips: p.trips ? p.trips.length : 1,
+      estimatedTimes: p.estimated ?? 0,
+      warnings: p.warnings ?? [],
       errors: p.errors,
     })),
   })

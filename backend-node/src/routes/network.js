@@ -87,13 +87,13 @@ export function haversineKm(lat1, lon1, lat2, lon2) {
   return 2 * radius * Math.asin(Math.sqrt(a))
 }
 
-/** Per-stop counts of timetable rows (busesAvailable) and route memberships (routes). */
+/** Per-stop counts of buses (busesAvailable; a bus out and back counts once) and route memberships (routes). */
 async function stopCounts(stopIds) {
   const buses = new Map()
   const routes = new Map()
   if (!stopIds.length) return { buses, routes }
   const ph = placeholders(stopIds)
-  for (const r of await all(`SELECT stop_id AS id, COUNT(id) AS n FROM bus_timetable WHERE stop_id IN (${ph}) GROUP BY stop_id`, ...stopIds)) {
+  for (const r of await all(`SELECT stop_id AS id, COUNT(DISTINCT bus_id) AS n FROM bus_timetable WHERE stop_id IN (${ph}) GROUP BY stop_id`, ...stopIds)) {
     buses.set(r.id, Number(r.n))
   }
   for (const r of await all(`SELECT stop_id AS id, COUNT(id) AS n FROM bus_route_stops WHERE stop_id IN (${ph}) GROUP BY stop_id`, ...stopIds)) {

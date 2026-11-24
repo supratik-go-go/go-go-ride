@@ -1,5 +1,6 @@
 // Buses from the owner's Excel sheet (docs/bus-import-template.xlsx): one row per bus, all its
 // stops and times in one cell. Rows are checked first and shown to the admin, then imported.
+// The bigger sheet with Buses and Stops tabs (and two trips per bus) is read by busTripImport.js.
 import readXlsxFile from 'read-excel-file/node'
 import { at, get, insert, run, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
@@ -8,6 +9,7 @@ import { haversineKm } from '../routes/network.js'
 import { getSettingsRow } from '../routes/platform.js'
 import { logActivity } from './common.js'
 import { insertStopages } from './buses.js'
+import { applyTripImport, planTripImport, readTripSheets } from './busTripImport.js'
 
 const MAX_ROWS = 500
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
@@ -23,9 +25,9 @@ const COLUMNS = {
   stops: /stops?/i,
 }
 
-const text = (v) => (v === null || v === undefined ? '' : String(v).trim())
+export const text = (v) => (v === null || v === undefined ? '' : String(v).trim())
 
-function readDays(raw) {
+export function readDays(raw) {
   const value = text(raw).toUpperCase().replace(/\s+/g, '')
   if (!value || value === 'DAILY' || value === 'EVERYDAY') return DAYS
   const days = []
@@ -67,7 +69,10 @@ function readStops(raw) {
 const findStop = (name) =>
   get(`SELECT id, name, latitude, longitude FROM bus_stops WHERE name = ? ORDER BY status = 'ACTIVE' DESC, created_at, id LIMIT 1`, name)
 
-/** Read the uploaded workbook into one object per filled row, keeping the Excel row number. */
+/**
+ * Read the uploaded workbook into one object per filled row, keeping the Excel row number.
+ * The bigger sheet (Buses and Stops tabs) comes back as { trips: true, buses, stops }.
+ */
 export async function readSheet(buffer) {
   let sheets
   try {
@@ -75,6 +80,8 @@ export async function readSheet(buffer) {
   } catch {
     throw ApiError.badRequest('That file could not be read. Save it as an Excel .xlsx file and try again.')
   }
+  const tripSheet = readTripSheets(sheets)
+  if (tripSheet) return tripSheet
   // The bus table may not be the first tab, so use whichever tab has a Bus Number header.
   const hasHeader = (r) => r.some((c) => COLUMNS.busNumber.test(text(c)))
   const rows = sheets.find((s) => s.data.some(hasHeader))?.data
@@ -93,6 +100,7 @@ export async function readSheet(buffer) {
 
 /** What would happen to each row. Nothing is written. */
 export async function planImport(rows) {
+  if (rows.trips) return planTripImport(rows)
   const seen = new Set()
   const plan = []
   for (const r of rows) {
@@ -165,6 +173,7 @@ async function stopIdFor(stop) {
 /** Write every row without errors. `publish` makes new buses live straight away. */
 export async function applyImport(plan, admin, { publish }) {
   const ready = plan.filter((p) => p.action !== 'error')
+  if (plan.some((p) => p.trips)) return { ...(await applyTripImport(ready, admin, { publish })), skipped: plan.length - ready.length }
   const contactFallback = (await getSettingsRow()).contactNumber
   let created = 0
   let updated = 0
@@ -182,6 +191,8 @@ export async function applyImport(plan, admin, { publish }) {
         if (p.contact) changes.contactNumber = p.contact
         await update('buses', p.existingId, changes)
         await run('DELETE FROM bus_timetable WHERE bus_id = ?', p.existingId)
+        // This sheet gives one trip per bus, so any later trips are switched off.
+        await run('UPDATE bus_trips SET is_active = 0, updated_at = ? WHERE bus_id = ? AND trip_number > 1', at(now), p.existingId)
         await insertStopages(p.existingId, stopages, stopIds)
         updated += 1
       } else {

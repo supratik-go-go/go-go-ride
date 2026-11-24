@@ -7,6 +7,7 @@ import { ok, okPage } from '../http.js'
 import { newId } from '../ids.js'
 import { DATE_ONLY, Query, fail, oneOf, optional, parseBody, required, saveChanges, startOfDayStrict, str } from '../pyfields.js'
 import { alarmOut } from '../serialize.js'
+import { tripBetween, tripsOf } from '../services/buses.js'
 import { publicBus } from '../services/privacy.js'
 import { runsOnDay, todayMs } from '../time.js'
 import { ENUMS, REMIND_BEFORE_OPTIONS } from '../validate.js'
@@ -73,7 +74,9 @@ router.post('/alarms', requireUser, async (req, res) => {
   if (!bus) throw ApiError.notFound('Bus not found')
   if (bus.status !== 'APPROVED') throw ApiError.badRequest('This bus is not active yet')
 
-  const stopages = await all('SELECT * FROM bus_timetable WHERE bus_id = ? ORDER BY stop_order', bus.id)
+  // A bus that goes out and back: the trip in the passenger's direction gives the time.
+  const trips = await tripsOf(bus.id)
+  const stopages = tripBetween(trips, b.boardingStopId, b.arrivalStopId) ?? trips[0] ?? []
   const boarding = stopages.find((s) => s.stopId === b.boardingStopId)
   const arrival = stopages.find((s) => s.stopId === b.arrivalStopId)
   if (!boarding) throw ApiError.badRequest('This bus does not stop at the boarding stop')

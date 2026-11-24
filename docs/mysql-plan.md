@@ -156,6 +156,7 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 7. Admin History page (every change, before and after)
 8. Route request photo, thank-you points, Top Helpers list
 9. Second names in search, notification read fix
+10. Fares from passengers (owner's idea, 2026-11-25): a passenger can add the fare of a bus that has none, with a short note; after a trip the app asks "Is this fare correct?" and, if not, what the fare is. Admins review the answers before a fare changes.
 
 ## Phase A: how it is built
 
@@ -171,6 +172,19 @@ Removed: `Ride`, `RideWaitlist` (Running Car), saved to a backup file during the
 1. Finish the move to MySQL, with bus number optional.
 2. Then load the owner's Excel file (`bus-import-template_filled.xlsx`: 1,107 buses, about 13,300 stop rows, mostly two trips per bus: out and back; some times unknown, `--:--`). Needs a few data decisions with the owner first.
 3. Remove the demo data during the switch, after the owner confirms the exact list (it cannot be undone).
+
+### Excel bus data (decided 2026-11-25)
+
+- File: `C:\Users\Administrator\Downloads\bus-import-ready.xlsx` is the owner's `bus-import-template_filled.xlsx` with the sample Operator, Seats and Fare on its first two rows cleared (owner's choice). Not in git.
+- Read by `backend-node/src/services/busTripImport.js` through the normal admin import (Admin > Buses > Import from Excel), which now also takes the Buses + Stops tabs. Tested on the demo copy: 1,092 of 1,107 buses load in about a second (2,180 trips, 13,192 stop times, 689 new stops); importing again updates instead of adding copies.
+- Bus numbers 1, 2, 3 only link the two tabs: those buses have no bus number. Real numbers (with letters) are kept.
+- Out and back: one bus, two trips. Search, alarms and the stop page use the trip in the passenger's direction; the bus page shows the first trip until the trips app update.
+- Unknown (`--:--`) and out-of-order times are worked out from the stops around them and from how long that stretch usually takes other buses, and marked `is_estimated` in `bus_timetable` (2,874 of 13,246). Times written as ranges ("10:30/10:35 AM") use the first time.
+- Fare: saved only when the sheet has one (`buses.fare` empty = not known). Missing contact numbers stay empty.
+- Stop names typed in different cases ("khatra", "Khatra") become one stop.
+- The route column is not stored: routes need a unique route number, and the app already shows each bus's first and last stop.
+- 15 buses are not loaded (10 with only one stop per trip, 5 listed twice) and 36 more have notes: `C:\Users\Administrator\Downloads\bus-import-check-list.xlsx` for the owner.
+- App update needed (next release): the search card shows "₹0" for an unknown fare; it should hide the fare. Phase B's trips update then shows both trips on the bus page.
 
 ### Progress
 

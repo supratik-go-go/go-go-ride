@@ -9,7 +9,9 @@
 //   npm run check -- --only 20-buses-network --verbose
 //
 // A case: { name, method = 'GET', path: string | (ctx) => string, as = 'public' | 'passenger' |
-//           'owner' | 'driver' | 'admin' | 'super', body?, ignore?: [keys], mode?: 'full' | 'status' }
+//           'owner' | 'driver' | 'admin' | 'super', body?, ignore?: [keys], mode?: 'full' | 'status',
+//           file?: { path (from scripts/api-cases), fields? } to upload a file,
+//           prepare?: async (get) => ({ ...values added to ctx }) for ids made by earlier cases }
 // Cases run in file order against one database copy, so a write case affects later cases.
 // Needs seed/gogoride.db (git-ignored; made by scripts/make-starter.mjs) and the local test MariaDB
 // (data/mysql-test.env, see docs/mysql-plan.md). The copy goes into the database gogoride_check, which
@@ -99,11 +101,12 @@ const ACCOUNTS = {
 }
 
 async function call(method, p, token, body, retry = true) {
-  const headers = { 'Content-Type': 'application/json' }
+  const form = body instanceof FormData
+  const headers = form ? {} : { 'Content-Type': 'application/json' }
   if (token) headers.Authorization = `Bearer ${token}`
   let res
   try {
-    res = await fetch(BASE + p, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) })
+    res = await fetch(BASE + p, { method, headers, body: body === undefined ? undefined : form ? body : JSON.stringify(body) })
   } catch (err) {
     // A dropped connection never reached the API, so sending it again is safe.
     if (retry && err.cause?.code === 'ECONNRESET') return call(method, p, token, body, false)
@@ -234,12 +237,21 @@ try {
     for (const c of cases) {
       if (c.name in fresh) throw new Error(`Two cases in ${file} are named "${c.name}". Give each a unique name.`)
       const method = (c.method || 'GET').toUpperCase()
+      if (c.prepare) {
+        const get = async (q, role = 'public') => (await call('GET', q, role === 'public' ? null : tokens[role].accessToken)).json?.data
+        Object.assign(ctx, await c.prepare(get))
+      }
       const p = typeof c.path === 'function' ? c.path(ctx) : c.path
       if (p == null || p.includes('undefined')) {
         realLog(`  SKIP ${c.name} (no id available)`)
         continue
       }
-      const body = typeof c.body === 'function' ? c.body(ctx) : c.body
+      let body = typeof c.body === 'function' ? c.body(ctx) : c.body
+      if (c.file) {
+        body = new FormData()
+        for (const [k, v] of Object.entries(c.file.fields || {})) body.append(k, v)
+        body.append('file', new Blob([fs.readFileSync(path.join(caseDir, c.file.path))]), path.basename(c.file.path))
+      }
       const role = c.as || 'public'
       const r = await call(method, p, role === 'public' ? null : tokens[role].accessToken, body)
       const ignore = new Set(c.ignore || [])

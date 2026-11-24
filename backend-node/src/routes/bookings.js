@@ -135,6 +135,7 @@ router.post('/bookings', requireUser, async (req, res) => {
       if (await get('SELECT id FROM bus_off_days WHERE bus_id = ? AND off_date = ?', bus.id, day(travelDate))) {
         throw ApiError.badRequest('This bus is not running on the selected date')
       }
+      if (bus.fare === null) throw ApiError.badRequest('The fare of this bus is not known yet, so it cannot be booked')
       amount = Number(bus.fare) * b.seats
     } else if (b.type === 'RIDE') {
       const ride = await byId('shared_rides', b.rideId)

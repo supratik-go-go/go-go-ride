@@ -140,6 +140,25 @@ export async function insert(table, obj) {
   return obj
 }
 
+/**
+ * INSERT many objects with the same keys, 500 rows per statement (the Excel import adds thousands).
+ * `refresh` lists snake_case columns to overwrite when a row with the same id is already there.
+ */
+export async function insertMany(table, objs, { refresh = [] } = {}) {
+  const onDuplicate = refresh.length ? ` ON DUPLICATE KEY UPDATE ${refresh.map((c) => `${c} = VALUES(${c})`).join(', ')}` : ''
+  for (let i = 0; i < objs.length; i += 500) {
+    const chunk = []
+    let cols
+    for (const obj of objs.slice(i, i + 500)) {
+      const c = await toColumns(table, obj)
+      cols ??= c.cols
+      chunk.push(c.values)
+    }
+    const row = `(${placeholders(cols)})`
+    await run(`INSERT INTO ${table} (${cols.join(', ')}) VALUES ${chunk.map(() => row).join(', ')}${onDuplicate}`, ...chunk.flat())
+  }
+}
+
 /** UPDATE the given columns (camelCase keys) of one row by id. Ignores undefined values. */
 export async function update(table, id, patch) {
   const { cols, values } = await toColumns(table, patch)
