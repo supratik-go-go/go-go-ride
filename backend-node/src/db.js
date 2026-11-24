@@ -74,10 +74,16 @@ export async function connect() {
   try {
     await pool.query('SELECT 1')
   } catch (err) {
-    if (activeHost === 'localhost' || !SHUT_OUT.has(err.code)) throw err
+    // err.tried names each host and its error code (no secrets), for /api/health.
+    if (activeHost === 'localhost' || !SHUT_OUT.has(err.code)) throw Object.assign(err, { tried: `${activeHost} ${err.code}` })
     console.warn(`[db] ${activeHost} did not let the app in (${err.code}); trying localhost`)
     const local = makePool('localhost')
-    await local.query('SELECT 1')
+    try {
+      await local.query('SELECT 1')
+    } catch (second) {
+      local.end().catch(() => {})
+      throw Object.assign(second, { tried: `${activeHost} ${err.code}; localhost ${second.code}` })
+    }
     pool.end().catch(() => {})
     pool = local
     activeHost = 'localhost'

@@ -1,4 +1,5 @@
 // GO-GO Ride API - entry point (Hostinger Node.js app "entry file").
+import express from 'express'
 import { app } from './src/app.js'
 import { config } from './src/config.js'
 import { connect, ensureSchema } from './src/db.js'
@@ -13,18 +14,37 @@ process.on('uncaughtException', (err) => {
   process.exit(1)
 })
 
-// Without its database settings the API cannot work, so it stops with a clear message instead of
-// starting empty (the old SQLite setup silently created a new, empty database).
-if (!config.mysql.user || !config.mysql.database) {
-  console.error('[db] MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD and MYSQL_DATABASE must be set (hPanel > Environment variables).')
-  process.exit(1)
-}
-const dbHost = await connect()
-await ensureSchema()
-startScheduler()
-
-app.listen(config.port, () => {
-  console.log(`GO-GO Ride API ready on port ${config.port}${config.apiPrefix} (${config.environment})`)
-  console.log(`  database: MySQL ${config.mysql.database} on ${dbHost}:${config.mysql.port}`)
+// Hostinger starts the app on the first visit and gives up when the port does not open quickly, so
+// the server listens at once and connects to MySQL right after. Until the database answers, every
+// call gets 503 "starting", and /api/health says what the database is doing (no secrets), so a
+// wrong setting shows up there instead of as a site that never starts. It never starts empty.
+let database = 'starting'
+const server = express()
+server.get(`${config.apiPrefix}/health`, (req, res) => {
+  const ok = database === 'ok'
+  res.status(ok ? 200 : 503).json({ success: ok, status: ok ? 'ok' : 'starting', database, uptime: process.uptime(), timestamp: new Date().toISOString() })
+})
+server.use((req, res, next) =>
+  database === 'ok' ? next() : res.status(503).json({ success: false, message: 'The server is starting. Try again in a moment.', code: 'STARTING' }),
+)
+server.use(app)
+server.listen(config.port, () => {
+  console.log(`GO-GO Ride API listening on port ${config.port}${config.apiPrefix} (${config.environment})`)
   console.log(`  uploads:  ${config.uploadDir}`)
 })
+
+async function startDatabase() {
+  try {
+    if (!config.mysql.user || !config.mysql.database) throw new Error('MYSQL_USER or MYSQL_DATABASE is not set (hPanel > Environment variables)')
+    const host = await connect()
+    await ensureSchema()
+    database = 'ok'
+    startScheduler()
+    console.log(`  database: MySQL ${config.mysql.database} on ${host}:${config.mysql.port}`)
+  } catch (err) {
+    database = `error: ${err.tried || err.code || err.message}`.slice(0, 200)
+    console.error('[db] could not reach the database; trying again in a minute:', err)
+    setTimeout(startDatabase, 60_000)
+  }
+}
+startDatabase()
