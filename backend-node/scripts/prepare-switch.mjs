@@ -7,7 +7,7 @@
 //   4. loads the Excel buses as the owner, published
 //   5. writes data/gogoride-switch.sql.gz to import in phpMyAdmin
 //
-//   node scripts/prepare-switch.mjs <live gogoride.db> <owner phone> [<buses.xlsx>]
+//   node scripts/prepare-switch.mjs <live gogoride.db> <owner phone> [<buses.xlsx>] [--temporary-password]
 //
 // Needs the local test MariaDB (data/mysql-test.env). The live SQLite file is only read.
 import fs from 'node:fs'
@@ -17,7 +17,7 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
-const [liveFile, ownerPhone, excelFile] = process.argv.slice(2)
+const [liveFile, ownerPhone, excelFile] = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 if (!liveFile || !ownerPhone || !fs.existsSync(liveFile)) {
   console.error('Usage: node scripts/prepare-switch.mjs <live gogoride.db> <owner phone> [<buses.xlsx>]')
   process.exit(1)
@@ -121,6 +121,24 @@ const owner = (await q('SELECT id, name, role, status FROM users WHERE phone = ?
 if (!owner) throw new Error(`No account with phone ${ownerPhone}. Sign up in the app with it first, then download the live file again.`)
 await q("UPDATE users SET role = 'SUPER_ADMIN', status = 'ACTIVE', updated_at = NOW(3) WHERE id = ?", [owner.id])
 console.log(`   ${owner.name}: ${owner.role} -> SUPER_ADMIN`)
+// --temporary-password: the owner forgot the account's password. A random one goes into a file only
+// the owner opens (never printed); they sign in with it and choose their own in Profile > Change password.
+if (process.argv.includes('--temporary-password')) {
+  const { randomInt } = await import('node:crypto')
+  const { hashPassword } = await import('../src/auth.js')
+  const letters = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const temporary = Array.from({ length: 10 }, () => letters[randomInt(letters.length)]).join('')
+  await q('UPDATE users SET password = ?, updated_at = NOW(3) WHERE id = ?', [hashPassword(temporary), owner.id])
+  await q('DELETE FROM sign_in_sessions WHERE user_id = ?', [owner.id])
+  const note = path.join(root, 'data', 'YOUR-TEMPORARY-PASSWORD.txt')
+  fs.writeFileSync(
+    note,
+    `GO-GO Ride - temporary password for ${ownerPhone}\r\n\r\n${temporary}\r\n\r\n` +
+      'It works after the switch. Sign in with it, then go to Profile > Change password and choose your own.\r\n' +
+      'Delete this file afterwards.\r\n',
+  )
+  console.log(`   temporary password written to ${note} (not shown here)`)
+}
 await conn.end()
 
 // ---------------------------------------------------------------- 4. Excel buses
