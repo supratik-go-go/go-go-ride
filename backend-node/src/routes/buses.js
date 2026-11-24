@@ -1,7 +1,7 @@
 // Search, details, owner submission and verification documents (port of app/api/buses.py).
 import { Router } from 'express'
 import { isAdmin, optionalUser, requireUser } from '../auth.js'
-import { all, byId, get, insert, run, scalar, tx } from '../db.js'
+import { all, byId, day, get, insert, run, scalar, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok, okPage } from '../http.js'
 import { newId } from '../ids.js'
@@ -97,7 +97,7 @@ const serviceDaysCsv = (days) => [...new Set(days)].join(',')
 
 // ---------------------------------------------------------------- search
 
-router.get('/buses/search', optionalUser, (req, res) => {
+router.get('/buses/search', optionalUser, async (req, res) => {
   const d = []
   const query = req.query
   const from = q(d, query, 'from', str())
@@ -117,7 +117,7 @@ router.get('/buses/search', optionalUser, (req, res) => {
   const includeNotRunning = q(d, query, 'includeNotRunning', bool(), { fallback: true })
   raise(d)
 
-  const result = busService.searchBuses({
+  const result = await busService.searchBuses({
     fromText: from,
     toText: to,
     viaText: via,
@@ -136,13 +136,13 @@ router.get('/buses/search', optionalUser, (req, res) => {
   })
 
   if (req.user) {
-    insert('RecentSearch', {
+    await insert('recent_searches', {
       id: newId(),
       userId: req.user.id,
       searchType,
       fromText: from,
       toText: to,
-      query: text,
+      searchText: text,
       searchedAt: Date.now(),
     })
   }
@@ -152,7 +152,7 @@ router.get('/buses/search', optionalUser, (req, res) => {
 
 // ---------------------------------------------------------------- lists
 
-router.get('/buses', optionalUser, (req, res) => {
+router.get('/buses', optionalUser, async (req, res) => {
   const d = []
   const page = pageParams(d, req.query)
   const status = q(d, req.query, 'status', enumOf(ENUMS.busStatus))
@@ -168,23 +168,23 @@ router.get('/buses', optionalUser, (req, res) => {
   // Passengers only ever see approved buses.
   const effectiveStatus = admin ? status : 'APPROVED'
   if (effectiveStatus) {
-    where.push('"Bus".status = ?')
+    where.push('buses.status = ?')
     params.push(effectiveStatus)
   }
   if (type) {
-    where.push('"Bus".type = ?')
-    params.push(type)
+    where.push('buses.is_ac = ?')
+    params.push(type === 'AC' ? 1 : 0)
   }
   if (category) {
-    where.push('"Bus".category = ?')
+    where.push('buses.category = ?')
     params.push(category)
   }
   if (routeId) {
-    where.push('"Bus"."routeId" = ?')
+    where.push('buses.route_id = ?')
     params.push(routeId)
   }
   if (ownerId) {
-    where.push('"Bus"."ownerId" = ?')
+    where.push('buses.owner_id = ?')
     params.push(ownerId)
   }
   if (page.search) {
@@ -194,32 +194,29 @@ router.get('/buses', optionalUser, (req, res) => {
   }
   const clause = where.length ? ` WHERE ${where.join(' AND ')}` : ''
 
-  const total = Number(scalar(`SELECT COUNT("Bus".id) FROM "Bus"${clause}`, ...params) || 0)
-  let items = all(`SELECT * FROM "Bus"${clause} ORDER BY "Bus"."createdAt" DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip).map(busOut)
+  const total = Number((await scalar(`SELECT COUNT(buses.id) FROM buses${clause}`, ...params)) || 0)
+  const rows = await all(`SELECT * FROM buses${clause} ORDER BY buses.created_at DESC, buses.id DESC LIMIT ? OFFSET ?`, ...params, page.limit, page.skip)
+  let items = await Promise.all(rows.map(busOut))
   // Owners' personal contact details and ownership documents are not public.
   if (!admin) items = items.map(publicBus)
   okPage(res, items, total, page)
 })
 
-router.get('/buses/mine/list', requireUser, (req, res) => {
+router.get('/buses/mine/list', requireUser, async (req, res) => {
   const d = []
   const page = pageParams(d, req.query)
   raise(d)
-  const total = Number(scalar('SELECT COUNT("Bus".id) FROM "Bus" WHERE "Bus"."ownerId" = ?', req.user.id) || 0)
-  const items = all(
-    'SELECT * FROM "Bus" WHERE "Bus"."ownerId" = ? ORDER BY "Bus"."createdAt" DESC LIMIT ? OFFSET ?',
-    req.user.id,
-    page.limit,
-    page.skip,
-  ).map(busOut)
+  const total = Number((await scalar('SELECT COUNT(id) FROM buses WHERE owner_id = ?', req.user.id)) || 0)
+  const rows = await all('SELECT * FROM buses WHERE owner_id = ? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?', req.user.id, page.limit, page.skip)
+  const items = await Promise.all(rows.map(busOut))
   okPage(res, items, total, page)
 })
 
 // ---------------------------------------------------------------- details
 
-router.get('/buses/:busId', optionalUser, (req, res) => {
+router.get('/buses/:busId', optionalUser, async (req, res) => {
   const date = q([], req.query, 'date', str())
-  const data = busService.busDetails(req.params.busId, date)
+  const data = await busService.busDetails(req.params.busId, date)
   if (isAdmin(req.user) || (req.user && req.user.id === data.ownerId)) return ok(res, data)
   // Everyone else: approved buses only, without the owner's personal details.
   if (data.status !== 'APPROVED') throw ApiError.notFound('Bus not found')
@@ -230,50 +227,51 @@ router.get('/buses/:busId', optionalUser, (req, res) => {
 
 // Anyone signed in can send bus information. A passenger has no booking line of their own,
 // so the platform's number is used, and any new stops stay hidden until the bus is approved.
-router.post('/buses', requireUser, (req, res) => {
+router.post('/buses', requireUser, async (req, res) => {
   const user = req.user
   const contributor = user.role !== 'BUS_OWNER' && !isAdmin(user)
-  if (contributor && !req.body?.contactNumber) req.body = { ...req.body, contactNumber: getSettingsRow().contactNumber }
+  if (contributor && !req.body?.contactNumber) req.body = { ...req.body, contactNumber: (await getSettingsRow()).contactNumber }
   const b = parseBody(req, BusCreateBody)
   if (contributor) {
-    const waiting = Number(scalar('SELECT COUNT(id) FROM "Bus" WHERE "ownerId" = ? AND status = ?', user.id, 'PENDING') || 0)
+    const waiting = Number((await scalar('SELECT COUNT(id) FROM buses WHERE owner_id = ? AND status = ?', user.id, 'PENDING')) || 0)
     if (waiting >= MAX_PENDING_PER_CONTRIBUTOR) throw ApiError.badRequest('You have too many buses waiting for review. Please wait for them to be checked.')
   }
-  if (get('SELECT id FROM "Bus" WHERE "busNumber" = ?', b.busNumber)) {
+  if (await get('SELECT id FROM buses WHERE bus_number = ?', b.busNumber)) {
     throw ApiError.conflict('This bus number is already registered')
   }
 
-  const busId = tx(() => {
-    const stopIds = b.stopages.map((s) => busService.resolveStopId(s, contributor ? 'INACTIVE' : 'ACTIVE'))
+  const busId = await tx(async () => {
+    const stopIds = []
+    for (const s of b.stopages) stopIds.push(await busService.resolveStopId(s, contributor ? 'INACTIVE' : 'ACTIVE'))
     const now = Date.now()
-    const bus = insert('Bus', {
+    const bus = await insert('buses', {
       id: newId(),
       busNumber: b.busNumber,
       busName: b.busName,
       ownerId: user.id,
       routeId: b.routeId,
-      type: b.type,
+      isAc: b.type === 'AC' ? 1 : 0,
       category: b.category,
       operator: b.operator,
       totalSeats: b.totalSeats,
       fare: b.fare,
       contactNumber: b.contactNumber,
-      contactStart: b.contactStart,
-      contactEnd: b.contactEnd,
-      serviceDays: serviceDaysCsv(b.serviceDays),
-      imageUrl: null,
+      callFrom: b.contactStart,
+      callUntil: b.contactEnd,
+      runsOn: serviceDaysCsv(b.serviceDays),
+      pictureUrl: null,
       status: 'PENDING',
       rejectionReason: null,
-      ratingAvg: 0,
+      ratingAverage: 0,
       ratingCount: 0,
       submittedAt: now,
       reviewedAt: null,
-      reviewedById: null,
+      reviewedBy: null,
       createdAt: now,
       updatedAt: now,
     })
-    busService.insertStopages(bus.id, b.stopages, stopIds)
-    logActivity({
+    await busService.insertStopages(bus.id, b.stopages, stopIds)
+    await logActivity({
       actorId: user.id,
       action: 'BUS_SUBMITTED',
       entityType: 'BUS',
@@ -283,15 +281,27 @@ router.post('/buses', requireUser, (req, res) => {
     return bus.id
   })
 
-  ok(res, busById(busId), 'Bus submitted for verification. You will be notified once it is approved.', 201)
+  ok(res, await busById(busId), 'Bus submitted for verification. You will be notified once it is approved.', 201)
 })
 
-const UPDATABLE = ['busName', 'type', 'category', 'operator', 'totalSeats', 'fare', 'contactNumber', 'contactStart', 'contactEnd', 'routeId']
+// Request field -> [column (camelCase), value as stored].
+const UPDATABLE = {
+  busName: ['busName', (v) => v],
+  type: ['isAc', (v) => (v === 'AC' ? 1 : 0)],
+  category: ['category', (v) => v],
+  operator: ['operator', (v) => v],
+  totalSeats: ['totalSeats', (v) => v],
+  fare: ['fare', (v) => v],
+  contactNumber: ['contactNumber', (v) => v],
+  contactStart: ['callFrom', (v) => v],
+  contactEnd: ['callUntil', (v) => v],
+  routeId: ['routeId', (v) => v],
+}
 
-router.patch('/buses/:busId', requireUser, (req, res) => {
+router.patch('/buses/:busId', requireUser, async (req, res) => {
   const b = parseBody(req, BusUpdateBody)
   const admin = isAdmin(req.user)
-  const bus = admin ? byId('Bus', req.params.busId) : busService.assertOwnership(req.params.busId, req.user.id)
+  const bus = admin ? await byId('buses', req.params.busId) : await busService.assertOwnership(req.params.busId, req.user.id)
   if (!bus) throw ApiError.notFound('Bus not found')
 
   // Only columns whose value really changes are written (and only then does updatedAt move).
@@ -299,44 +309,35 @@ router.patch('/buses/:busId', requireUser, (req, res) => {
   const set = (key, value) => {
     if (bus[key] !== value) patch[key] = value
   }
-  for (const key of UPDATABLE) if (b.$provided.has(key)) set(key, b[key])
-  if (b.serviceDays !== null) set('serviceDays', serviceDaysCsv(b.serviceDays))
+  for (const [field, [column, store]] of Object.entries(UPDATABLE)) if (b.$provided.has(field)) set(column, store(b[field]))
+  if (b.serviceDays !== null) set('runsOn', serviceDaysCsv(b.serviceDays))
 
   // An owner editing an approved bus sends it back through verification.
   if (!admin && bus.status === 'APPROVED') {
     set('status', 'UNDER_REVIEW')
     set('reviewedAt', null)
-    set('reviewedById', null)
+    set('reviewedBy', null)
   }
 
-  tx(() => {
-    if (b.stopages !== null) busService.replaceStopages(bus.id, b.stopages, admin || req.user.role === 'BUS_OWNER' ? 'ACTIVE' : 'INACTIVE')
-    if (Object.keys(patch).length) {
-      // update() skips undefined; null must be written, so build the statement here.
-      const keys = Object.keys(patch)
-      run(
-        `UPDATE "Bus" SET ${keys.map((k) => `"${k}" = ?`).join(', ')}, "updatedAt" = ? WHERE id = ?`,
-        ...keys.map((k) => patch[k]),
-        Date.now(),
-        bus.id,
-      )
-    }
+  await tx(async () => {
+    if (b.stopages !== null) await busService.replaceStopages(bus.id, b.stopages, admin || req.user.role === 'BUS_OWNER' ? 'ACTIVE' : 'INACTIVE')
+    if (Object.keys(patch).length) await update('buses', bus.id, { ...patch, updatedAt: Date.now() })
   })
-  ok(res, busById(bus.id), 'Bus updated')
+  ok(res, await busById(bus.id), 'Bus updated')
 })
 
-router.delete('/buses/:busId', requireUser, (req, res) => {
-  const bus = isAdmin(req.user) ? byId('Bus', req.params.busId) : busService.assertOwnership(req.params.busId, req.user.id)
+router.delete('/buses/:busId', requireUser, async (req, res) => {
+  const bus = isAdmin(req.user) ? await byId('buses', req.params.busId) : await busService.assertOwnership(req.params.busId, req.user.id)
   if (!bus) throw ApiError.notFound('Bus not found')
-  // Stopages, documents, exceptions, reviews and alarms go with it (ON DELETE CASCADE);
+  // Trips, timetable, documents, off days, reviews and alarms go with it (ON DELETE CASCADE);
   // a bus with bookings is refused by the foreign key (400 INVALID_REFERENCE), as in Python.
-  run('DELETE FROM "Bus" WHERE id = ?', bus.id)
+  await run('DELETE FROM buses WHERE id = ?', bus.id)
   ok(res, null, 'Bus removed')
 })
 
 // ---------------------------------------------------------------- documents
 
-router.post('/buses/:busId/documents', requireUser, singleFile, (req, res) => {
+router.post('/buses/:busId/documents', requireUser, singleFile, async (req, res) => {
   const d = []
   const form = req.is('multipart/form-data') && req.body ? req.body : {}
   const rawDocType = Array.isArray(form.docType) ? form.docType[form.docType.length - 1] : form.docType
@@ -345,16 +346,16 @@ router.post('/buses/:busId/documents', requireUser, singleFile, (req, res) => {
   raise(d)
 
   const busId = req.params.busId
-  if (!isAdmin(req.user)) busService.assertOwnership(busId, req.user.id)
-  else if (!byId('Bus', busId)) throw ApiError.notFound('Bus not found')
+  if (!isAdmin(req.user)) await busService.assertOwnership(busId, req.user.id)
+  else if (!(await byId('buses', busId))) throw ApiError.notFound('Bus not found')
 
   const url = saveUpload(req.file, 'documents')
-  const doc = insert('BusDocument', {
+  const doc = await insert('bus_documents', {
     id: newId(),
     busId,
-    docType,
+    documentType: docType,
     fileUrl: url,
-    originalName: req.file.originalname ?? null,
+    originalFileName: req.file.originalname ?? null,
     uploadedAt: Date.now(),
   })
   ok(res, busDocumentOut(doc), 'Document uploaded', 201)
@@ -362,24 +363,24 @@ router.post('/buses/:busId/documents', requireUser, singleFile, (req, res) => {
 
 // ---------------------------------------------------------------- non-operating dates
 
-router.post('/buses/:busId/exceptions', requireUser, (req, res) => {
+router.post('/buses/:busId/exceptions', requireUser, async (req, res) => {
   const b = parseBody(req, BusExceptionBody)
   const busId = req.params.busId
   const admin = isAdmin(req.user)
-  if (!admin) busService.assertOwnership(busId, req.user.id)
-  else if (!byId('Bus', busId)) throw ApiError.notFound('Bus not found')
+  if (!admin) await busService.assertOwnership(busId, req.user.id)
+  else if (!(await byId('buses', busId))) throw ApiError.notFound('Bus not found')
 
-  const exception = busService.addException(busId, { date: b.date, reason: b.reason, enforceNotice: !admin })
+  const exception = await busService.addException(busId, { date: b.date, reason: b.reason, enforceNotice: !admin })
 
   // Warn everyone holding an alarm for that bus on that date.
-  const bus = byId('Bus', busId)
-  const alarms = all('SELECT * FROM "Alarm" WHERE "busId" = ? AND "alarmDate" = ? AND status = ?', busId, exception.date, 'ACTIVE')
-  tx(() => {
+  const bus = await byId('buses', busId)
+  const alarms = await all('SELECT * FROM alarms WHERE bus_id = ? AND travel_date = ? AND status = ?', busId, day(exception.offDate), 'ACTIVE')
+  await tx(async () => {
     for (const alarm of alarms) {
-      notify({
+      await notify({
         userId: alarm.userId,
         title: 'Bus not running',
-        message: `${bus.busNumber} will not operate on ${dateOnly(exception.date)}. Please plan an alternative.`,
+        message: `${bus.busNumber || bus.busName} will not operate on ${dateOnly(exception.offDate)}. Please plan an alternative.`,
         type: 'ALARM',
       })
     }
@@ -388,56 +389,56 @@ router.post('/buses/:busId/exceptions', requireUser, (req, res) => {
   ok(res, busExceptionOut(exception), 'Non-operating date recorded', 201)
 })
 
-router.delete('/buses/:busId/exceptions/:exceptionId', requireUser, (req, res) => {
+router.delete('/buses/:busId/exceptions/:exceptionId', requireUser, async (req, res) => {
   const { busId, exceptionId } = req.params
-  if (!isAdmin(req.user)) busService.assertOwnership(busId, req.user.id)
-  run('DELETE FROM "BusException" WHERE id = ? AND "busId" = ?', exceptionId, busId)
+  if (!isAdmin(req.user)) await busService.assertOwnership(busId, req.user.id)
+  await run('DELETE FROM bus_off_days WHERE id = ? AND bus_id = ?', exceptionId, busId)
   ok(res, null, 'Non-operating date removed')
 })
 
 // ---------------------------------------------------------------- reviews
 
-router.get('/buses/:busId/reviews', (req, res) => {
+router.get('/buses/:busId/reviews', async (req, res) => {
   const d = []
   const page = pageParams(d, req.query)
   raise(d)
   const busId = req.params.busId
-  const total = Number(scalar('SELECT COUNT("Review".id) FROM "Review" WHERE "Review"."busId" = ?', busId) || 0)
-  const items = all(
-    'SELECT * FROM "Review" WHERE "Review"."busId" = ? ORDER BY "Review"."createdAt" DESC LIMIT ? OFFSET ?',
+  const total = Number((await scalar('SELECT COUNT(id) FROM reviews WHERE bus_id = ? AND is_hidden = 0', busId)) || 0)
+  const items = await all(
+    'SELECT * FROM reviews WHERE bus_id = ? AND is_hidden = 0 ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?',
     busId,
     page.limit,
     page.skip,
   )
-  okPage(res, items.map((r) => publicReview(reviewOut(r))), total, page)
+  okPage(res, await Promise.all(items.map(async (r) => publicReview(await reviewOut(r)))), total, page)
 })
 
-router.post('/buses/:busId/reviews', requireUser, (req, res) => {
+router.post('/buses/:busId/reviews', requireUser, async (req, res) => {
   const b = parseBody(req, ReviewBody)
   const busId = req.params.busId
-  const bus = byId('Bus', busId)
+  const bus = await byId('buses', busId)
   if (!bus) throw ApiError.notFound('Bus not found')
 
-  const reviewId = tx(() => {
-    let review = get('SELECT * FROM "Review" WHERE "userId" = ? AND "busId" = ?', req.user.id, busId)
+  const reviewId = await tx(async () => {
+    let review = await get('SELECT * FROM reviews WHERE user_id = ? AND bus_id = ?', req.user.id, busId)
     if (!review) {
-      review = insert('Review', {
+      review = await insert('reviews', {
         id: newId(),
         userId: req.user.id,
         busId,
-        localCarId: null,
+        localVehicleId: null,
         rating: b.rating,
         comment: b.comment,
         createdAt: Date.now(),
       })
     } else {
-      run('UPDATE "Review" SET rating = ?, comment = ? WHERE id = ?', b.rating, b.comment, review.id)
+      await run('UPDATE reviews SET rating = ?, comment = ? WHERE id = ?', b.rating, b.comment, review.id)
     }
-    busService.recomputeRating(bus)
+    await busService.recomputeRating(bus)
     return review.id
   })
 
-  ok(res, reviewOut(byId('Review', reviewId)), 'Thanks for rating this bus', 201)
+  ok(res, await reviewOut(await byId('reviews', reviewId)), 'Thanks for rating this bus', 201)
 })
 
 export default router
