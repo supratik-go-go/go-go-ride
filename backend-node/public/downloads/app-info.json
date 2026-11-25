@@ -1,7 +1,7 @@
 {
-  "version": "1.9",
-  "versionCode": 10,
-  "notes": "A smaller search box, your Recent Searches on Home, bus names in search results, add a bus without its number, and quicker location setup.",
+  "version": "1.11",
+  "versionCode": 11,
+  "notes": "Voice search in English, Hindi and Bengali, search and local police on the Emergency list, send a bus ticket photo, and Forgot password.",
   "sizeMB": 5.9,
-  "builtAt": "2026-11-24T23:42:12.182Z"
+  "builtAt": "2026-11-25T00:28:47.131Z"
 }

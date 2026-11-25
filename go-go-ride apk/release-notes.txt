@@ -1,1 +1,1 @@
-A smaller search box, your Recent Searches on Home, bus names in search results, add a bus without its number, and quicker location setup.
+Voice search in English, Hindi and Bengali, search and local police on the Emergency list, send a bus ticket photo, and Forgot password.

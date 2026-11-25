@@ -43,7 +43,13 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 - [ ] iPhone launch: the project is ready, see `go-go-ride apk\IOS.md`. Needs a Mac and an Apple Developer account (US$99 per year)
 - [x] OTP by SMS: decided 2026-11-25 to use a spare Android phone + SIM as a free SMS sender (about 100 SMS a day)
 
-## App v1.9 — the owner's changes (2026-11-25)
+## App v1.9 and v1.11 — the owner's changes (2026-11-25)
+
+v1.9 released 2026-11-25 (1, 6, 7, 8 and the search-card fixes). v1.10 and v1.11 combined into v1.11 (2, 4, 5, 9).
+
+- [ ] Owner: test both on a real phone (voice search in all three languages, ticket photo with the camera, Allow location)
+- [ ] Owner: set up the SMS phone so Forgot password works: spare Android phone + SIM, the free "SMS Gateway for Android" app in Cloud Server mode, then add `SMS_GATEWAY_USER` and `SMS_GATEWAY_PASSWORD` in hPanel (Claude gives click-by-click steps and tests one SMS)
+- [ ] Second names (other spellings, Bengali / Hindi) for busy stops help voice search. Admin editing comes with phase B #9; until then send Claude a list (stop -> other names)
 
 1. Home search box 20% shorter (same layout, tighter spacing)
 2. Add Bus Info: choose "Manually" (today's form) or "Upload your ticket photo" (camera or gallery, note, Submit ticket); new admin page "Ticket photos"
