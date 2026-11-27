@@ -1,4 +1,7 @@
-// Registration, password and OTP sign-in, token rotation (port of app/api/auth.py).
+// Registration, password and OTP sign-in, token rotation (port of app/api/auth.py), the free
+// mobile number check by SMS (services/phoneCheck.js) for sign-up and password changes, and
+// Sign in with Google (services/google.js).
+import crypto from 'node:crypto'
 import { Router } from 'express'
 import { config } from '../config.js'
 import { at, byId, get, insert, run, scalar, tx, update } from '../db.js'
@@ -13,12 +16,15 @@ import {
   hashCode,
   hashPassword,
   hashToken,
+  optionalUser,
   requireUser,
   verifyCode,
   verifyPassword,
 } from '../auth.js'
 import { userOut } from '../serialize.js'
-import { sendSms, smsReady } from '../services/sms.js'
+import { googleOn, verifyGoogleToken } from '../services/google.js'
+import { checkStatus, smsReceived, startCheck, useCheck } from '../services/phoneCheck.js'
+import { linkSmsPhone, phoneChecksOn } from '../services/sms.js'
 import { body, email, ENUMS, name, oneOf, opt, password, phone, z } from '../validate.js'
 
 const router = Router()
@@ -40,6 +46,18 @@ export async function issueSession(user, ctx, { recordLogin = true } = {}) {
 
 const findByPhone = (p) => get('SELECT * FROM users WHERE phone = ?', p)
 
+// A finished number check from /auth/phone-check (both or neither).
+const checkFields = {
+  checkId: opt(z.string().max(64)),
+  checkToken: opt(z.string().max(100)),
+}
+
+// A Google sign-in has no mobile number until the person adds one; a password goes with the number.
+const needsNumber = () => new ApiError(400, 'Add your mobile number first (Settings > Mobile Number): you sign in with the number and password.', 'PHONE_MISSING')
+
+// Apps before v1.12 don't know the check; they get this instead of a confusing field error.
+const updateApp = () => new ApiError(400, 'Verify your mobile number first: update GO-GO Ride to the latest version.', 'PHONE_CHECK_REQUIRED')
+
 // ---------------------------------------------------------------- register
 
 const RegisterBody = z.object({
@@ -48,26 +66,33 @@ const RegisterBody = z.object({
   email: opt(email),
   password,
   role: oneOf(ENUMS.publicRole).default('PASSENGER'),
+  ...checkFields,
 })
 
+// Once number checks are switched on, a new account needs a check that proves its number.
 router.post('/auth/register', async (req, res) => {
   const b = body(req, RegisterBody)
   if (await findByPhone(b.phone)) throw ApiError.conflict('An account with this mobile number already exists')
   if (b.email && (await get('SELECT id FROM users WHERE email = ?', b.email))) throw ApiError.conflict('An account with this email already exists')
+  const checked = phoneChecksOn()
+  if (checked && !b.checkId) throw updateApp()
   const now = Date.now()
-  const user = await insert('users', {
-    id: newId(),
-    name: b.name,
-    phone: b.phone,
-    email: b.email || null,
-    password: hashPassword(b.password),
-    role: b.role,
-    pictureUrl: null,
-    status: 'ACTIVE',
-    phoneVerified: 0,
-    lastLoginAt: null,
-    createdAt: now,
-    updatedAt: now,
+  const user = await tx(async () => {
+    if (checked) await useCheck({ checkId: b.checkId, checkToken: b.checkToken, phone: b.phone, purpose: 'REGISTER' })
+    return insert('users', {
+      id: newId(),
+      name: b.name,
+      phone: b.phone,
+      email: b.email || null,
+      password: hashPassword(b.password),
+      role: b.role,
+      pictureUrl: null,
+      status: 'ACTIVE',
+      phoneVerified: checked ? 1 : 0,
+      lastLoginAt: null,
+      createdAt: now,
+      updatedAt: now,
+    })
   })
   ok(res, await issueSession(user, clientContext(req)), 'Account created successfully', 201)
 })
@@ -102,14 +127,14 @@ router.post('/auth/otp/request', async (req, res) => {
   if (recent >= 3) throw ApiError.tooMany('Please wait a minute before requesting another code')
   // Forgot password only works for an account that exists.
   if (b.purpose === 'RESET' && !(await findByPhone(b.phone))) throw ApiError.notFound('No account with this mobile number')
-  // On the live server a code nobody receives is useless, so without the SMS phone the request is refused.
-  if (config.isProd && !smsReady()) {
-    throw new ApiError(503, 'SMS codes are not available yet. Please contact GO-GO Ride support to reset your password.', 'SMS_NOT_READY')
+  // The live server sends no SMS (people prove their number by sending one, see /auth/phone-check),
+  // so a code here would never arrive. Apps before v1.12 asked for one to reset a password.
+  if (config.isProd) {
+    throw new ApiError(503, 'Update GO-GO Ride to reset your password, or contact GO-GO Ride support.', 'SMS_NOT_READY')
   }
   const code = generateOtp()
   const expiresAt = Date.now() + config.otpExpiryMinutes * 60000
   await insert('otp_codes', { id: newId(), phone: b.phone, codeHash: hashCode(code), purpose: b.purpose, expiresAt, consumedAt: null, attempts: 0, createdAt: Date.now() })
-  if (smsReady()) await sendSms(b.phone, `${code} is your GO-GO Ride code. It expires in ${config.otpExpiryMinutes} minutes. Don't share it with anyone.`)
   console.log(`[otp] ${b.phone} -> ${config.echoOtp ? code : '******'} (expires ${new Date(expiresAt).toISOString()})`)
   const data = { phone: b.phone, expiresInSeconds: config.otpExpiryMinutes * 60 }
   if (config.echoOtp) data.devCode = code
@@ -181,19 +206,23 @@ router.post('/auth/otp/verify', async (req, res) => {
 
 const PasswordResetBody = z.object({
   phone,
-  code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+  code: opt(z.string().regex(/^\d{6}$/, 'Enter the 6-digit code')),
   newPassword: password,
+  ...checkFields,
 })
 
-// The code sent by SMS (purpose RESET) proves the phone. Every other sign-in of the account ends.
+// A number check (purpose RESET) proves the phone; development builds can still use a code from
+// /auth/otp/request. Every other sign-in of the account ends.
 router.post('/auth/password/reset', async (req, res) => {
   const b = body(req, PasswordResetBody)
   const user = await findByPhone(b.phone)
   if (!user) throw ApiError.notFound('No account with this mobile number')
-  const record = await checkCode(b.phone, 'RESET', b.code)
+  if (!b.checkId && !b.code) throw ApiError.badRequest('Verify your mobile number first')
+  const record = b.checkId ? null : await checkCode(b.phone, 'RESET', b.code)
   const now = Date.now()
   await tx(async () => {
-    await run('UPDATE otp_codes SET consumed_at = ? WHERE id = ?', at(now), record.id)
+    if (record) await run('UPDATE otp_codes SET consumed_at = ? WHERE id = ?', at(now), record.id)
+    else await useCheck({ checkId: b.checkId, checkToken: b.checkToken, phone: b.phone, purpose: 'RESET' })
     await update('users', user.id, { password: hashPassword(b.newPassword), phoneVerified: 1, updatedAt: now })
     await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE revoked_at IS NULL AND user_id = ?', at(now), user.id)
   })
@@ -240,20 +269,141 @@ router.get('/auth/me', requireUser, (req, res) => ok(res, userOut(req.user)))
 const ChangePasswordBody = z.object({
   currentPassword: opt(z.preprocess((v) => (typeof v === 'string' ? v.trim() : v), z.string())),
   newPassword: password,
+  ...checkFields,
 })
 
+// Once number checks are on, the account's own number proves the person (no current password
+// needed); before that, the current password does.
 router.post('/auth/change-password', requireUser, async (req, res) => {
   const b = body(req, ChangePasswordBody)
   const user = req.user
-  if (user.password) {
+  if (!user.phone) throw needsNumber()
+  const checked = phoneChecksOn()
+  if (checked && !b.checkId) throw updateApp()
+  if (!checked && user.password) {
     if (!b.currentPassword) throw ApiError.badRequest('Current password is required')
     if (!verifyPassword(b.currentPassword, user.password)) throw ApiError.badRequest('Current password is incorrect')
   }
   await tx(async () => {
+    if (checked) await useCheck({ checkId: b.checkId, checkToken: b.checkToken, phone: user.phone, purpose: 'CHANGE' })
     await update('users', user.id, { password: hashPassword(b.newPassword), updatedAt: Date.now() })
     await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL', at(Date.now()), user.id)
   })
   ok(res, null, 'Password updated, please sign in again')
+})
+
+// ---------------------------------------------------------------- mobile number check by SMS
+
+/** Whether sign-up and password changes need a number check. */
+router.get('/auth/phone-check', (req, res) => ok(res, { required: phoneChecksOn() }))
+
+const PhoneCheckStartBody = z.object({
+  purpose: oneOf(['REGISTER', 'RESET', 'CHANGE']),
+  phone: opt(phone),
+})
+
+// REGISTER and RESET name the number; CHANGE is for the signed-in account's own number.
+router.post('/auth/phone-check/start', optionalUser, async (req, res) => {
+  const b = body(req, PhoneCheckStartBody)
+  if (!phoneChecksOn()) throw new ApiError(503, 'Mobile number checks are not switched on yet.', 'SMS_NOT_READY')
+  let number = b.phone
+  if (b.purpose === 'CHANGE') {
+    if (!req.user) throw ApiError.unauthorized()
+    if (!req.user.phone) throw needsNumber()
+    number = req.user.phone
+  } else if (!number) {
+    throw ApiError.badRequest('Enter your 10-digit mobile number')
+  } else if (b.purpose === 'REGISTER' && (await findByPhone(number))) {
+    throw ApiError.conflict('An account with this mobile number already exists')
+  } else if (b.purpose === 'RESET' && !(await findByPhone(number))) {
+    throw ApiError.notFound('No account with this mobile number')
+  }
+  // Usually linked at start already; if that failed, try again in the background (the person still
+  // has to send the SMS), so a gateway problem never slows this answer down.
+  linkSmsPhone()
+  ok(res, await startCheck(number, b.purpose), 'Send the SMS to verify your number')
+})
+
+const PhoneCheckStatusBody = z.object({ checkId: z.string().max(64), checkToken: z.string().max(100) })
+
+/** The app asks every few seconds until the SMS has arrived. */
+router.post('/auth/phone-check/status', async (req, res) => {
+  const b = body(req, PhoneCheckStatusBody)
+  ok(res, { status: await checkStatus(b.checkId, b.checkToken) })
+})
+
+// The SMS phone posts every SMS it receives here (event sms:received). The key in the address keeps
+// others out. Always 200 for a known key, or the phone keeps sending it again.
+router.post('/sms/incoming/:key', async (req, res) => {
+  const key = Buffer.from(String(req.params.key))
+  const expected = Buffer.from(config.sms.webhookKey)
+  if (key.length !== expected.length || !crypto.timingSafeEqual(key, expected)) throw ApiError.notFound()
+  const sms = req.body?.payload || {}
+  const matched = req.body?.event === 'sms:received' ? await smsReceived(sms.sender ?? sms.phoneNumber, sms.message) : false
+  ok(res, { matched }, 'Received')
+})
+
+// ---------------------------------------------------------------- Sign in with Google
+
+/** The Google client ID the app signs in with; null hides the Google button. */
+router.get('/auth/google', (req, res) => ok(res, { clientId: config.google.clientId || null }))
+
+const GoogleBody = z.object({ idToken: z.string().min(20).max(4096) })
+
+// A new Google account gets a GO-GO Ride account with no mobile number (added later in Settings).
+// A Gmail address that is already on an account is not joined to it: that account's email was typed,
+// never proved, so its owner signs in with the mobile number instead.
+router.post('/auth/google', async (req, res) => {
+  if (!googleOn()) throw new ApiError(503, 'Google sign-in is not switched on yet.', 'GOOGLE_NOT_READY')
+  const b = body(req, GoogleBody)
+  const google = await verifyGoogleToken(b.idToken)
+  const login = await get("SELECT user_id FROM user_logins WHERE provider = 'GOOGLE' AND subject = ?", google.sub)
+  let user = login ? await byId('users', login.userId) : null
+  const isNewUser = !user
+  if (!user) {
+    if (await get('SELECT id FROM users WHERE email = ?', google.email)) {
+      throw ApiError.conflict('This Gmail is already on a GO-GO Ride account. Sign in with that mobile number and password.')
+    }
+    const now = Date.now()
+    user = await tx(async () => {
+      const created = await insert('users', {
+        id: newId(),
+        name: google.name,
+        phone: null,
+        email: google.email,
+        password: null,
+        role: 'PASSENGER',
+        pictureUrl: null,
+        status: 'ACTIVE',
+        phoneVerified: 0,
+        lastLoginAt: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      await insert('user_logins', { id: newId(), userId: created.id, provider: 'GOOGLE', subject: google.sub, email: google.email, createdAt: now })
+      return created
+    })
+  }
+  if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
+  const session = await issueSession(user, clientContext(req))
+  ok(res, { ...session, isNewUser }, isNewUser ? 'Welcome to GO-GO Ride' : 'Logged in successfully')
+})
+
+const AddPhoneBody = z.object({ phone, ...checkFields })
+
+// After a Google sign-in: the person adds their mobile number, proved like a sign-up once checks are on.
+router.post('/users/me/phone', requireUser, async (req, res) => {
+  const b = body(req, AddPhoneBody)
+  const user = req.user
+  if (user.phone) throw ApiError.badRequest('Your account already has a mobile number')
+  if (await findByPhone(b.phone)) throw ApiError.conflict('An account with this mobile number already exists')
+  const checked = phoneChecksOn()
+  if (checked && !b.checkId) throw updateApp()
+  await tx(async () => {
+    if (checked) await useCheck({ checkId: b.checkId, checkToken: b.checkToken, phone: b.phone, purpose: 'REGISTER' })
+    await update('users', user.id, { phone: b.phone, phoneVerified: checked ? 1 : 0, updatedAt: Date.now() })
+  })
+  ok(res, userOut(await byId('users', user.id)), 'Mobile number added')
 })
 
 export default router

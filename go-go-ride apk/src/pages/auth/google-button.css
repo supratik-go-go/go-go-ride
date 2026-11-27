@@ -1,0 +1,21 @@
+/* "Continue with Google" (GoogleButton.jsx): white with Google's "G", as Google's button guidelines ask. */
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid #dadce0;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: var(--font);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--t), box-shadow var(--t);
+}
+.google-btn:hover { background: #f8faff; box-shadow: 0 2px 8px rgba(11, 42, 122, 0.12); }
+.google-btn:disabled { opacity: 0.7; cursor: default; }

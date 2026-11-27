@@ -4,6 +4,7 @@ import { app } from './src/app.js'
 import { config } from './src/config.js'
 import { connect, ensureSchema } from './src/db.js'
 import { startScheduler } from './src/scheduler.js'
+import { linkSmsPhone, smsStatus } from './src/services/sms.js'
 
 // Last resort for errors outside a request (Express handles those inside one): log them so they
 // show in the Hostinger logs. A rejected promise is logged and the API keeps serving; a thrown
@@ -18,11 +19,12 @@ process.on('uncaughtException', (err) => {
 // the server listens at once and connects to MySQL right after. Until the database answers, every
 // call gets 503 "starting", and /api/health says what the database is doing (no secrets), so a
 // wrong setting shows up there instead of as a site that never starts. It never starts empty.
+// `sms` says whether the phone that receives number-check SMS is linked (off | connecting | ok | error).
 let database = 'starting'
 const server = express()
 server.get(`${config.apiPrefix}/health`, (req, res) => {
   const ok = database === 'ok'
-  res.status(ok ? 200 : 503).json({ success: ok, status: ok ? 'ok' : 'starting', database, uptime: process.uptime(), timestamp: new Date().toISOString() })
+  res.status(ok ? 200 : 503).json({ success: ok, status: ok ? 'ok' : 'starting', database, sms: smsStatus(), uptime: process.uptime(), timestamp: new Date().toISOString() })
 })
 server.use((req, res, next) =>
   database === 'ok' ? next() : res.status(503).json({ success: false, message: 'The server is starting. Try again in a moment.', code: 'STARTING' }),
@@ -40,6 +42,7 @@ async function startDatabase() {
     await ensureSchema()
     database = 'ok'
     startScheduler()
+    linkSmsPhone()
     console.log(`  database: MySQL ${config.mysql.database} on ${host}:${config.mysql.port}`)
   } catch (err) {
     database = `error: ${err.tried || err.code || err.message}`.slice(0, 200)

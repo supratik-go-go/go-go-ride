@@ -1,29 +1,63 @@
-// Sends a text message through the owner's own Android phone (the free "SMS Gateway for Android"
-// app, cloud mode; settings in config.sms). Free, about 100 messages a day on a normal SIM, and the
-// phone has to stay switched on and online.
+// The owner's Android phone, running the free "SMS Gateway for Android" app in cloud mode
+// (https://sms-gate.app), receives the SMS people send to prove their number (services/phoneCheck.js).
+// Nothing is sent from it, so it costs nothing. This file tells the app, through its cloud service,
+// to pass every SMS it receives to /api/sms/incoming/<webhookKey> on this server.
 import { config } from '../config.js'
-import { ApiError } from '../errors.js'
 
-export const smsReady = () => Boolean(config.sms.user && config.sms.password)
+const EVENT = 'sms:received'
+const incomingBase = () => `${config.sms.publicUrl.replace(/\/+$/, '')}${config.apiPrefix}/sms/incoming/`
+export const webhookUrl = () => incomingBase() + config.sms.webhookKey
 
-/** phone: the 10-digit Indian mobile number. Throws a user-readable ApiError when it can't send. */
-export async function sendSms(phone, text) {
-  if (!smsReady()) throw new ApiError(503, 'SMS codes are not available yet', 'SMS_NOT_READY')
+/** Number checks are asked for only once there is a number to text (and, live, the app login to pass SMS on). */
+export const phoneChecksOn = () => Boolean(config.sms.receiveNumber && (!config.isProd || (config.sms.user && config.sms.password)))
+
+// 'off' | 'connecting' | 'ok' | 'error: ...', shown on /api/health so the owner can see the phone is linked.
+let status = 'off'
+let linking = null
+export const smsStatus = () => (phoneChecksOn() ? status : 'off')
+
+async function gateway(method, p, body) {
   const auth = Buffer.from(`${config.sms.user}:${config.sms.password}`).toString('base64')
-  let res
-  try {
-    res = await fetch(config.sms.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
-      body: JSON.stringify({ textMessage: { text }, phoneNumbers: [`+91${String(phone).slice(-10)}`] }),
-      signal: AbortSignal.timeout(15000),
-    })
-  } catch (err) {
-    console.error('[sms] gateway not reachable:', err.message)
-    throw new ApiError(502, "Couldn't send the SMS right now. Try again in a minute.", 'SMS_FAILED')
-  }
-  if (!res.ok) {
-    console.error('[sms] gateway answered', res.status, (await res.text().catch(() => '')).slice(0, 200))
-    throw new ApiError(502, "Couldn't send the SMS right now. Try again in a minute.", 'SMS_FAILED')
-  }
+  const res = await fetch(`${config.sms.api.replace(/\/+$/, '')}${p}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal: AbortSignal.timeout(15000),
+  })
+  if (!res.ok) throw new Error(`${method} ${p} answered ${res.status}`)
+  return res.status === 204 ? null : res.json().catch(() => null)
+}
+
+/**
+ * Makes sure the SMS app passes received SMS here: adds the webhook once, and removes older ones that
+ * point at this server with another key. Runs at start and before a check if it hasn't worked yet.
+ */
+export function linkSmsPhone() {
+  if (!config.sms.user || !config.sms.password || !config.sms.receiveNumber) return Promise.resolve(false)
+  if (status === 'ok') return Promise.resolve(true)
+  linking ??= (async () => {
+    status = 'connecting'
+    try {
+      const url = webhookUrl()
+      const hooks = (await gateway('GET', '/webhooks')) || []
+      let linked = false
+      for (const h of hooks) {
+        if (h.event !== EVENT || !String(h.url || '').startsWith(incomingBase())) continue
+        if (h.url === url && !linked) linked = true
+        else if (h.id) await gateway('DELETE', `/webhooks/${encodeURIComponent(h.id)}`)
+      }
+      if (!linked) await gateway('POST', '/webhooks', { url, event: EVENT })
+      status = 'ok'
+      console.log('[sms] the SMS phone passes received SMS to this server')
+      return true
+    } catch (err) {
+      // The reason has no secrets in it (method, path, status code or network error).
+      status = `error: ${err.message}`.slice(0, 200)
+      console.error('[sms] could not link the SMS phone:', err.message)
+      return false
+    } finally {
+      linking = null
+    }
+  })()
+  return linking
 }

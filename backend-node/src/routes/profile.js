@@ -34,7 +34,7 @@ async function refreshRatings(reviewed) {
 /** Personal rows that go with the account. Bookings and tickets stay, without a name attached. */
 const PERSONAL_TABLES = [
   'alarms', 'arcade_scores', 'favorites', 'leaderboard', 'login_history', 'notifications', 'notification_reads', 'recent_searches',
-  'sign_in_sessions', 'reviews', 'ride_waitlist', 'helper_points',
+  'sign_in_sessions', 'reviews', 'ride_waitlist', 'helper_points', 'user_logins',
 ]
 
 // Required by the App Store and Google Play. The row itself stays because old bookings point at it,
@@ -55,6 +55,7 @@ router.delete('/users/me', requireUser, async (req, res) => {
     await leaveActiveRooms(user.id)
     for (const table of PERSONAL_TABLES) await run(`DELETE FROM ${table} WHERE user_id = ?`, user.id)
     await run('DELETE FROM otp_codes WHERE phone = ?', user.phone)
+    await run('DELETE FROM phone_checks WHERE phone = ?', user.phone)
     await run('DELETE FROM ride_waitlist WHERE phone = ?', user.phone)
     await run('UPDATE support_tickets SET name = ?, phone = ?, email = NULL WHERE user_id = ?', 'Deleted user', '', user.id)
     await refreshRatings(rated)

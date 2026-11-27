@@ -11,7 +11,7 @@ SET NAMES utf8mb4;
 CREATE TABLE users (
   id             VARCHAR(32)  NOT NULL PRIMARY KEY,
   name           VARCHAR(190) NOT NULL,
-  phone          VARCHAR(64)  NOT NULL,
+  phone          VARCHAR(64)  NULL COMMENT 'Empty after a Google sign-in until the person adds it',
   email          VARCHAR(190) NULL,
   password       VARCHAR(100) NULL COMMENT 'Scrambled (bcrypt). The real password is never stored',
   role           ENUM('PASSENGER','BUS_OWNER','DRIVER','DATA_MANAGER','ADMIN','SUPER_ADMIN') NOT NULL,

@@ -1,4 +1,5 @@
 // Runtime configuration from environment variables (and an optional .env file).
+import { createHmac } from 'node:crypto'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -66,13 +67,26 @@ export const config = {
   // Never leak the OTP in production, whatever the flag says.
   echoOtp: bool('OTP_DEV_ECHO', 'true') && environment !== 'production',
 
-  // OTP codes go out as SMS from the owner's own Android phone, running the free "SMS Gateway for
-  // Android" app in cloud mode (https://sms-gate.app). The login is shown in that app's Cloud
-  // Server section; until it is set in hPanel, no SMS is sent.
+  // Mobile number checks cost GO-GO Ride nothing: the person texts a code from their own number to
+  // the owner's phone (receiveNumber), whose free "SMS Gateway for Android" app (cloud mode,
+  // https://sms-gate.app) passes every SMS it gets to /api/sms/incoming/<webhookKey>. user and
+  // password are shown in that app's Cloud Server section; the server uses them to tell the app
+  // where to pass the SMS. Until receiveNumber is set (and, on the live server, the login), no
+  // check is asked for.
   sms: {
-    url: env('SMS_GATEWAY_URL', 'https://api.sms-gate.app/3rdparty/v1/message'),
+    api: env('SMS_GATEWAY_URL', 'https://api.sms-gate.app/3rdparty/v1'),
     user: env('SMS_GATEWAY_USER', ''),
     password: env('SMS_GATEWAY_PASSWORD', ''),
+    receiveNumber: env('SMS_RECEIVE_NUMBER', '').replace(/\D/g, '').slice(-10),
+    webhookKey: env('SMS_WEBHOOK_KEY', ''),
+    publicUrl: env('PUBLIC_URL', 'https://go-goride.com'),
+  },
+
+  // Sign in with Google (free). clientId is the "Web application" client ID from Google Cloud
+  // (Google Auth Platform > Clients); the app shows the Google button only once it is set.
+  google: {
+    clientId: env('GOOGLE_CLIENT_ID', ''),
+    certsUrl: env('GOOGLE_CERTS_URL', 'https://www.googleapis.com/oauth2/v3/certs'),
   },
 
   busExceptionMinDays: num('BUS_EXCEPTION_MIN_DAYS', 5),
@@ -81,6 +95,9 @@ export const config = {
   // Clock used for "today", timetables and alarms - the service is for West Bengal.
   timeZone: 'Asia/Kolkata',
 }
+
+// The secret part of the address the SMS phone posts to: made from the JWT secret unless set.
+config.sms.webhookKey ||= createHmac('sha256', config.jwtAccessSecret).update('sms-webhook').digest('hex').slice(0, 32)
 
 if (config.isProd && config.jwtAccessSecret.startsWith('change-me')) {
   console.warn('[config] WARNING: set JWT_ACCESS_SECRET / JWT_REFRESH_SECRET to long random values in production')

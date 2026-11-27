@@ -134,8 +134,8 @@
  "change password: wrong current": {
   "status": 400,
   "body": {
-   "code": "BAD_REQUEST",
-   "message": "Current password is incorrect",
+   "code": "PHONE_CHECK_REQUIRED",
+   "message": "Verify your mobile number first: update GO-GO Ride to the latest version.",
    "success": false
   }
  }

@@ -1,11 +1,12 @@
-import { startTransition, useMemo, useState } from 'react'
+import { startTransition, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { AlertCircle, ArrowRight, BusFront, CarTaxiFront, Check, KeyRound, Mail, ShieldCheck, UserRound } from 'lucide-react'
-import { Button, Input, useToast } from '../../components/ui'
+import { AlertCircle, ArrowRight, BusFront, CarTaxiFront, Check, KeyRound, Mail, PencilLine, ShieldCheck, UserRound } from 'lucide-react'
+import { Button, Input, Spinner, useToast } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { authService } from '../../services'
-import { isValidPhone } from '../../utils/format'
+import { formatPhone, isValidPhone } from '../../utils/format'
 import { AuthShell } from './AuthShell'
+import { PhoneCheck } from './PhoneCheck'
 import { PhoneInput } from './PhoneInput'
 import { isValidEmail, safeNext, serverFieldErrors } from './formUtils'
 
@@ -47,6 +48,13 @@ export default function Register() {
   const [formError, setFormError] = useState('')
   const [phoneTaken, setPhoneTaken] = useState(false)
   const [busy, setBusy] = useState(false)
+  // Once the server asks for it, the number is proved with one SMS before the account is made.
+  const [stage, setStage] = useState('form') // form | verify
+  const [checkNeeded, setCheckNeeded] = useState(false)
+
+  useEffect(() => {
+    authService.phoneCheckRequired().then(setCheckNeeded, () => {})
+  }, [])
 
   const level = useMemo(() => strength(form.password), [form.password])
   const loginHref = `/login${nextParam ? `?next=${encodeURIComponent(nextParam)}` : ''}`
@@ -73,13 +81,20 @@ export default function Register() {
     return e
   }
 
-  const submit = async (ev) => {
+  const submit = (ev) => {
     ev.preventDefault()
     setFormError('')
     const e = validate()
     setErrors(e)
     if (Object.keys(e).length) return
+    if (checkNeeded) setStage('verify')
+    else create()
+  }
+
+  /** check: { checkId, checkToken } from PhoneCheck, when the server asks for one. */
+  const create = async (check) => {
     setBusy(true)
+    setFormError('')
     try {
       const data = await authService.register({
         name: form.name.trim(),
@@ -87,6 +102,7 @@ export default function Register() {
         email: form.email.trim() || undefined,
         password: form.password,
         role,
+        ...check,
       })
       const target = role === 'BUS_OWNER' ? '/owner/buses/new' : role === 'DRIVER' ? '/driver/cars' : safeNext(nextParam, '/home')
       toast.success(
@@ -103,6 +119,13 @@ export default function Register() {
       })
     } catch (err) {
       setBusy(false)
+      // Switched on since this page opened: prove the number first.
+      if (err.code === 'PHONE_CHECK_REQUIRED') {
+        setCheckNeeded(true)
+        setStage('verify')
+        return
+      }
+      setStage('form')
       if (err.status === 409) {
         if (/email/i.test(err.message)) setErrors({ email: err.message })
         else {
@@ -117,16 +140,56 @@ export default function Register() {
     }
   }
 
+  const footer = (
+    <span>
+      Already have an account? <Link to={loginHref}>Sign in</Link>
+    </span>
+  )
+
+  if (stage === 'verify') {
+    return (
+      <AuthShell title="Verify your mobile number" subtitle="One SMS from your phone proves the number is yours." footer={footer}>
+        <div className="auth-sent-to">
+          <span>
+            Account <strong>{formatPhone(form.phone)}</strong>
+          </span>
+          <button type="button" className="link-btn" onClick={() => setStage('form')} disabled={busy}>
+            <PencilLine size={14} /> Change
+          </button>
+        </div>
+        {busy ? (
+          <div className="auth-check-status" role="status">
+            <Spinner size={18} /> Creating your account...
+          </div>
+        ) : (
+          <PhoneCheck
+            purpose="REGISTER"
+            phone={form.phone}
+            onVerified={create}
+            onUnavailable={() => {
+              setCheckNeeded(false)
+              setStage('form')
+              create()
+            }}
+            onError={(err) => {
+              setStage('form')
+              if (err.status === 409) {
+                setErrors({ phone: err.message })
+                setPhoneTaken(true)
+              } else setFormError(err.message)
+            }}
+          />
+        )}
+      </AuthShell>
+    )
+  }
+
   return (
     <AuthShell
       wide
       title="Create your account"
       subtitle={SUBTITLES[role]}
-      footer={
-        <span>
-          Already have an account? <Link to={loginHref}>Sign in</Link>
-        </span>
-      }
+      footer={footer}
     >
       <form className="auth-form" onSubmit={submit} noValidate>
         <fieldset className="auth-roles" aria-label="Account type">
@@ -156,7 +219,7 @@ export default function Register() {
           <div className="alert alert-info" role="status">
             <AlertCircle size={18} />
             <span>
-              This number already has a GO-GO Ride account. <Link to={loginHref}>Sign in instead</Link> - you can use a one-time code if you forgot the password.
+              This number already has a GO-GO Ride account. <Link to={loginHref}>Sign in instead</Link>, or <Link to="/forgot-password">reset the password</Link> if you forgot it.
             </span>
           </div>
         )}

@@ -62,3 +62,16 @@ export async function openAppSettings() {
     return false
   }
 }
+
+/**
+ * Sign in with Google on the Android app: Google's account picker, then the ID token for the server.
+ * Throws an Error with .code 'CANCELLED' when the person closes the picker.
+ */
+export async function googleIdToken(clientId) {
+  if (!hasDeviceSettings()) throw new Error('Google sign-in works in the GO-GO Ride app.')
+  try {
+    return (await GoGoDevice.googleSignIn({ clientId })).idToken
+  } catch (err) {
+    throw Object.assign(new Error(err?.message || 'Google sign-in failed. Please try again.'), { code: err?.code })
+  }
+}

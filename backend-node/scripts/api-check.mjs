@@ -11,12 +11,15 @@
 // A case: { name, method = 'GET', path: string | (ctx) => string, as = 'public' | 'passenger' |
 //           'owner' | 'driver' | 'admin' | 'super', body?, ignore?: [keys], mode?: 'full' | 'status',
 //           file?: { path (from scripts/api-cases), type?, fields? } to upload a file,
-//           prepare?: async (get, post) => ({ ...values added to ctx }) for ids made by earlier cases }
+//           prepare?: async (get, post) => ({ ...values added to ctx }) for ids made by earlier cases,
+//           token?: (ctx) => access token to send instead of the `as` login }
 // Cases run in file order against one database copy, so a write case affects later cases.
 // Needs seed/gogoride.db (git-ignored; made by scripts/make-starter.mjs) and the local test MariaDB
 // (data/mysql-test.env, see docs/mysql-plan.md). The copy goes into the database gogoride_check, which
 // is wiped and refilled on every run. Live data is never used.
+import crypto from 'node:crypto'
 import fs from 'node:fs'
+import http from 'node:http'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -64,6 +67,21 @@ process.env.ENVIRONMENT = 'development'
 process.env.UPLOAD_DIR = path.join(work, 'uploads')
 process.env.MYSQL_ENV_FILE = process.env.MYSQL_ENV_FILE || 'data/mysql-test.env'
 process.env.MYSQL_DATABASE = 'gogoride_check'
+// Mobile number checks on, as on the live server once the SMS phone is set up (cases 95-app-v1-12);
+// no gateway login, so nothing is sent to the real SMS service.
+process.env.SMS_RECEIVE_NUMBER = '9000012345'
+process.env.SMS_WEBHOOK_KEY = 'check-key'
+process.env.SMS_GATEWAY_USER = ''
+process.env.SMS_GATEWAY_PASSWORD = ''
+// Plays Google for the Sign in with Google cases: a key pair whose public half is served as Google's
+// keys. The cases sign their own Google tokens with globalThis.googleTestKey.
+const googleKeys = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 })
+const googleJwk = { ...googleKeys.publicKey.export({ format: 'jwk' }), kid: 'check-google-key', alg: 'RS256', use: 'sig' }
+const googleCerts = http.createServer((req, res) => res.end(JSON.stringify({ keys: [googleJwk] })))
+await new Promise((resolve) => googleCerts.listen(0, '127.0.0.1', resolve))
+process.env.GOOGLE_CLIENT_ID = 'check-client.apps.googleusercontent.com'
+process.env.GOOGLE_CERTS_URL = `http://127.0.0.1:${googleCerts.address().port}/certs`
+globalThis.googleTestKey = googleKeys.privateKey
 const cleanUp = () => fs.rmSync(work, { recursive: true, force: true })
 
 // A fresh copy of the seed in MySQL, through the same copy script the real switch uses.
@@ -264,7 +282,9 @@ try {
         body.append('file', new Blob([fs.readFileSync(path.join(caseDir, c.file.path))], { type: c.file.type || '' }), path.basename(c.file.path))
       }
       const role = c.as || 'public'
-      const r = await call(method, p, role === 'public' ? null : tokens[role].accessToken, body)
+      // token(ctx): a sign-in made by an earlier case (e.g. a Google account), instead of a demo login.
+      const token = c.token ? c.token(ctx) : role === 'public' ? null : tokens[role].accessToken
+      const r = await call(method, p, token, body)
       const ignore = new Set(c.ignore || [])
       const got = { status: r.status, body: (c.mode || 'full') === 'full' ? normalise(r.json, ignore) : { code: r.json?.code ?? null } }
       fresh[c.name] = got
@@ -287,6 +307,7 @@ try {
   }
 } finally {
   server.close()
+  googleCerts.close()
   await closeDb()
   cleanUp()
 }

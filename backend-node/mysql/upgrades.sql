@@ -46,3 +46,41 @@ CREATE TABLE IF NOT EXISTS ticket_photos (
   CONSTRAINT fk_ticket_bus FOREIGN KEY (bus_id) REFERENCES buses (id) ON DELETE SET NULL,
   CONSTRAINT fk_ticket_reviewer FOREIGN KEY (reviewed_by) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Bus ticket photos from users, read by an admin';
+
+-- v1.12: a person proves their mobile number by texting a code from it to the GO-GO Ride phone
+-- (SMS_RECEIVE_NUMBER). The phone's "SMS Gateway for Android" app passes each SMS to /api/sms/incoming.
+CREATE TABLE IF NOT EXISTS phone_checks (
+  id          VARCHAR(32)  NOT NULL PRIMARY KEY,
+  phone       VARCHAR(64)  NOT NULL COMMENT 'The number that has to send the SMS',
+  purpose     ENUM('REGISTER','RESET','CHANGE') NOT NULL,
+  code        CHAR(6)      NOT NULL COMMENT 'Shown in the app; the person texts it',
+  token_hash  VARCHAR(100) NOT NULL COMMENT 'Scrambled key the app uses to ask about this check',
+  verified_at DATETIME(3)  NULL COMMENT 'When the SMS came from the right number',
+  used_at     DATETIME(3)  NULL,
+  expires_at  DATETIME(3)  NOT NULL,
+  created_at  DATETIME(3)  NOT NULL,
+  KEY ix_phone_checks_match (phone, code),
+  KEY ix_phone_checks_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Mobile number checks: the person sends an SMS with the code';
+
+-- v1.12: people who sign in with Google have no mobile number until they add one, so users.phone may
+-- be empty. The ALTER runs only while the column still says NOT NULL (the unique key stays; MySQL
+-- allows any number of empty values in it).
+SET @phone_required = (SELECT IS_NULLABLE = 'NO' FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'users' AND column_name = 'phone');
+SET @make_phone_optional = IF(@phone_required, "ALTER TABLE users MODIFY phone VARCHAR(64) NULL COMMENT 'Empty after a Google sign-in until the person adds it'", 'DO 0');
+PREPARE make_phone_optional FROM @make_phone_optional;
+EXECUTE make_phone_optional;
+DEALLOCATE PREPARE make_phone_optional;
+
+-- v1.12: the Google account each Google sign-in belongs to (Google's account id; no password is kept).
+CREATE TABLE IF NOT EXISTS user_logins (
+  id         VARCHAR(32)  NOT NULL PRIMARY KEY,
+  user_id    VARCHAR(32)  NOT NULL,
+  provider   ENUM('GOOGLE') NOT NULL,
+  subject    VARCHAR(190) NOT NULL COMMENT 'The Google account id',
+  email      VARCHAR(190) NULL,
+  created_at DATETIME(3)  NOT NULL,
+  UNIQUE KEY uq_user_logins (provider, subject),
+  KEY ix_user_logins_user (user_id),
+  CONSTRAINT fk_user_logins_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Google accounts used to sign in';

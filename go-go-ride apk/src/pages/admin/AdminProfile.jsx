@@ -1,13 +1,14 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Camera, ChevronRight, KeyRound, Mail, Monitor, Save, ShieldCheck, Smartphone, Tablet, User } from 'lucide-react'
-import { Avatar, Button, DataTable, Input, SectionHeader } from '../../components/ui'
+import { Avatar, Button, DataTable, Input, SectionHeader, Spinner } from '../../components/ui'
 import { LoginStatus, RoleBadge, deviceLabel } from '../../components/admin'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { usePagedQuery } from '../../hooks/usePagedQuery'
 import { authService, profileService } from '../../services'
 import { formatDateTime, formatPhone } from '../../utils/format'
+import { PhoneCheck } from '../auth/PhoneCheck'
 import './admin.css'
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -147,26 +148,44 @@ function PasswordCard({ onChanged }) {
   const [form, setForm] = useState({ current: '', next: '', confirm: '' })
   const [errors, setErrors] = useState({})
   const [saving, setSaving] = useState(false)
+  // Once the server asks for it, one SMS from the account's number replaces the current password.
+  const [checkNeeded, setCheckNeeded] = useState(false)
+  const [verifying, setVerifying] = useState(false)
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
-  const submit = async (e) => {
+  useEffect(() => {
+    authService.phoneCheckRequired().then(setCheckNeeded, () => {})
+  }, [])
+
+  const submit = (e) => {
     e.preventDefault()
     const v = {}
-    if (!form.current) v.current = 'Enter your current password'
+    if (!checkNeeded && !form.current) v.current = 'Enter your current password'
     if (form.next.length < 6) v.next = 'Use at least 6 characters'
-    else if (form.next === form.current) v.next = 'Choose a password different from the current one'
+    else if (!checkNeeded && form.next === form.current) v.next = 'Choose a password different from the current one'
     if (form.confirm !== form.next) v.confirm = 'Passwords do not match'
     setErrors(v)
     if (Object.keys(v).length) return
+    if (checkNeeded) setVerifying(true)
+    else save()
+  }
 
+  /** check: { checkId, checkToken } from PhoneCheck, when the server asks for one. */
+  const save = async (check) => {
     setSaving(true)
     try {
-      await authService.changePassword(form.current, form.next)
+      await authService.changePassword(checkNeeded ? undefined : form.current, form.next, check)
     } catch (err) {
+      setSaving(false)
+      setVerifying(false)
+      if (err.code === 'PHONE_CHECK_REQUIRED') {
+        setCheckNeeded(true)
+        setVerifying(true)
+        return
+      }
       const fe = err.fieldErrors || {}
       setErrors({ current: fe.currentPassword || (/current password/i.test(err.message) ? err.message : undefined), next: fe.newPassword })
       toast.error(err)
-      setSaving(false)
       return
     }
     // The API revokes every session, this one included - sign straight back in
@@ -174,6 +193,7 @@ function PasswordCard({ onChanged }) {
     try {
       await login(user.phone, form.next)
       setForm({ current: '', next: '', confirm: '' })
+      setVerifying(false)
       toast.success('Password changed. You were signed out on all other devices.')
       onChanged?.()
     } catch {
@@ -191,18 +211,48 @@ function PasswordCard({ onChanged }) {
         <h2 className="adm-card-title">Change Password</h2>
         <KeyRound size={18} className="text-muted" />
       </div>
-      <form className="adm-card-body stack" style={{ '--gap': '14px' }} onSubmit={submit} noValidate>
-        <Input label="Current Password" type="password" required value={form.current} onChange={set('current')} error={errors.current} placeholder="Enter current password" autoComplete="current-password" />
-        <Input label="New Password" type="password" required value={form.next} onChange={set('next')} error={errors.next} placeholder="Enter new password" hint="At least 6 characters" autoComplete="new-password" />
-        <Input label="Confirm Password" type="password" required value={form.confirm} onChange={set('confirm')} error={errors.confirm} placeholder="Confirm new password" autoComplete="new-password" />
-        <div className="alert alert-info">
-          <ShieldCheck size={18} />
-          <div>Changing your password signs you out on every other device.</div>
+      {verifying ? (
+        <div className="adm-card-body stack" style={{ '--gap': '14px' }}>
+          {saving ? (
+            <div className="auth-check-status" role="status">
+              <Spinner size={18} /> Saving your new password...
+            </div>
+          ) : (
+            <>
+              <PhoneCheck
+                purpose="CHANGE"
+                phone={user?.phone}
+                onVerified={save}
+                onUnavailable={() => {
+                  setCheckNeeded(false)
+                  setVerifying(false)
+                }}
+              />
+              <Button variant="ghost" onClick={() => setVerifying(false)}>
+                Back
+              </Button>
+            </>
+          )}
         </div>
-        <Button type="submit" variant="accent" block loading={saving} disabled={!form.current || !form.next || !form.confirm}>
-          Change Password
-        </Button>
-      </form>
+      ) : (
+        <form className="adm-card-body stack" style={{ '--gap': '14px' }} onSubmit={submit} noValidate>
+          {!checkNeeded && (
+            <Input label="Current Password" type="password" required value={form.current} onChange={set('current')} error={errors.current} placeholder="Enter current password" autoComplete="current-password" />
+          )}
+          <Input label="New Password" type="password" required value={form.next} onChange={set('next')} error={errors.next} placeholder="Enter new password" hint="At least 6 characters" autoComplete="new-password" />
+          <Input label="Confirm Password" type="password" required value={form.confirm} onChange={set('confirm')} error={errors.confirm} placeholder="Confirm new password" autoComplete="new-password" />
+          <div className="alert alert-info">
+            <ShieldCheck size={18} />
+            <div>
+              {checkNeeded && <>Next, you&apos;ll send one SMS from {formatPhone(user?.phone)} to prove it&apos;s you. </>}
+              Changing your password signs you out on every other device.
+            </div>
+          </div>
+          <Button type="submit" variant="accent" block loading={saving} disabled={(!checkNeeded && !form.current) || !form.next || !form.confirm}>
+            {checkNeeded ? 'Next' : 'Change Password'}
+          </Button>
+        </form>
+      )}
     </section>
   )
 }

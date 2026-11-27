@@ -1,7 +1,7 @@
 {
-  "version": "1.11",
-  "versionCode": 11,
-  "notes": "Voice search in English, Hindi and Bengali, search and local police on the Emergency list, send a bus ticket photo, and Forgot password.",
-  "sizeMB": 5.9,
-  "builtAt": "2026-11-25T00:28:47.131Z"
+  "version": "1.12",
+  "versionCode": 12,
+  "notes": "Sign in with Google, and prove your mobile number with one SMS when you create an account, forget or change your password.",
+  "sizeMB": 6.8,
+  "builtAt": "2026-11-27T18:22:15.532Z"
 }

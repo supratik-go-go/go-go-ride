@@ -1,0 +1,511 @@
+{
+ "check: needed": {
+  "status": 200,
+  "body": {
+   "data": {
+    "required": true
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "check: sign-up for a taken number": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "An account with this mobile number already exists",
+   "success": false
+  }
+ },
+ "check: reset for an unknown number": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "No account with this mobile number",
+   "success": false
+  }
+ },
+ "check: change signed out": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Authentication required",
+   "success": false
+  }
+ },
+ "check: no number": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Enter your 10-digit mobile number",
+   "success": false
+  }
+ },
+ "check: unknown purpose": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "register: without a check": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_CHECK_REQUIRED",
+   "message": "Verify your mobile number first: update GO-GO Ride to the latest version.",
+   "success": false
+  }
+ },
+ "check: start sign-up": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 900,
+    "sendTo": "+9190********"
+   },
+   "success": true
+  }
+ },
+ "check: waiting for the SMS": {
+  "status": 200,
+  "body": {
+   "data": {
+    "status": "WAITING"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "check: wrong token": {
+  "status": 400,
+  "body": {
+   "code": "CHECK_NOT_FOUND",
+   "message": "Verify your mobile number again",
+   "success": false
+  }
+ },
+ "register: SMS not arrived yet": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_NOT_VERIFIED",
+   "message": "Your SMS hasn't arrived yet. Send it, then try again.",
+   "success": false
+  }
+ },
+ "sms: wrong key": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Resource not found",
+   "success": false
+  }
+ },
+ "sms: from another number": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": false
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "sms: wrong code": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": false
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "sms: not a received SMS": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": false
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "sms: from the right number": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": true
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "check: verified": {
+  "status": 200,
+  "body": {
+   "data": {
+    "status": "VERIFIED"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "register: check of another number": {
+  "status": 400,
+  "body": {
+   "code": "CHECK_NOT_FOUND",
+   "message": "Verify your mobile number again",
+   "success": false
+  }
+ },
+ "register: with the check": {
+  "status": 201,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": null,
+     "name": "Riya Das",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Account created successfully",
+   "success": true
+  }
+ },
+ "check: used up": {
+  "status": 200,
+  "body": {
+   "data": {
+    "status": "USED"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "reset: waiting for the SMS": {
+  "status": 200,
+  "body": {
+   "data": {
+    "status": "WAITING"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "reset: the SMS arrives": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": true
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "reset: no check or code": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Verify your mobile number first",
+   "success": false
+  }
+ },
+ "reset: a sign-up check": {
+  "status": 400,
+  "body": {
+   "code": "CHECK_NOT_FOUND",
+   "message": "Verify your mobile number again",
+   "success": false
+  }
+ },
+ "reset: with the check": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": null,
+     "name": "Riya Das",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Password changed. You are signed in.",
+   "success": true
+  }
+ },
+ "reset: the new password works": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": null,
+     "name": "Riya Das",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Logged in successfully",
+   "success": true
+  }
+ },
+ "check: too many in a minute": {
+  "status": 429,
+  "body": {
+   "code": "TOO_MANY_REQUESTS",
+   "message": "Please wait a minute before trying again",
+   "success": false
+  }
+ },
+ "google: client id": {
+  "status": 200,
+  "body": {
+   "data": {
+    "clientId": "check-client.apps.googleusercontent.com"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "google: not a token": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Google sign-in failed. Please try again.",
+   "success": false
+  }
+ },
+ "google: signed by someone else": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Google sign-in failed. Please try again.",
+   "success": false
+  }
+ },
+ "google: for another app": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Google sign-in failed. Please try again.",
+   "success": false
+  }
+ },
+ "google: expired": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "Google sign-in failed. Please try again.",
+   "success": false
+  }
+ },
+ "google: email not confirmed": {
+  "status": 401,
+  "body": {
+   "code": "UNAUTHORIZED",
+   "message": "This Google account has no confirmed email address.",
+   "success": false
+  }
+ },
+ "google: new account": {
+  "status": 200,
+  "body": {
+   "data": {
+    "isNewUser": true,
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": "***@example.com",
+     "lastLoginAt": "2026-09-22T04:30:00.000Z",
+     "name": "Asha Roy",
+     "phone": null,
+     "phoneVerified": false,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Welcome to GO-GO Ride",
+   "success": true
+  }
+ },
+ "google: same account again": {
+  "status": 200,
+  "body": {
+   "data": {
+    "isNewUser": false,
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": "***@example.com",
+     "lastLoginAt": "2026-09-22T04:30:00.000Z",
+     "name": "Asha Roy",
+     "phone": null,
+     "phoneVerified": false,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Logged in successfully",
+   "success": true
+  }
+ },
+ "google: another Google account, same Gmail": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "This Gmail is already on a GO-GO Ride account. Sign in with that mobile number and password.",
+   "success": false
+  }
+ },
+ "google: signed in, no number": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "email": "***@example.com",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Asha Roy",
+    "phone": null,
+    "phoneVerified": false,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "google: password before a number": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_MISSING",
+   "message": "Add your mobile number first (Settings > Mobile Number): you sign in with the number and password.",
+   "success": false
+  }
+ },
+ "google: number check for a password": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_MISSING",
+   "message": "Add your mobile number first (Settings > Mobile Number): you sign in with the number and password.",
+   "success": false
+  }
+ },
+ "google: add a number without a check": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_CHECK_REQUIRED",
+   "message": "Verify your mobile number first: update GO-GO Ride to the latest version.",
+   "success": false
+  }
+ },
+ "google: add a taken number": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "An account with this mobile number already exists",
+   "success": false
+  }
+ },
+ "google: add the number": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "email": "***@example.com",
+    "lastLoginAt": "2026-09-22T04:30:00.000Z",
+    "name": "Asha Roy",
+    "phone": "90********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Mobile number added",
+   "success": true
+  }
+ },
+ "google: number already added": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Your account already has a mobile number",
+   "success": false
+  }
+ },
+ "change: no check": {
+  "status": 400,
+  "body": {
+   "code": "PHONE_CHECK_REQUIRED",
+   "message": "Verify your mobile number first: update GO-GO Ride to the latest version.",
+   "success": false
+  }
+ },
+ "change: start": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 900,
+    "sendTo": "+9190********"
+   },
+   "success": true
+  }
+ },
+ "change: the SMS arrives": {
+  "status": 200,
+  "body": {
+   "data": {
+    "matched": true
+   },
+   "message": "Received",
+   "success": true
+  }
+ },
+ "change: another account's check": {
+  "status": 400,
+  "body": {
+   "code": "CHECK_NOT_FOUND",
+   "message": "Verify your mobile number again",
+   "success": false
+  }
+ },
+ "change: with the check": {
+  "status": 200,
+  "body": {
+   "data": null,
+   "message": "Password updated, please sign in again",
+   "success": true
+  }
+ },
+ "change: the new password works": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-20T19:25:59.897Z",
+     "email": null,
+     "id": "cmua7ig2h0008af67g99rwmsv",
+     "name": "Ritaban Guchait",
+     "phone": "91********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Logged in successfully",
+   "success": true
+  }
+ }
+}

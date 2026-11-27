@@ -381,6 +381,7 @@
   animation: slide-up 420ms var(--ease) both;
 }
 .pub-splash-cta { max-width: 360px; font-size: 1.15rem; min-height: 56px; border-radius: 14px; box-shadow: 0 10px 24px rgba(11, 42, 122, 0.3); }
+.pub-splash-google { max-width: 360px; min-height: 52px; }
 .pub-splash-login { color: var(--accent); font-weight: 600; font-size: var(--fs-md); padding: 4px 12px; }
 .pub-splash-login:hover { color: var(--accent-600); }
 .pub-splash-links { display: flex; align-items: center; color: var(--accent); font-weight: 600; font-size: var(--fs-md); }
@@ -397,10 +398,7 @@
   align-items: center;
   justify-content: center;
   background: var(--surface);
-  transition: transform var(--t) var(--ease), background var(--t), color var(--t);
 }
-.pub-mode:hover .pub-mode-ring,
-.pub-mode:active .pub-mode-ring { transform: translateY(-2px); }
 .pub-mode.navy { color: var(--primary); }
 .pub-mode.orange { color: var(--accent); }
 .pub-mode.green { color: #15803d; }

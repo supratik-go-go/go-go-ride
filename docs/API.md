@@ -18,7 +18,7 @@ App version, stats, settings, news, public pages. Code: `backend-node/src/routes
 | GET | `/settings` | anyone |
 | GET | `/internal/run-alarms` | the server timer (needs the CRON_KEY secret) |
 
-## auth (9)
+## auth (16)
 
 Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 
@@ -33,6 +33,13 @@ Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 | POST | `/auth/logout` | signed in |
 | GET | `/auth/me` | signed in |
 | POST | `/auth/change-password` | signed in |
+| GET | `/auth/phone-check` | anyone |
+| POST | `/auth/phone-check/start` | anyone (more if signed in) |
+| POST | `/auth/phone-check/status` | anyone |
+| POST | `/sms/incoming/:key` | anyone |
+| GET | `/auth/google` | anyone |
+| POST | `/auth/google` | anyone |
+| POST | `/users/me/phone` | signed in |
 
 ## profile (11)
 

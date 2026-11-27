@@ -52,7 +52,7 @@ const limited = (windowMs, limit) =>
     handler: (req, res) =>
       res.status(429).json({ success: false, message: 'Too many requests, please slow down', code: 'TOO_MANY_REQUESTS' }),
   })
-app.use(['/api/auth/login', '/api/auth/register', '/api/auth/otp', '/api/auth/password'], limited(15 * 60 * 1000, 20))
+app.use(['/api/auth/login', '/api/auth/register', '/api/auth/otp', '/api/auth/password', '/api/auth/phone-check/start', '/api/auth/google'], limited(15 * 60 * 1000, 20))
 app.use('/api/games/pingball/score', limited(60 * 1000, 30))
 app.use('/api', limited(60 * 1000, 300))
 

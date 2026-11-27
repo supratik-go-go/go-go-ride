@@ -9,6 +9,16 @@ import android.net.Uri;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import androidx.activity.result.ActivityResult;
+import androidx.core.content.ContextCompat;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialCancellationException;
+import androidx.credentials.exceptions.GetCredentialException;
+import androidx.credentials.exceptions.NoCredentialException;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -16,13 +26,15 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import java.util.ArrayList;
 
 /**
  * Small Android helpers the web code can't do itself (src/native/device.js): is the phone's
  * Location switched on, open the Location switch or GO-GO Ride's own permission page directly,
- * and voice search through Android's own voice typing (no microphone permission needed: the
- * Google app records).
+ * voice search through Android's own voice typing (no microphone permission needed: the Google
+ * app records), and Sign in with Google through Android's Credential Manager.
  */
 @CapacitorPlugin(name = "GoGoDevice")
 public class GoGoDevicePlugin extends Plugin {
@@ -75,6 +87,55 @@ public class GoGoDevicePlugin extends Plugin {
         JSObject out = new JSObject();
         out.put("matches", matches);
         call.resolve(out);
+    }
+
+    /**
+     * Sign in with Google: { clientId } is the server's "Web application" client ID. Shows Google's
+     * account picker and resolves { idToken } for the server to check; rejects with code CANCELLED
+     * when the person closes it, NO_ACCOUNT when the phone has no Google account.
+     */
+    @PluginMethod
+    public void googleSignIn(PluginCall call) {
+        String clientId = call.getString("clientId");
+        if (clientId == null || clientId.isEmpty()) {
+            call.reject("Google sign-in is not set up yet.");
+            return;
+        }
+        GetSignInWithGoogleOption option = new GetSignInWithGoogleOption.Builder(clientId).build();
+        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(option).build();
+        CredentialManager manager = CredentialManager.create(getContext());
+        manager.getCredentialAsync(
+            getActivity(),
+            request,
+            null,
+            ContextCompat.getMainExecutor(getContext()),
+            new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                @Override
+                public void onResult(GetCredentialResponse response) {
+                    Credential credential = response.getCredential();
+                    if (!(credential instanceof CustomCredential)
+                        || !GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
+                        call.reject("Google sign-in failed. Please try again.");
+                        return;
+                    }
+                    try {
+                        GoogleIdTokenCredential google = GoogleIdTokenCredential.createFrom(((CustomCredential) credential).getData());
+                        JSObject out = new JSObject();
+                        out.put("idToken", google.getIdToken());
+                        call.resolve(out);
+                    } catch (Exception e) {
+                        call.reject("Google sign-in failed. Please try again.", e);
+                    }
+                }
+
+                @Override
+                public void onError(GetCredentialException e) {
+                    if (e instanceof GetCredentialCancellationException) call.reject("Cancelled", "CANCELLED");
+                    else if (e instanceof NoCredentialException) call.reject("Add a Google account to this phone first (Settings > Accounts).", "NO_ACCOUNT");
+                    else call.reject("Google sign-in failed. Please try again.", e);
+                }
+            }
+        );
     }
 
     private void open(PluginCall call, Intent intent) {

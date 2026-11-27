@@ -1,0 +1,30 @@
+/* Mobile number check: the SMS to send, and whether it has arrived (PhoneCheck.jsx).
+   Its own file: Settings and the admin profile use it without the sign-in page styles. */
+.auth-check { display: flex; flex-direction: column; gap: 16px; }
+.auth-check-lead { color: var(--muted); font-size: var(--fs-sm); line-height: 1.5; }
+.auth-check-lead strong { color: var(--text); }
+.auth-check-sms {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  align-items: baseline;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: var(--fs-sm);
+}
+.auth-check-sms span { color: var(--muted); }
+.auth-check-sms strong { color: var(--text); font-size: var(--fs-md); }
+.auth-check-code { letter-spacing: 2px; }
+.auth-check-hint { color: var(--muted); font-size: var(--fs-xs); text-align: center; line-height: 1.45; }
+.auth-check-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  text-align: left;
+}
+.auth-check-status.is-done { color: var(--success); font-weight: 600; }

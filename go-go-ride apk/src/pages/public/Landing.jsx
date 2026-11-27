@@ -25,6 +25,7 @@ import heroCity from '../../assets/brand/hero-city.jpg'
 import logoWordmark from '../../assets/brand/logo-wordmark.png'
 import logoFull from '../../assets/brand/logo-full.png'
 import { PlatformStats } from './publicShared'
+import { GoogleButton } from '../auth/GoogleButton'
 import { useMediaQuery } from './useMediaQuery'
 import './public.css'
 
@@ -263,11 +264,12 @@ function AutoIcon(props) {
   )
 }
 
+// Pictures only: the app is entered with As A Guest or Login, not from these.
 const MODES = [
-  { to: '/search', label: 'Bus', icon: (p) => <BusFront size={26} {...p} />, tone: 'navy' },
-  { to: '/local-cars', label: 'Car', icon: (p) => <CarFront size={26} {...p} />, tone: 'orange' },
-  { to: '/running-car', label: 'Auto', icon: (p) => <AutoIcon {...p} />, tone: 'green' },
-  { to: '/running-car', label: 'Bike', icon: (p) => <Motorbike size={26} {...p} />, tone: 'navy' },
+  { label: 'Bus', icon: (p) => <BusFront size={26} {...p} />, tone: 'navy' },
+  { label: 'Car', icon: (p) => <CarFront size={26} {...p} />, tone: 'orange' },
+  { label: 'Auto', icon: (p) => <AutoIcon {...p} />, tone: 'green' },
+  { label: 'Bike', icon: (p) => <Motorbike size={26} {...p} />, tone: 'navy' },
 ]
 
 function MobileSplash() {
@@ -306,8 +308,9 @@ function MobileSplash() {
 
       <div className="pub-splash-sheet">
         <Button to="/home" size="lg" block className="pub-splash-cta">
-          {isAuthenticated ? 'Continue' : 'Guest Login'}
+          {isAuthenticated ? 'Continue' : 'As A Guest'}
         </Button>
+        {!isAuthenticated && <GoogleButton className="pub-splash-google" />}
         {isAuthenticated ? (
           <span className="pub-splash-signed">Signed in as {user?.name}</span>
         ) : (
@@ -321,16 +324,16 @@ function MobileSplash() {
             </Link>
           </div>
         )}
-        <nav className="pub-modes" aria-label="Travel modes">
-          {MODES.map(({ to, label, icon: Icon, tone }) => (
-            <Link key={label} to={to} className={`pub-mode ${tone}`}>
+        <div className="pub-modes" aria-hidden="true">
+          {MODES.map(({ label, icon: Icon, tone }) => (
+            <span key={label} className={`pub-mode ${tone}`}>
               <span className="pub-mode-ring">
                 <Icon />
               </span>
               <span>{label}</span>
-            </Link>
+            </span>
           ))}
-        </nav>
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { PhoneAlarmsCard, ServerCard, serverSettingsNeeded } from '../../native/AppSettings'
 import { isNativeApp } from '../../native/platform'
+import { formatPhone } from '../../utils/format'
 import { AccountPage } from './accountShared'
 import { AboutCard } from './settings/AboutCard'
 import { ActivityCard } from './settings/ActivityCard'
@@ -10,6 +11,7 @@ import { DeleteAccountCard } from './settings/DeleteAccountCard'
 import { LanguageCard } from './settings/LanguageCard'
 import { NotificationsCard } from './settings/NotificationsCard'
 import { PasswordCard } from './settings/PasswordCard'
+import { PhoneNumberCard } from './settings/PhoneNumberCard'
 import { ThemeCard } from './settings/ThemeCard'
 import { UpdatesCard } from './settings/UpdatesCard'
 import './settings/settings.css'
@@ -17,11 +19,18 @@ import './settings/settings.css'
 const APP_VERSION = __APP_VERSION__
 
 /** One row per screen, in menu order. `path` is the part after /settings/. */
-function settingsItems({ isAdmin }) {
+function settingsItems({ isAdmin, user }) {
   const native = isNativeApp()
   return [
     { path: 'theme', emoji: '🎨', title: 'Theme', hint: 'Light, dark or auto', screen: <ThemeCard /> },
     { path: 'language', emoji: '💬', title: 'Language', hint: 'English', screen: <LanguageCard /> },
+    {
+      path: 'phone',
+      emoji: '📞',
+      title: 'Mobile Number',
+      hint: user?.phone ? formatPhone(user.phone) : 'Add your mobile number',
+      screen: <PhoneNumberCard />,
+    },
     { path: 'password', emoji: '🔑', title: 'Change Password', hint: 'Update your sign-in password', screen: <PasswordCard /> },
     {
       path: 'notifications',
@@ -65,8 +74,8 @@ function SettingsMenu({ items }) {
 
 /** /settings is a menu; each row opens its own screen at /settings/<path>. */
 export default function Settings() {
-  const { isAdmin } = useAuth()
-  const items = settingsItems({ isAdmin })
+  const { isAdmin, user } = useAuth()
+  const items = settingsItems({ isAdmin, user })
 
   return (
     <Routes>

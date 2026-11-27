@@ -22,7 +22,7 @@ Tick a box by changing `- [ ]` to `- [x]`, then run `push-to-github.bat`.
 - [ ] Check both GitHub repos are **Private** (repo → Settings)
 - [x] Demo accounts blocked on the live server (2026-11-25); deleted at the MySQL switch
 - [x] Live server moved to MySQL (2026-11-25): demo data removed, 1,092 buses from the Excel file loaded
-- [ ] Sign in with 9382480016 and the temporary password in `backend-node\data\YOUR-TEMPORARY-PASSWORD.txt`, then Profile → Change password; delete that file afterwards
+- [ ] Owner: sign in with your own number and your password, check it works, then delete `backend-node\data\YOUR-TEMPORARY-PASSWORD.txt`
 - [ ] Change the MySQL password in hPanel → Databases (it was written in a chat), then update `MYSQL_PASSWORD` in Environment variables and in `production-secrets.txt`
 - [ ] Local Vehicle has no listings now (the 4 were demo): add real drivers, or ask drivers to list themselves
 - [ ] Check the 51 buses in `Downloads\bus-import-check-list.xlsx` (15 were not loaded); fix them in Excel and import again from Admin → Buses → Import
@@ -41,14 +41,21 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 
 - [ ] Google Play Store? If yes: create a developer account at play.google.com/console (US$25, identity check takes days)
 - [ ] iPhone launch: the project is ready, see `go-go-ride apk\IOS.md`. Needs a Mac and an Apple Developer account (US$99 per year)
-- [x] OTP by SMS: decided 2026-11-25 to use a spare Android phone + SIM as a free SMS sender (about 100 SMS a day)
+- [x] OTP by SMS: decided 2026-11-27 that it must cost GO-GO Ride nothing: the user sends one SMS from their own number to the owner's phone (receiving is free, no daily limit). Asked at sign-up, Forgot password and Change password, not at every login (replaces the 2026-11-25 idea of the owner's phone sending codes)
+
+## App v1.12 — mobile number check by SMS (2026-11-27)
+
+- [ ] Owner: set up the SMS phone (own phone, or a second SIM in it if the personal number should not be shown to users): install "SMS Gateway for Android", allow SMS, switch on Cloud Server and go Online, battery saving off for the app, RCS chats off in Google Messages (RCS messages never reach the app). Then in hPanel add `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` (from the app's Cloud Server section) and `SMS_RECEIVE_NUMBER` (that SIM's number), save and redeploy. `/api/health` then shows `"sms":"ok"`; test with Forgot password on a phone
+- [ ] Owner: set up Google sign-in (free): Google Cloud project "GO-GO Ride", Google Auth Platform branding + audience External, published; an Android client (package `com.gogoride.app`, SHA-1 of the release key `96:15:D2:5A:25:46:0C:B9:56:B8:68:02:46:81:97:00:74:FA:80:A4`) and a Web application client; put the Web client ID in hPanel as `GOOGLE_CLIENT_ID`. If the app later goes to Google Play with Play App Signing, add Play's SHA-1 too
+- [ ] Owner: test v1.12 on a phone (sign-up, Forgot password, Settings > Change Password, the SMS app opens with the message filled in, Continue with Google, Settings > Mobile Number)
+- Also in v1.12: Continue with Google on the opening screen and Login, no mobile number needed (owner's choice); the number can be added later in Settings > Mobile Number. A Gmail already on a phone account is refused (sign in with the number)
+- Also in v1.12: the opening screen's Bus / Car / Auto / Bike icons are pictures only (they used to open the app without signing in); "Guest Login" now reads "As A Guest"
 
 ## App v1.9 and v1.11 — the owner's changes (2026-11-25)
 
 v1.9 released 2026-11-25 (1, 6, 7, 8 and the search-card fixes). v1.10 and v1.11 combined into v1.11 (2, 4, 5, 9).
 
 - [ ] Owner: test both on a real phone (voice search in all three languages, ticket photo with the camera, Allow location)
-- [ ] Owner: set up the SMS phone so Forgot password works: spare Android phone + SIM, the free "SMS Gateway for Android" app in Cloud Server mode, then add `SMS_GATEWAY_USER` and `SMS_GATEWAY_PASSWORD` in hPanel (Claude gives click-by-click steps and tests one SMS)
 - [ ] Second names (other spellings, Bengali / Hindi) for busy stops help voice search. Admin editing comes with phase B #9; until then send Claude a list (stop -> other names)
 
 1. Home search box 20% shorter (same layout, tighter spacing)
@@ -59,7 +66,7 @@ v1.9 released 2026-11-25 (1, 6, 7, 8 and the search-card fixes). v1.10 and v1.11
 6. Add Bus Information: Bus Number optional, Bus Name required instead (owner and admin forms too)
 7. Live Location: "Allow location" goes straight to Android's permission popup, the phone's Location switch, or the app's permission page; no instruction screen; "While using the app" only
 8. Home: remove Popular Routes; add Recent Search (today / yesterday cards, repeat or remove, View All); guests keep theirs on the phone
-9. Forgot password by OTP to the account's own number, sent through the owner's own phone (free); new password + confirm
+9. Forgot password with the account's own number proved by SMS; new password + confirm (finished in v1.12, see above)
 - Also: search card shows the bus name when there is no bus number, and hides "₹0" when the fare is not known
 - Also: update `express-rate-limit` to 8.7.5 (Hostinger security warning, moderate)
 
@@ -70,7 +77,6 @@ v1.9 released 2026-11-25 (1, 6, 7, 8 and the search-card fixes). v1.10 and v1.11
 - [ ] Serve the API at `/api/v1` as well as `/api` (installed phones keep using `/api`)
 - [ ] Fix whatever the phone test finds
 - [ ] Play Store release: signed app bundle (.aab), listing text, screenshots, data-safety answers
-- [ ] Connect the SMS provider for OTP login (after the decision above)
 - [ ] Computer players for empty seats, so Call Break and 29 can start without 4 people online
 - [ ] Bengali language for the whole app (owner to decide how much)
 - [ ] How to Use video: owner to record it, then set `VIDEO_URL` in `go-go-ride apk/src/pages/passenger/HowToUse.jsx`

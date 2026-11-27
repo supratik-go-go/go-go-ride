@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import { authService, profileService } from '../../services'
 import { formatPhone, isValidPhone } from '../../utils/format'
 import { AuthShell } from './AuthShell'
+import { GoogleButton } from './GoogleButton'
 import { PhoneInput } from './PhoneInput'
 import { OtpInput } from './OtpInput'
 import { safeNext, serverFieldErrors } from './formUtils'
@@ -356,6 +357,8 @@ export default function Login() {
           </Button>
         </form>
       )}
+
+      <GoogleButton next={dest} withDivider />
 
       <p className="text-xs text-muted" style={{ textAlign: 'center' }}>
         By continuing you agree to GO-GO Ride&apos;s terms of use and privacy policy.

@@ -15,6 +15,7 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Smartphone,
   SquarePlus,
   Star,
 } from 'lucide-react'
@@ -77,7 +78,7 @@ export default function Profile() {
         <Avatar src={user.avatarUrl} name={user.name} size={76} />
         <div className="acc-hero-text">
           <span className="acc-hero-name">{user.name}</span>
-          <span className="acc-hero-phone">{formatPhone(user.phone)}</span>
+          <span className="acc-hero-phone">{user.phone ? formatPhone(user.phone) : 'No mobile number yet'}</span>
           {user.email && <span className="acc-hero-email truncate">{user.email}</span>}
           <span className="acc-role-pill">
             {isAdmin ? <ShieldCheck size={12} /> : null}
@@ -86,6 +87,13 @@ export default function Profile() {
         </div>
         <ChevronRight size={26} className="acc-hero-chevron" />
       </Link>
+
+      {!user.phone && (
+        <Link to="/settings/phone" className="alert alert-info">
+          <Smartphone size={18} />
+          <span>Add your mobile number, so you can also sign in with it and reset your password.</span>
+        </Link>
+      )}
 
       <nav className="card acc-menu" aria-label="Account">
         <MenuRow to="/bookings" icon={CalendarCheck}>
