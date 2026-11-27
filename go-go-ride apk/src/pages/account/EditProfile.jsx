@@ -7,6 +7,7 @@ import { profileService } from '../../services'
 import { formatPhone, label } from '../../utils/format'
 import { isValidEmail, serverFieldErrors } from '../auth/formUtils'
 import { AccountPage } from './accountShared'
+import { EmailConfirmCard } from './EmailConfirmCard'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -62,7 +63,9 @@ export default function EditProfile() {
     const email = form.email.trim()
     if (name.length < 2) next.name = 'Enter your full name (at least 2 characters)'
     else if (name.length > 80) next.name = 'Name is too long'
-    if (email && !isValidEmail(email)) next.email = 'Enter a valid email address'
+    // Required since v1.13: Forgot password sends its code there.
+    if (!email) next.email = 'Enter your email address'
+    else if (!isValidEmail(email)) next.email = 'Enter a valid email address'
     setErrors(next)
     if (Object.keys(next).length || !dirty) return
 
@@ -75,10 +78,15 @@ export default function EditProfile() {
       if (nameChanged || emailChanged) {
         const body = {}
         if (nameChanged) body.name = name
-        if (emailChanged) body.email = email || null
+        if (emailChanged) body.email = email
         await profileService.update(body)
       }
       await refreshUser()
+      // A new email isn't confirmed yet: stay here, where the Confirm your email card now shows.
+      if (emailChanged) {
+        toast.success('Now confirm your new email.', 'Profile updated')
+        return
+      }
       toast.success('Profile updated')
       goBack()
     } catch (err) {
@@ -99,6 +107,13 @@ export default function EditProfile() {
 
   return (
     <AccountPage title="Edit Profile">
+      {/* Outside the form below: a form can't sit inside another. A Google account has no password
+          unless one was set after adding a mobile number. */}
+      {user.email && !user.emailConfirmed && !emailChanged && (
+        <div style={{ marginBottom: 16 }}>
+          <EmailConfirmCard email={user.email} askPassword={Boolean(user.phone)} />
+        </div>
+      )}
       <form className="stack" style={{ '--gap': '16px' }} onSubmit={submit} noValidate>
         <Card>
           <div className="acc-avatar-edit">
@@ -148,12 +163,18 @@ export default function EditProfile() {
               value={form.email}
               onChange={set('email')}
               error={errors.email}
-              hint="Optional - used for receipts and account recovery."
+              suffix={user.emailConfirmed && !emailChanged ? <BadgeCheck size={18} className="text-success" aria-label="Confirmed" style={{ marginRight: 6 }} /> : null}
+              hint={
+                user.emailConfirmed && !emailChanged
+                  ? "Confirmed. If you forget your password, we'll email you a code here."
+                  : "If you forget your password, we'll email you a code here once it's confirmed."
+              }
+              required
             />
             <Input
               label="Mobile number"
               icon={<Phone size={18} />}
-              value={formatPhone(user.phone)}
+              value={user.phone ? formatPhone(user.phone) : 'Not added yet'}
               disabled
               readOnly
               suffix={user.phoneVerified ? <BadgeCheck size={18} className="text-success" aria-label="Verified" style={{ marginRight: 6 }} /> : null}

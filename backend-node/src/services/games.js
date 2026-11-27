@@ -134,16 +134,28 @@ async function forfeit(room, seat, what, who) {
   return finish(room, { winners, reason: `${name} ${what}`, forfeited: seat })
 }
 
+/**
+ * Inside a transaction: the room, locked until the transaction ends. Every change to a game goes
+ * through this, or two phones asking at the same moment could both end the game and both hand out
+ * the points.
+ */
+const lockRoom = (id) => get('SELECT * FROM game_rooms WHERE id = ? FOR UPDATE', id)
+
+// Counted from the last join: a four-seat table takes longer to fill than a two-seat one.
+const unjoinedTooLong = (room, now) => room.status === 'WAITING' && now - room.updatedAt > WAITING_MS
+const outOfTime = (room, now) => room.status === 'PLAYING' && now > room.turnEndsAt
+
 /** Bring a room up to date: expire an unjoined room, or end a game whose turn timed out. */
 async function settle(room) {
-  const now = Date.now()
-  // Counted from the last join: a four-seat table takes longer to fill than a two-seat one.
-  if (room.status === 'WAITING' && now - room.updatedAt > WAITING_MS) return tx(() => bump(room, { status: 'CANCELLED' }))
-  if (room.status === 'PLAYING' && now > room.turnEndsAt) {
-    const turn = GAMES[room.game].turn(stateOf(room))
-    return tx(() => forfeit(room, turn, 'ran out of time'))
-  }
-  return room
+  if (!unjoinedTooLong(room, Date.now()) && !outOfTime(room, Date.now())) return room
+  return tx(async () => {
+    // Read again under the lock: another request may have settled it a moment ago.
+    const fresh = await lockRoom(room.id)
+    const now = Date.now()
+    if (unjoinedTooLong(fresh, now)) return bump(fresh, { status: 'CANCELLED' })
+    if (outOfTime(fresh, now)) return forfeit(fresh, GAMES[fresh.game].turn(stateOf(fresh)), 'ran out of time')
+    return fresh
+  })
 }
 
 export async function roomOut(room, userId) {
@@ -194,7 +206,8 @@ export async function quickMatch(game, user) {
     if (existing) return existing
     const open = await all(`SELECT * FROM game_rooms WHERE game = ? AND status = 'WAITING' AND is_public = 1 ORDER BY created_at, id LIMIT 20`, game)
     for (const row of open) {
-      const room = await settle(row)
+      // Locked, so two people sitting down at once don't both take the same seat.
+      const room = await settle(await lockRoom(row.id))
       if (room.status === 'WAITING') return seatPlayer(room, user)
     }
     return createRoom(game, user, { isPublic: true })
@@ -209,8 +222,9 @@ export async function createPrivateRoom(game, user) {
 export async function joinByCode(rawCode, user) {
   const code = typeof rawCode === 'string' ? rawCode.trim().toUpperCase() : ''
   return tx(async () => {
-    const found = await get(`SELECT * FROM game_rooms WHERE room_code = ? AND status IN ('WAITING', 'PLAYING')`, code)
-    if (!found) throw ApiError.notFound('No game found with that code')
+    const row = await get(`SELECT id FROM game_rooms WHERE room_code = ? AND status IN ('WAITING', 'PLAYING')`, code)
+    if (!row) throw ApiError.notFound('No game found with that code')
+    const found = await lockRoom(row.id)
     if ((await playersOf(found.id)).some((p) => p.userId === user.id)) return found
     const room = await settle(found)
     if (room.status !== 'WAITING') throw ApiError.badRequest('That game has already started')
@@ -221,8 +235,9 @@ export async function joinByCode(rawCode, user) {
   })
 }
 
-const roomFor = async (id, userId) => {
-  const room = await byId('game_rooms', id)
+/** `lock` inside a transaction that changes the game. */
+const roomFor = async (id, userId, { lock = false } = {}) => {
+  const room = lock ? await lockRoom(id) : await byId('game_rooms', id)
   if (!room) throw ApiError.notFound('Game not found')
   if (!(await get('SELECT id FROM game_players WHERE game_room_id = ? AND user_id = ?', id, userId))) throw ApiError.forbidden('You are not in this game')
   return room
@@ -232,7 +247,7 @@ export const pollRoom = async (id, userId) => settle(await roomFor(id, userId))
 
 export async function playMove(id, user, input) {
   return tx(async () => {
-    const room = await settle(await roomFor(id, user.id))
+    const room = await settle(await roomFor(id, user.id, { lock: true }))
     if (room.status !== 'PLAYING') throw ApiError.badRequest('This game has ended')
     const engine = engineFor(room.game)
     const state = stateOf(room)
@@ -254,7 +269,7 @@ async function withdraw(room, userId) {
 /** Null when the player left before the start, as they then have no room to be shown. */
 export async function leaveRoom(id, user) {
   return tx(async () => {
-    const room = await settle(await roomFor(id, user.id))
+    const room = await settle(await roomFor(id, user.id, { lock: true }))
     if (room.status === 'WAITING') {
       await withdraw(room, user.id)
       return null
@@ -277,7 +292,7 @@ export async function leaveActiveRooms(userId) {
     userId,
   )
   for (const row of rooms) {
-    const room = await settle(row)
+    const room = await settle(await lockRoom(row.id))
     if (room.status === 'WAITING') await withdraw(room, userId)
     if (room.status === 'PLAYING') await forfeit(room, (await playersOf(room.id)).find((p) => p.userId === userId).seat, 'left the game', 'A player')
   }

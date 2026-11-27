@@ -6,6 +6,7 @@ import { Button, Input, useToast } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { authService, profileService } from '../../services'
 import { formatPhone, isValidPhone } from '../../utils/format'
+import { AddEmailForm } from './AddEmail'
 import { AuthShell } from './AuthShell'
 import { GoogleButton } from './GoogleButton'
 import { PhoneInput } from './PhoneInput'
@@ -28,7 +29,7 @@ export default function Login() {
   const { setUser } = useAuth()
 
   const [mode, setMode] = useState(OTP_ENABLED ? 'otp' : 'password') // otp | password
-  const [step, setStep] = useState('phone') // phone | code | name  (OTP flow)
+  const [step, setStep] = useState('phone') // phone | code | name (OTP flow) | email
   const [phone, setPhone] = useState('')
   const [code, setCode] = useState('')
   const [devCode, setDevCode] = useState('')
@@ -57,6 +58,15 @@ export default function Login() {
       setUser(user)
       navigate(dest, { replace: true })
     })
+  }
+
+  /** Signed in: an account without an email adds one first (required since v1.13), then goes in. */
+  const done = (user, message) => {
+    if (user?.email) return finish(user, message)
+    setNewUser(user)
+    setErrors({})
+    setBusy('')
+    setStep('email')
   }
 
   const switchMode = (m) => {
@@ -108,7 +118,7 @@ export default function Login() {
         setName('')
         setStep('name')
       } else {
-        finish(data.user)
+        done(data.user)
       }
     } catch (err) {
       setErrors({ code: err.message })
@@ -131,7 +141,7 @@ export default function Login() {
     setBusy('name')
     try {
       const updated = await profileService.update({ name: n })
-      finish(updated, `Welcome to GO-GO Ride, ${firstName(n)}!`)
+      done(updated, `Welcome to GO-GO Ride, ${firstName(n)}!`)
     } catch (err) {
       const fe = serverFieldErrors(err)
       if (fe.name) setErrors({ name: fe.name })
@@ -153,7 +163,7 @@ export default function Login() {
     setBusy('password')
     try {
       const data = await authService.login(phone, password)
-      finish(data.user)
+      done(data.user)
     } catch (err) {
       const fe = serverFieldErrors(err)
       if (Object.keys(fe).length) setErrors(fe)
@@ -163,6 +173,14 @@ export default function Login() {
   }
 
   // ------------------------------------------------------------ render
+
+  if (step === 'email') {
+    return (
+      <AuthShell title="Add your email" subtitle="GO-GO Ride now needs an email on every account, so you can reset your password if you forget it.">
+        <AddEmailForm onSaved={(updated) => finish(updated, `Welcome back, ${firstName(updated?.name)}!`)} />
+      </AuthShell>
+    )
+  }
 
   if (step === 'name') {
     return (
@@ -189,7 +207,7 @@ export default function Login() {
           <Button type="submit" size="lg" block loading={busy === 'name'} iconRight={<ArrowRight size={18} />}>
             Continue
           </Button>
-          <button type="button" className="link-btn" style={{ alignSelf: 'center' }} onClick={() => finish(newUser, 'Welcome to GO-GO Ride!')} disabled={busy === 'name'}>
+          <button type="button" className="link-btn" style={{ alignSelf: 'center' }} onClick={() => done(newUser, 'Welcome to GO-GO Ride!')} disabled={busy === 'name'}>
             Skip for now
           </button>
         </form>

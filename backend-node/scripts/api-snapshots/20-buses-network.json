@@ -223,14 +223,14 @@
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -249,20 +249,53 @@
       },
       "totalSeats": 45,
       "type": "NON_AC"
+     },
+     {
+      "arrivalTime": "09:30",
+      "arrivalTime12h": "09:30 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "30m",
+      "durationMinutes": 30,
+      "fare": 45,
+      "from": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
+      },
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "id": "cmua7ihdx000isb1mz8nyi6x0",
+       "name": "Esplanade"
+      },
+      "totalSeats": 40,
+      "type": "AC"
      }
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": {
      "id": "cmua7ihdx000isb1mz8nyi6x0",
      "name": "Esplanade"
     },
-    "total": 1
+    "total": 2
    },
-   "message": "1 buses found",
+   "message": "2 buses found",
    "success": true
   }
  },
@@ -413,15 +446,15 @@
    "data": {
     "buses": [
      {
-      "arrivalTime": "08:50",
-      "arrivalTime12h": "08:50 AM",
+      "arrivalTime": "09:00",
+      "arrivalTime12h": "09:00 AM",
       "busName": "AC21 Salt Lake Connect",
       "busNumber": "WB 11 2345",
       "category": "SUPER_FAST",
       "departureTime": "08:37",
       "departureTime12h": "08:37 AM",
-      "durationLabel": "13m",
-      "durationMinutes": 13,
+      "durationLabel": "23m",
+      "durationMinutes": 23,
       "fare": 25,
       "from": {
        "id": "cmua7ihdx000isb1mz8nyi6x0",
@@ -439,8 +472,8 @@
       "routeName": "Salt Lake - Howrah (AC)",
       "routeNumber": "AC21",
       "to": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "totalSeats": 40,
       "type": "AC"
@@ -452,7 +485,7 @@
      "name": "Esplanade"
     },
     "to": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "total": 1
@@ -467,19 +500,52 @@
    "data": {
     "buses": [
      {
+      "arrivalTime": "07:25",
+      "arrivalTime12h": "07:25 AM",
+      "busName": "Test Travels",
+      "busNumber": "WB 99 ZZ 0001",
+      "category": "SUPER_FAST",
+      "departureTime": "06:40",
+      "departureTime12h": "06:40 AM",
+      "durationLabel": "45m",
+      "durationMinutes": 45,
+      "fare": 35,
+      "from": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
+      },
+      "id": "cmua7jo19000f3yhtwsc18vaw",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "Shree Travels",
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Howrah Station - Bandel",
+      "routeNumber": null,
+      "to": {
+       "id": "cmua7ihdx000p9kbc8c6fv960",
+       "name": "Bandel"
+      },
+      "totalSeats": 45,
+      "type": "AC"
+     },
+     {
       "arrivalTime": "08:45",
       "arrivalTime12h": "08:45 AM",
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -505,15 +571,12 @@
       "busName": "AC21 Salt Lake Connect",
       "busNumber": "WB 11 2345",
       "category": "SUPER_FAST",
-      "departureTime": "08:52",
-      "departureTime12h": "08:52 AM",
-      "durationLabel": "8m",
-      "durationMinutes": 8,
+      "departureTime": "07:45",
+      "departureTime12h": "07:45 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 25,
-      "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
-      },
+      "from": null,
       "id": "cmua7ihe7001xaq9w74f38133",
       "isRunning": true,
       "nextDepartureInMinutes": null,
@@ -525,9 +588,39 @@
       },
       "routeName": "Salt Lake - Howrah (AC)",
       "routeNumber": "AC21",
-      "to": {
+      "to": null,
+      "totalSeats": 40,
+      "type": "AC"
+     },
+     {
+      "arrivalTime": "10:40",
+      "arrivalTime12h": "10:40 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "1h 40m",
+      "durationMinutes": 100,
+      "fare": 45,
+      "from": {
        "id": "cmua7ihdx000e1j9kasf7h8qe",
        "name": "Howrah Station"
+      },
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "id": "cmua7ihdx000qoygyld3vl137",
+       "name": "New Town"
       },
       "totalSeats": 40,
       "type": "AC"
@@ -535,13 +628,13 @@
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": null,
-    "total": 2
+    "total": 4
    },
-   "message": "2 buses found",
+   "message": "4 buses found",
    "success": true
   }
  },
@@ -1671,14 +1764,14 @@
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -1724,20 +1817,53 @@
       "to": null,
       "totalSeats": 40,
       "type": "AC"
+     },
+     {
+      "arrivalTime": "09:30",
+      "arrivalTime12h": "09:30 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "30m",
+      "durationMinutes": 30,
+      "fare": 45,
+      "from": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
+      },
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "id": "cmua7ihdx000isb1mz8nyi6x0",
+       "name": "Esplanade"
+      },
+      "totalSeats": 40,
+      "type": "AC"
      }
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": {
      "id": "cmua7ihdx000isb1mz8nyi6x0",
      "name": "Esplanade"
     },
-    "total": 2
+    "total": 3
    },
-   "message": "2 buses found",
+   "message": "3 buses found",
    "success": true
   }
  },
@@ -1823,19 +1949,52 @@
    "data": {
     "buses": [
      {
+      "arrivalTime": "07:25",
+      "arrivalTime12h": "07:25 AM",
+      "busName": "Test Travels",
+      "busNumber": "WB 99 ZZ 0001",
+      "category": "SUPER_FAST",
+      "departureTime": "06:40",
+      "departureTime12h": "06:40 AM",
+      "durationLabel": "45m",
+      "durationMinutes": 45,
+      "fare": 35,
+      "from": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
+      },
+      "id": "cmua7jo19000f3yhtwsc18vaw",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "Shree Travels",
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Howrah Station - Bandel",
+      "routeNumber": null,
+      "to": {
+       "id": "cmua7ihdx000p9kbc8c6fv960",
+       "name": "Bandel"
+      },
+      "totalSeats": 45,
+      "type": "AC"
+     },
+     {
       "arrivalTime": "08:45",
       "arrivalTime12h": "08:45 AM",
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -1861,15 +2020,12 @@
       "busName": "AC21 Salt Lake Connect",
       "busNumber": "WB 11 2345",
       "category": "SUPER_FAST",
-      "departureTime": "08:52",
-      "departureTime12h": "08:52 AM",
-      "durationLabel": "8m",
-      "durationMinutes": 8,
+      "departureTime": "07:45",
+      "departureTime12h": "07:45 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 25,
-      "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
-      },
+      "from": null,
       "id": "cmua7ihe7001xaq9w74f38133",
       "isRunning": true,
       "nextDepartureInMinutes": null,
@@ -1881,9 +2037,39 @@
       },
       "routeName": "Salt Lake - Howrah (AC)",
       "routeNumber": "AC21",
-      "to": {
+      "to": null,
+      "totalSeats": 40,
+      "type": "AC"
+     },
+     {
+      "arrivalTime": "10:40",
+      "arrivalTime12h": "10:40 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "1h 40m",
+      "durationMinutes": 100,
+      "fare": 45,
+      "from": {
        "id": "cmua7ihdx000e1j9kasf7h8qe",
        "name": "Howrah Station"
+      },
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "id": "cmua7ihdx000qoygyld3vl137",
+       "name": "New Town"
       },
       "totalSeats": 40,
       "type": "AC"
@@ -1891,13 +2077,13 @@
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": null,
-    "total": 2
+    "total": 4
    },
-   "message": "2 buses found",
+   "message": "4 buses found",
    "success": true
   }
  },
@@ -2387,19 +2573,52 @@
    "data": {
     "buses": [
      {
+      "arrivalTime": "09:30",
+      "arrivalTime12h": "09:30 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "30m",
+      "durationMinutes": 30,
+      "fare": 45,
+      "from": {
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
+      },
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "id": "cmua7ihdx000isb1mz8nyi6x0",
+       "name": "Esplanade"
+      },
+      "totalSeats": 40,
+      "type": "AC"
+     },
+     {
       "arrivalTime": "08:45",
       "arrivalTime12h": "08:45 AM",
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": false,
@@ -2422,16 +2641,16 @@
     ],
     "date": "2026-09-23",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": {
      "id": "cmua7ihdx000isb1mz8nyi6x0",
      "name": "Esplanade"
     },
-    "total": 1
+    "total": 2
    },
-   "message": "1 buses found",
+   "message": "2 buses found",
    "success": true
   }
  },
@@ -3787,14 +4006,14 @@
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -3817,7 +4036,7 @@
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": null,
@@ -5236,34 +5455,34 @@
    "data": {
     "buses": [
      {
-      "arrivalTime": "09:00",
-      "arrivalTime12h": "09:00 AM",
-      "busName": "AC21 Salt Lake Connect",
-      "busNumber": "WB 11 2345",
-      "category": "SUPER_FAST",
-      "departureTime": "08:52",
-      "departureTime12h": "08:52 AM",
-      "durationLabel": "8m",
-      "durationMinutes": 8,
-      "fare": 25,
+      "arrivalTime": "10:40",
+      "arrivalTime12h": "10:40 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "1h 40m",
+      "durationMinutes": 100,
+      "fare": 45,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
-      "id": "cmua7ihe7001xaq9w74f38133",
+      "id": "cmua7ihee002qg8vy6zjcxwgr",
       "isRunning": true,
       "nextDepartureInMinutes": null,
       "notRunningReason": null,
       "operator": "WBTC",
       "rating": {
-       "average": 4.4,
-       "count": 98
+       "average": 4.8,
+       "count": 142
       },
-      "routeName": "Salt Lake - Howrah (AC)",
-      "routeNumber": "AC21",
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
       "to": {
-       "id": "cmua7ihdx000e1j9kasf7h8qe",
-       "name": "Howrah Station"
+       "id": "cmua7ihdx000qoygyld3vl137",
+       "name": "New Town"
       },
       "totalSeats": 40,
       "type": "AC"
@@ -5271,7 +5490,7 @@
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": null,
@@ -5306,14 +5525,14 @@
       "busName": "S12 Howrah Express",
       "busNumber": "WB 01 AB 1234",
       "category": "NORMAL",
-      "departureTime": "07:42",
-      "departureTime12h": "07:42 AM",
-      "durationLabel": "1h 3m",
-      "durationMinutes": 63,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
       "fare": 20,
       "from": {
-       "id": "cmua7ihdx000f1c86jmk4qop5",
-       "name": "Howrah Bridge"
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "name": "Howrah Station"
       },
       "id": "cmua7ihe6001sx4rgeb0nvsvb",
       "isRunning": true,
@@ -5336,7 +5555,7 @@
     ],
     "date": "2026-09-22",
     "from": {
-     "id": "cmua7ihdx000f1c86jmk4qop5",
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
      "name": "Howrah"
     },
     "to": null,
@@ -5436,11 +5655,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -5545,11 +5764,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -5683,11 +5902,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -5821,11 +6040,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -5935,11 +6154,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -6097,11 +6316,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -6274,11 +6493,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -6383,11 +6602,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -6521,11 +6740,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -6659,11 +6878,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -6773,11 +6992,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -6935,11 +7154,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -7112,11 +7331,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -7289,11 +7508,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -7427,11 +7646,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -7589,11 +7808,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -7766,11 +7985,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -7875,11 +8094,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -8013,11 +8232,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -8190,11 +8409,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -8299,11 +8518,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -8476,11 +8695,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -8585,11 +8804,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -8723,11 +8942,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -8861,11 +9080,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -8975,11 +9194,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -9137,11 +9356,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -9314,11 +9533,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -9491,11 +9710,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -9600,11 +9819,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -9738,11 +9957,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -9915,11 +10134,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -10053,11 +10272,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -10196,11 +10415,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -10305,11 +10524,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -10443,11 +10662,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -10581,11 +10800,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -10695,11 +10914,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -10857,11 +11076,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -11034,11 +11253,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,
@@ -11143,11 +11362,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.2,
      "ratingCount": 51,
      "rejectionReason": null,
@@ -11281,11 +11500,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h000795zwi3b9r3f2",
+      "id": null,
       "name": "Amit Shaw",
       "phone": null
      },
-     "ownerId": "cmua7ig2h000795zwi3b9r3f2",
+     "ownerId": null,
      "ratingAvg": 4.8,
      "ratingCount": 142,
      "rejectionReason": null,
@@ -11419,11 +11638,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h0005cfxuwboi328e",
+      "id": null,
       "name": "Milan Mondal",
       "phone": null
      },
-     "ownerId": "cmua7ig2h0005cfxuwboi328e",
+     "ownerId": null,
      "ratingAvg": 4.1,
      "ratingCount": 64,
      "rejectionReason": null,
@@ -11533,11 +11752,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00048d0r8drcpfl6",
+      "id": null,
       "name": "Sanjay Das",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+     "ownerId": null,
      "ratingAvg": 4.4,
      "ratingCount": 98,
      "rejectionReason": null,
@@ -11695,11 +11914,11 @@
      "owner": {
       "avatarUrl": null,
       "email": null,
-      "id": "cmua7ig2h00030d5ia9e9j3el",
+      "id": null,
       "name": "Rakesh Sharma",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+     "ownerId": null,
      "ratingAvg": 4.6,
      "ratingCount": 256,
      "rejectionReason": null,
@@ -15090,11 +15309,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "id": null,
      "name": "Rakesh Sharma",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ownerId": null,
     "ratingAvg": 4.6,
     "ratingCount": 256,
     "rejectionReason": null,
@@ -15402,11 +15621,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "id": null,
      "name": "Rakesh Sharma",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ownerId": null,
     "ratingAvg": 4.6,
     "ratingCount": 256,
     "rejectionReason": null,
@@ -16041,11 +16260,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "id": null,
      "name": "Rakesh Sharma",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ownerId": null,
     "ratingAvg": 4.6,
     "ratingCount": 256,
     "rejectionReason": null,
@@ -16673,11 +16892,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00048d0r8drcpfl6",
+     "id": null,
      "name": "Sanjay Das",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00048d0r8drcpfl6",
+    "ownerId": null,
     "ratingAvg": 4.4,
     "ratingCount": 98,
     "rejectionReason": null,
@@ -16985,11 +17204,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "id": null,
      "name": "Rakesh Sharma",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ownerId": null,
     "ratingAvg": 4.6,
     "ratingCount": 256,
     "rejectionReason": null,
@@ -17297,11 +17516,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h00030d5ia9e9j3el",
+     "id": null,
      "name": "Rakesh Sharma",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00030d5ia9e9j3el",
+    "ownerId": null,
     "ratingAvg": 4.6,
     "ratingCount": 256,
     "rejectionReason": null,
@@ -17602,11 +17821,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h0005cfxuwboi328e",
+     "id": null,
      "name": "Milan Mondal",
      "phone": null
     },
-    "ownerId": "cmua7ig2h0005cfxuwboi328e",
+    "ownerId": null,
     "ratingAvg": 4.1,
     "ratingCount": 64,
     "rejectionReason": null,
@@ -17811,11 +18030,11 @@
     "owner": {
      "avatarUrl": null,
      "email": null,
-     "id": "cmua7ig2h0005cfxuwboi328e",
+     "id": null,
      "name": "Milan Mondal",
      "phone": null
     },
-    "ownerId": "cmua7ig2h0005cfxuwboi328e",
+    "ownerId": null,
     "ratingAvg": 4.1,
     "ratingCount": 64,
     "rejectionReason": null,

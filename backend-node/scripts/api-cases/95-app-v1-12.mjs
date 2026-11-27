@@ -19,7 +19,7 @@ const start = (key, purpose, phone, role) => async (get, post) => ({ [key]: awai
 const ids = (check) => ({ checkId: check?.checkId, checkToken: check?.checkToken })
 const codeOf = (check) => String(check?.message || '').split(' ')[1]
 const random = ['checkId', 'checkToken', 'message']
-const riya = { name: 'Riya Das', phone: NEW, password: 'Riya@1234' }
+const riya = { name: 'Riya Das', phone: NEW, email: 'riya.das@example.com', password: 'Riya@1234' }
 
 const GOOGLE_CLIENT = 'check-client.apps.googleusercontent.com'
 const signGoogle = (claims, key) =>

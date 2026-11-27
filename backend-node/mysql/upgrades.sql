@@ -84,3 +84,45 @@ CREATE TABLE IF NOT EXISTS user_logins (
   KEY ix_user_logins_user (user_id),
   CONSTRAINT fk_user_logins_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Google accounts used to sign in';
+
+-- v1.13: 6-digit codes sent by email to reset a forgotten password (free: no SMS, no phone).
+CREATE TABLE IF NOT EXISTS reset_codes (
+  id         VARCHAR(32)  NOT NULL PRIMARY KEY,
+  user_id    VARCHAR(32)  NOT NULL,
+  code_hash  VARCHAR(100) NOT NULL COMMENT 'Scrambled (bcrypt); the code itself is only in the email',
+  attempts   INT          NOT NULL DEFAULT 0,
+  expires_at DATETIME(3)  NOT NULL,
+  used_at    DATETIME(3)  NULL,
+  created_at DATETIME(3)  NOT NULL,
+  KEY ix_reset_codes_user (user_id, created_at),
+  CONSTRAINT fk_reset_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Forgot-password codes sent by email';
+
+-- v1.13: Recent Searches showed "Anywhere -> Anywhere" for searches by picked stops (only their ids
+-- were sent, so no names were kept). Those entries can't be repaired, so they go; new ones keep names.
+DELETE FROM recent_searches WHERE from_text IS NULL AND to_text IS NULL AND search_text IS NULL;
+
+-- v1.13: Forgot password sends its code only to a confirmed email (one whose code came back), so a
+-- stranger's address typed by mistake can't reset the password. Empty = not confirmed; a changed
+-- email empties it. The ALTER runs only while the column is missing.
+SET @confirm_missing = (SELECT COUNT(*) = 0 FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'users' AND column_name = 'email_confirmed_at');
+SET @add_confirm = IF(@confirm_missing, "ALTER TABLE users ADD COLUMN email_confirmed_at DATETIME(3) NULL COMMENT 'When the email was confirmed with a code; empty = not confirmed' AFTER email", 'DO 0');
+PREPARE add_confirm FROM @add_confirm;
+EXECUTE add_confirm;
+DEALLOCATE PREPARE add_confirm;
+-- A Gmail that came with a Google sign-in was confirmed by Google.
+UPDATE users u JOIN user_logins l ON l.user_id = u.id AND l.provider = 'GOOGLE' SET u.email_confirmed_at = l.created_at WHERE u.email_confirmed_at IS NULL AND u.email = l.email;
+
+-- v1.13: 6-digit codes that confirm an email (Edit Profile). The email confirmed is the one in the row.
+CREATE TABLE IF NOT EXISTS email_codes (
+  id         VARCHAR(32)  NOT NULL PRIMARY KEY,
+  user_id    VARCHAR(32)  NOT NULL,
+  email      VARCHAR(190) NOT NULL COMMENT 'The email the code was sent to',
+  code_hash  VARCHAR(100) NOT NULL COMMENT 'Scrambled (bcrypt); the code itself is only in the email',
+  attempts   INT          NOT NULL DEFAULT 0,
+  expires_at DATETIME(3)  NOT NULL,
+  used_at    DATETIME(3)  NULL,
+  created_at DATETIME(3)  NOT NULL,
+  KEY ix_email_codes_user (user_id, created_at),
+  CONSTRAINT fk_email_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Codes that confirm an email';

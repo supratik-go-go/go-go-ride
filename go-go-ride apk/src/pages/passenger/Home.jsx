@@ -208,10 +208,16 @@ export default function Home() {
         <Link to="/home" aria-label="GO-GO Ride home" className="px-home-logo">
           <Logo height={46} />
         </Link>
-        <Link to="/notifications" className="icon-btn" aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}>
-          <Bell size={24} />
-          {unread > 0 && <span className="icon-btn-badge">{unread > 99 ? '99+' : unread}</span>}
-        </Link>
+        <div className="px-home-right">
+          {/* The installed version, so the owner and users can tell at a glance (from build.gradle). */}
+          <span className="px-home-version" aria-label={`App version ${__APP_VERSION__}`}>
+            v{__APP_VERSION__}
+          </span>
+          <Link to="/notifications" className="icon-btn" aria-label={`Notifications${unread ? ` (${unread} unread)` : ''}`}>
+            <Bell size={24} />
+            {unread > 0 && <span className="icon-btn-badge">{unread > 99 ? '99+' : unread}</span>}
+          </Link>
+        </div>
       </header>
 
       <section className="px-hello">

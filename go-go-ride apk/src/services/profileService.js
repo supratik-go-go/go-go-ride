@@ -4,8 +4,12 @@ export const profileService = {
   get: () => http.get('/users/me'),
   /** Permanent. `password` is needed when the account has one. */
   deleteAccount: (password) => http.del('/users/me', { password }),
-  /** { name?, email? } */
+  /** { name?, email? } - a new email is not confirmed until its code comes back. */
   update: (body) => http.patch('/users/me', body),
+  /** { email, password? } -> { sentTo, expiresInSeconds }; password when the account has one. */
+  sendEmailCode: (body) => http.post('/users/me/email/code', body),
+  /** The 6-digit code from the email -> the account, with emailConfirmed. */
+  confirmEmail: (code) => http.post('/users/me/email/confirm', { code }),
   uploadAvatar(file) {
     const fd = new FormData()
     fd.append('file', file)

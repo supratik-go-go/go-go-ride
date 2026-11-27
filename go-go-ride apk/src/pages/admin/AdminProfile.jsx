@@ -8,6 +8,7 @@ import { useToast } from '../../context/ToastContext'
 import { usePagedQuery } from '../../hooks/usePagedQuery'
 import { authService, profileService } from '../../services'
 import { formatDateTime, formatPhone } from '../../utils/format'
+import { EmailConfirmCard } from '../account/EmailConfirmCard'
 import { PhoneCheck } from '../auth/PhoneCheck'
 import './admin.css'
 
@@ -137,6 +138,12 @@ function ProfileCard() {
           </div>
         </div>
       </form>
+      {/* Forgot password sends its code only to a confirmed email. */}
+      {user?.email && !user.emailConfirmed && form.email.trim() === user.email && (
+        <div className="adm-card-body">
+          <EmailConfirmCard email={user.email} askPassword={Boolean(user.phone)} />
+        </div>
+      )}
     </section>
   )
 }

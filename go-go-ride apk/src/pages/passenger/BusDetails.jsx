@@ -20,12 +20,10 @@ import {
   ShieldAlert,
   Snowflake,
   Star,
-  Ticket,
   UserRound,
 } from 'lucide-react'
 import { Button, ErrorState, Modal, PageHeader, Skeleton, Spinner, StarRating, useToast } from '../../components/ui'
 import {
-  BookingModal,
   FavoriteButton,
   ReviewForm,
   ReviewList,
@@ -69,7 +67,6 @@ export default function BusDetails() {
   const q = useAsync(() => busService.get(id, date), [id, date])
   const bus = q.data
   const [reviewsOpen, setReviewsOpen] = useState(false)
-  const [bookOpen, setBookOpen] = useState(false)
 
   const trip = useMemo(() => {
     const p = new URLSearchParams({ date })
@@ -100,10 +97,6 @@ export default function BusDetails() {
   const goAlarm = () => {
     if (!requireLogin()) return
     navigate(`/bus/${id}/alarm?${trip}`)
-  }
-  const goBook = () => {
-    if (!requireLogin()) return
-    setBookOpen(true)
   }
 
   if (q.loading && !bus) return <BusDetailsSkeleton />
@@ -214,9 +207,16 @@ export default function BusDetails() {
           {/* contact + rating */}
           <section className="card px-cr px-o3">
             <div className="px-cr-cell">
-              <span className="px-cr-icon">
-                <Phone size={24} />
-              </span>
+              {/* The icon calls too, not only the number. */}
+              {bus.contactNumber ? (
+                <a href={`tel:${contactDigits}`} className="px-cr-icon" aria-label={`Call ${formatContact(bus.contactNumber)}`}>
+                  <Phone size={24} />
+                </a>
+              ) : (
+                <span className="px-cr-icon">
+                  <Phone size={24} />
+                </span>
+              )}
               <div className="px-cr-text">
                 <span className="text-sm text-muted">Contact for Booking</span>
                 {bus.contactNumber ? (
@@ -325,13 +325,10 @@ export default function BusDetails() {
             </div>
           )}
 
-          {/* primary actions (sticky bar on phones) */}
-          <div className="px-bus-actions px-o8 px-d2">
+          {/* primary action (sticky bar on phones). Seat booking is off for now (owner, 2026-11-28). */}
+          <div className="px-bus-actions px-bus-actions-one px-o8 px-d2">
             <Button icon={<Navigation size={18} />} onClick={() => navigate(`/bus/${id}/track?${trip}`)}>
               Track Live
-            </Button>
-            <Button variant="accent" icon={<Ticket size={18} />} onClick={goBook}>
-              Book Seat
             </Button>
           </div>
 
@@ -359,7 +356,6 @@ export default function BusDetails() {
       </div>
 
       <ReviewsModal open={reviewsOpen} onClose={() => setReviewsOpen(false)} bus={bus} onRated={() => q.reload({ silent: true })} />
-      <BookingModal open={bookOpen} onClose={() => setBookOpen(false)} type="BUS" bus={bus} defaultDate={date} />
     </div>
   )
 }

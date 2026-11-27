@@ -41,7 +41,8 @@ app.use(
 app.use(express.json({ limit: '1mb' }))
 
 // Rate limits (enforced in production): sign-in endpoints 20 per 15 min per IP,
-// Ping Ball scores 30 per minute because each one adds a row, everything else 300 per minute.
+// Ping Ball scores 30 per minute because each one adds a row, photo and document uploads 30 an
+// hour (each keeps up to 5 MB on the disk), everything else 300 per minute.
 const limited = (windowMs, limit) =>
   rateLimit({
     windowMs,
@@ -54,6 +55,10 @@ const limited = (windowMs, limit) =>
   })
 app.use(['/api/auth/login', '/api/auth/register', '/api/auth/otp', '/api/auth/password', '/api/auth/phone-check/start', '/api/auth/google'], limited(15 * 60 * 1000, 20))
 app.use('/api/games/pingball/score', limited(60 * 1000, 30))
+const uploadLimit = limited(60 * 60 * 1000, 30)
+app.use(['/api/users/me/avatar', '/api/local-cars/:id/photo', '/api/buses/:busId/documents', '/api/ticket-photos'], (req, res, next) =>
+  req.method === 'POST' ? uploadLimit(req, res, next) : next(),
+)
 app.use('/api', limited(60 * 1000, 300))
 
 // Uploaded documents / photos.

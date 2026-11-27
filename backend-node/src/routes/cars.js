@@ -25,7 +25,7 @@ import {
 } from '../pyfields.js'
 import { localCarOut, reviewOut, rideOut } from '../serialize.js'
 import { publicReview, publicRide } from '../services/privacy.js'
-import { singleFile, saveUpload } from '../uploads.js'
+import { removeUpload, singleFile, saveUpload } from '../uploads.js'
 import { ENUMS } from '../validate.js'
 
 const router = Router()
@@ -181,6 +181,7 @@ router.post('/local-cars/:id/photo', requireUser, singleFile, async (req, res) =
   assertCarOwner(car, req.user)
   const pictureUrl = saveUpload(req.file, 'cars')
   await saveChanges(update, 'local_vehicles', car, { pictureUrl })
+  removeUpload(car.pictureUrl, 'cars')
   ok(res, localCarOut(await byId('local_vehicles', car.id)), 'Photo updated')
 })
 
@@ -340,9 +341,15 @@ const RideBody = {
   farePerSeat: required(float({ ge: 0 })),
 }
 
+// Only an admin picks someone else as the driver: a ride shows its driver's phone number publicly.
+const assertDriverChoice = (user, driverId) => {
+  if (driverId && driverId !== user.id && !isAdmin(user)) throw ApiError.forbidden('Only an admin can choose the driver')
+}
+
 router.post('/rides', requireUser, async (req, res) => {
   const { data: b } = parseBody(req, RideBody)
   if (b.fromStopId === b.toStopId) throw ApiError.badRequest('Pick two different stops')
+  assertDriverChoice(req.user, b.driverId)
   const now = Date.now()
   const ride = await insert('shared_rides', {
     id: newId(),
@@ -378,6 +385,7 @@ router.patch('/rides/:id', requireUser, async (req, res) => {
   const { data, set } = parseBody(req, RideUpdateBody)
   const ride = await rideOr404(req.params.id)
   if (ride.driverId !== req.user.id && !isAdmin(req.user)) throw ApiError.forbidden('You can only edit your own rides')
+  if (set.includes('driverId')) assertDriverChoice(req.user, data.driverId)
 
   const patch = {}
   for (const key of set) if (key !== 'departureAt') patch[key] = data[key]

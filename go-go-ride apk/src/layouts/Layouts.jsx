@@ -10,6 +10,7 @@ import { ErrorBoundary } from '../components/ui/ErrorBoundary'
 import { useUnreadCount } from '../hooks/useUnreadCount'
 import { adminService, platformService } from '../services/adminService'
 import { useAuth } from '../context/AuthContext'
+import { AddEmailGate } from '../pages/auth/AddEmail'
 // Admin card/table styles are used directly by many admin pages, so load them with the layout.
 import '../components/admin/admin-ui.css'
 
@@ -117,14 +118,14 @@ export function PublicLayout() {
  * Tablets/desktop: website navbar on top, content centred.
  */
 export function AppLayout() {
+  const { user } = useAuth()
   return (
     <div className="layout-app">
       <div className="hide-mobile">
         <Navbar />
       </div>
-      <main className="app-main">
-        <SafeOutlet />
-      </main>
+      {/* Every account needs an email since v1.13 (Forgot password sends its code there). */}
+      <main className="app-main">{user && !user.email ? <AddEmailGate /> : <SafeOutlet />}</main>
       <BottomNavigation />
     </div>
   )

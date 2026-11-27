@@ -11,6 +11,8 @@ export const stopService = {
   create: (body) => http.post('/stops', body),
   update: (id, body) => http.patch(`/stops/${id}`, body),
   remove: (id) => http.del(`/stops/${id}`),
+  /** "Same place": joins stop `id` to `intoStopId` (its buses move there, its name becomes another name). */
+  merge: (id, intoStopId) => http.post(`/stops/${id}/merge`, { intoStopId }),
 }
 
 export const contributionService = {

@@ -11,7 +11,7 @@ export default [
   { name: 'me without token', path: '/auth/me', mode: 'status' },
   { name: 'login: bad phone + empty password', method: 'POST', path: '/auth/login', body: { phone: '123', password: '' }, mode: 'status' },
   { name: 'login: wrong password', method: 'POST', path: '/auth/login', body: { phone: '9000000001', password: 'nope' } },
-  { name: 'register: existing phone', method: 'POST', path: '/auth/register', body: { name: 'Dup', phone: '9123456789', password: 'secret123' } },
+  { name: 'register: existing phone', method: 'POST', path: '/auth/register', body: { name: 'Dup', phone: '9123456789', email: 'dup@example.com', password: 'secret123' } },
   { name: 'register: missing fields', method: 'POST', path: '/auth/register', body: {}, mode: 'status' },
   { name: 'otp verify: no code requested', method: 'POST', path: '/auth/otp/verify', body: { phone: '9000000002', code: '123456' } },
   { name: 'refresh: garbage token', method: 'POST', path: '/auth/refresh', body: { refreshToken: 'not-a-real-token' } },

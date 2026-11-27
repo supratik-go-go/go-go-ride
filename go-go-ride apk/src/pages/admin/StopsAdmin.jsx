@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { AlertTriangle, Download, List, Map as MapIcon, MapPin, MapPinOff, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Download, List, Map as MapIcon, MapPin, MapPinOff, Merge, Pencil, Plus, Trash2 } from 'lucide-react'
 import { Badge, Button, ConfirmDialog, DataTable, EmptyState, ErrorState, Input, Modal, SectionHeader, Select, Skeleton, StatusBadge, TableToolbar } from '../../components/ui'
 import { AdminTabs, useStatusCounts } from '../../components/admin'
 import { LocationPicker, RECORD_STATUS_OPTIONS, changedFields, fetchAll, fmtCoord, plural, toNumber } from '../../components/admin-ops'
@@ -176,6 +176,91 @@ function StopFormModal({ target, onClose, onSaved }) {
 
 // ---------------------------------------------------------------- map view
 
+/**
+ * "Same place as...": one place typed two ways (Chandrakona and Chandrakona Town). The admin picks the
+ * stop to keep; this stop's buses, routes, alarms and favourites move there, and its name stays as
+ * another name of the kept stop, so search, voice search and the Excel import still find it.
+ */
+function MergeStopModal({ stop, onClose, onMerged }) {
+  const toast = useToast()
+  const [search, setSearch] = useState('')
+  const [into, setInto] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const query = useDebounce(search, 300)
+  const found = useAsync(
+    () => (stop && query.trim().length >= 2 ? stopService.list({ search: query.trim(), limit: 8 }).then((r) => (r.data || []).filter((s) => s.id !== stop.id)) : Promise.resolve([])),
+    [stop?.id, query],
+  )
+
+  // Start with the first word of the name, where the likely twin usually is ("Chandrakona Town" -> "Chandrakona").
+  useEffect(() => {
+    setInto(null)
+    setSearch(stop ? stop.name.split(/\s+/)[0] : '')
+  }, [stop])
+
+  const merge = async () => {
+    setBusy(true)
+    try {
+      const kept = await stopService.merge(stop.id, into.id)
+      toast.success(`${stop.name} is now part of ${kept.name}`)
+      onMerged(stop, kept)
+    } catch (err) {
+      toast.error(err)
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={Boolean(stop)}
+      onClose={busy ? undefined : onClose}
+      title="Same place as another stop"
+      subtitle={stop ? `${stop.name} - ${plural(stop.busesAvailable ?? 0, 'bus')}` : ''}
+      footer={
+        <>
+          <Button variant="outline" onClick={onClose} disabled={busy}>
+            Cancel
+          </Button>
+          <Button variant="danger" icon={<Merge size={16} />} onClick={merge} loading={busy} disabled={!into}>
+            {into ? `Join to ${into.name}` : 'Choose a stop'}
+          </Button>
+        </>
+      }
+    >
+      {stop && (
+        <div className="stack" style={{ '--gap': '14px' }}>
+          <p className="text-sm">
+            Use this when <b>{stop.name}</b> is the same place as another stop, written differently. Its buses, routes and alarms move to the stop you pick, and
+            &quot;{stop.name}&quot; stays as another name for it, so searching either name finds every bus.
+          </p>
+          <Input label="Find the stop to keep" placeholder="Type a stop name" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" />
+          <div className="stack" style={{ '--gap': '6px' }} role="radiogroup" aria-label="Stop to keep">
+            {(found.data || []).map((s) => (
+              <label key={s.id} className={`ops-merge-option ${into?.id === s.id ? 'is-on' : ''}`}>
+                <input type="radio" name="merge-into" checked={into?.id === s.id} onChange={() => setInto(s)} />
+                <span className="grow">
+                  <b>{s.name}</b>
+                  {s.area ? <span className="text-muted"> - {s.area}</span> : null}
+                </span>
+                <span className="text-xs text-muted">{plural(s.busesAvailable ?? 0, 'bus')}</span>
+              </label>
+            ))}
+            {query.trim().length >= 2 && !found.loading && !(found.data || []).length && <p className="text-sm text-muted">No other stop matches that name.</p>}
+          </div>
+          {into && (
+            <div className="alert alert-warning">
+              <AlertTriangle size={18} />
+              <span>
+                <b>{stop.name}</b> will be removed and its {plural(stop.busesAvailable ?? 0, 'bus')} will show <b>{into.name}</b> instead. This can&apos;t be undone.
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
+  )
+}
+
 function StopsMap({ status, search, onEdit }) {
   const q = useAsync(() => fetchAll(stopService.list, { status: status || undefined, search: search || undefined }), [status, search])
   const rows = q.data?.rows
@@ -260,6 +345,7 @@ export default function StopsAdmin() {
   const [view, setView] = useState('table')
   const [formTarget, setFormTarget] = useState(null) // { stop } | { new: true }
   const [deleting, setDeleting] = useState(null)
+  const [merging, setMerging] = useState(null)
   const [mapKey, setMapKey] = useState(0)
   const mapSearch = useDebounce(list.search, 300)
 
@@ -286,6 +372,14 @@ export default function StopsAdmin() {
       )
       throw err
     }
+  }
+
+  const merged = (gone, kept) => {
+    setMerging(null)
+    list.removeRow(gone.id)
+    list.patchRow(kept.id, kept)
+    counts.reload()
+    setMapKey((k) => k + 1)
   }
 
   const exportRows = () => {
@@ -335,6 +429,9 @@ export default function StopsAdmin() {
         <span className="adm-actions">
           <button type="button" className="adm-act" onClick={() => setFormTarget({ stop: s })} aria-label={`Edit ${s.name}`} title="Edit">
             <Pencil size={15} />
+          </button>
+          <button type="button" className="adm-act" onClick={() => setMerging(s)} aria-label={`${s.name} is the same place as another stop`} title="Same place as...">
+            <Merge size={15} />
           </button>
           <button type="button" className="adm-act danger" onClick={() => setDeleting(s)} aria-label={`Delete ${s.name}`} title="Delete">
             <Trash2 size={15} />
@@ -404,6 +501,8 @@ export default function StopsAdmin() {
       </section>
 
       <StopFormModal key={formTarget?.stop?.id || (formTarget ? 'new' : 'closed')} target={formTarget} onClose={() => setFormTarget(null)} onSaved={saved} />
+
+      <MergeStopModal stop={merging} onClose={() => setMerging(null)} onMerged={merged} />
 
       <ConfirmDialog
         open={Boolean(deleting)}

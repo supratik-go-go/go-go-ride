@@ -98,9 +98,30 @@
 .px-result-title:hover .px-result-badge { text-decoration: underline; text-underline-offset: 3px; }
 .px-result-badge { font-size: 1.45rem; font-weight: 700; color: var(--primary); line-height: 1.15; letter-spacing: 0.2px; }
 .px-result-badge.is-name { font-size: 1.15rem; }
-.px-result-route { color: var(--text-2); font-size: var(--fs-sm); }
-.px-result-leg { display: block; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
-.px-result-leg svg { display: inline-block; vertical-align: -2px; margin: 0 2px; }
+/* The bus's whole route (grey, small) and the passenger's own trip on it (orange chip, bold). */
+.px-result-route { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 5px; min-width: 0; margin-top: 2px; color: var(--muted); font-size: var(--fs-sm); line-height: 1.35; }
+.px-result-route svg { flex-shrink: 0; align-self: center; }
+.px-result-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; opacity: 0.85; white-space: nowrap; }
+.px-result-leg {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 5px;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-top: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-100);
+  background: var(--accent-50);
+  color: var(--accent-600);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.px-result-leg svg { flex-shrink: 0; }
+/* From and to stay together; only a very long pair wraps. */
+.px-result-leg-stops { display: inline; }
+.px-result-leg-stops svg { display: inline-block; vertical-align: -2px; margin: 0 2px; }
 .px-result-rating { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
 .px-result-rating-value { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 1.1rem; color: var(--text); }
 .px-result-rating-count { font-size: var(--fs-xs); color: var(--muted); }

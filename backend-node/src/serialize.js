@@ -17,6 +17,7 @@ export const userOut = (u) =>
     name: u.name,
     phone: u.phone,
     email: u.email ?? null,
+    emailConfirmed: Boolean(u.email && u.emailConfirmedAt),
     role: u.role,
     avatarUrl: u.pictureUrl ?? null,
     status: u.status,

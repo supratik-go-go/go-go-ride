@@ -201,8 +201,15 @@ function fillTrip(trip, gap, warn) {
 export async function planTripImport(sheet) {
   // Every stop and bus the database already has, read once.
   const stopsByName = new Map()
-  for (const s of await all("SELECT id, name, status FROM bus_stops ORDER BY status = 'ACTIVE' DESC, created_at, id")) {
+  const stops = await all("SELECT id, name, other_name, status FROM bus_stops ORDER BY status = 'ACTIVE' DESC, created_at, id")
+  for (const s of stops) {
     if (!stopsByName.has(norm(s.name))) stopsByName.set(norm(s.name), s)
+  }
+  // Other names (e.g. a stop joined to another with "Same place") find the stop too, after real names.
+  for (const s of stops) {
+    for (const other of String(s.otherName || '').split(',')) {
+      if (other.trim() && !stopsByName.has(norm(other))) stopsByName.set(norm(other), s)
+    }
   }
   const numbered = new Map((await all('SELECT id, bus_number FROM buses WHERE bus_number IS NOT NULL')).map((b) => [b.busNumber, b.id]))
   const unnumbered = new Map()

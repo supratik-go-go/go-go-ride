@@ -1,0 +1,199 @@
+{
+ "same place: not for a bus owner": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN"
+  }
+ },
+ "same place: into itself": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Choose a different stop to join it to",
+   "success": false
+  }
+ },
+ "same place: unknown stop": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Bus stop not found",
+   "success": false
+  }
+ },
+ "same place: no stop chosen": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "same place: buses at Howrah Bridge before": {
+  "status": 200,
+  "body": {
+   "code": null
+  }
+ },
+ "same place: join Howrah Bridge to Howrah Station": {
+  "status": 200,
+  "body": {
+   "data": {
+    "area": "Howrah",
+    "city": "Kolkata",
+    "createdAt": "2026-09-20T19:26:01.605Z",
+    "id": "cmua7ihdx000e1j9kasf7h8qe",
+    "latitude": 22.5839,
+    "longitude": 88.3425,
+    "name": "Howrah Station",
+    "status": "ACTIVE",
+    "updatedAt": "2026-09-22T04:30:00.000Z"
+   },
+   "message": "Howrah Bridge is now part of Howrah Station",
+   "success": true
+  }
+ },
+ "same place: the joined stop is gone": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "Bus stop not found",
+   "success": false
+  }
+ },
+ "same place: its name finds the kept stop": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "area": "Howrah",
+     "busesAvailable": 9,
+     "city": "Kolkata",
+     "createdAt": null,
+     "id": "cmua7ihdx000e1j9kasf7h8qe",
+     "latitude": 22.5839,
+     "longitude": 88.3425,
+     "name": "Howrah Station",
+     "routes": 4,
+     "status": "ACTIVE",
+     "updatedAt": null
+    }
+   ],
+   "message": "Success",
+   "meta": {
+    "limit": 20,
+    "page": 1,
+    "total": 1,
+    "totalPages": 1
+   },
+   "success": true
+  }
+ },
+ "same place: search by the old name": {
+  "status": 200,
+  "body": {
+   "data": {
+    "buses": [
+     {
+      "arrivalTime": "08:45",
+      "arrivalTime12h": "08:45 AM",
+      "busName": "S12 Howrah Express",
+      "busNumber": "WB 01 AB 1234",
+      "category": "NORMAL",
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "durationLabel": "1h 15m",
+      "durationMinutes": 75,
+      "fare": 20,
+      "from": {
+       "name": "Howrah Station"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.6,
+       "count": 256
+      },
+      "routeName": "Howrah Station - Esplanade",
+      "routeNumber": "S12",
+      "to": {
+       "name": "Esplanade"
+      },
+      "totalSeats": 45,
+      "type": "NON_AC"
+     },
+     {
+      "arrivalTime": "08:35",
+      "arrivalTime12h": "08:35 AM",
+      "busName": "Test Express",
+      "busNumber": "WB 99 T 1234",
+      "category": "EXPRESS",
+      "departureTime": "08:02",
+      "departureTime12h": "08:02 AM",
+      "durationLabel": "33m",
+      "durationMinutes": 33,
+      "fare": 35,
+      "from": {
+       "name": "Howrah Station"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "Test Travels",
+      "rating": {
+       "average": 0,
+       "count": 0
+      },
+      "routeName": "Howrah Station - Test Ghat",
+      "routeNumber": null,
+      "to": {
+       "name": "Esplanade"
+      },
+      "totalSeats": 40,
+      "type": "AC"
+     },
+     {
+      "arrivalTime": "09:30",
+      "arrivalTime12h": "09:30 AM",
+      "busName": "AC1 New Town Deluxe",
+      "busNumber": "WB 16 5432",
+      "category": "DELUXE",
+      "departureTime": "09:00",
+      "departureTime12h": "09:00 AM",
+      "durationLabel": "30m",
+      "durationMinutes": 30,
+      "fare": 45,
+      "from": {
+       "name": "Howrah Station"
+      },
+      "isRunning": true,
+      "nextDepartureInMinutes": null,
+      "notRunningReason": null,
+      "operator": "WBTC",
+      "rating": {
+       "average": 4.8,
+       "count": 142
+      },
+      "routeName": "Howrah - New Town",
+      "routeNumber": "AC1",
+      "to": {
+       "name": "Esplanade"
+      },
+      "totalSeats": 40,
+      "type": "AC"
+     }
+    ],
+    "date": "2026-09-22",
+    "from": {
+     "name": "Howrah Bridge"
+    },
+    "to": {
+     "name": "Esplanade"
+    },
+    "total": 3
+   },
+   "message": "3 buses found",
+   "success": true
+  }
+ }
+}

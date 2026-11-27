@@ -41,11 +41,29 @@ Auto-deploy is connected to `supratik-go-go/go-go-ride`, branch **main**, root d
 
 - [ ] Google Play Store? If yes: create a developer account at play.google.com/console (US$25, identity check takes days)
 - [ ] iPhone launch: the project is ready, see `go-go-ride apk\IOS.md`. Needs a Mac and an Apple Developer account (US$99 per year)
-- [x] OTP by SMS: decided 2026-11-27 that it must cost GO-GO Ride nothing: the user sends one SMS from their own number to the owner's phone (receiving is free, no daily limit). Asked at sign-up, Forgot password and Change password, not at every login (replaces the 2026-11-25 idea of the owner's phone sending codes)
+- [x] OTP: decided 2026-11-28: no phone of the owner's may be involved and it must be free, so Forgot password sends a code by **email** (v1.13). An SMS OTP to the user's number always costs the sender (receiving is free in India), so it would need a paid SMS company; Truecaller (free missed-call check) is the option if many users have no email. The v1.12 SMS check (user texts the owner's phone) stays built but switched off
+
+## App v1.13 — Forgot password by email (2026-11-28)
+
+- [ ] Owner: set up the mailbox that sends the codes, then add `SMTP_HOST`, `SMTP_PORT` (465), `SMTP_USER`, `SMTP_PASSWORD` in hPanel (Claude gives the steps: a go-goride.com mailbox from hPanel > Emails if the plan has one, else a Gmail with 2-Step Verification and an app password). `/api/health` then shows `"mail":"ok"`
+- [ ] Owner: test on a phone: Forgot password with your number and with your email (your account needs an email: Profile > Edit)
+- [ ] Owner, once the mailbox works: confirm your own email in Profile > Edit (Confirm your email card). Forgot password only sends codes to a confirmed email
+- [ ] Decide: should "Add your email" after login go straight on to confirming it? (Today the person confirms later in Edit Profile.)
+
+1. Recent Searches showed "Anywhere -> Anywhere": stop names are now kept, repeats move to the top, old empty entries are removed
+2. Bus Details: the phone icon calls too, not only the number
+3. Bus Details: Book Seat removed (seat booking not needed for now); Track Live fills the bar
+4. Search results: the bus route (grey, "BUS ROUTE") and the passenger's own trip (orange chip, "YOUR TRIP") look different
+5. Search results: Approx. Departure, Approx. Arrival, Approx. Duration
+6. Email is required: at Create Account, in Edit Profile, and anyone without one adds it after logging in (or when opening the app) before going on
+7. Fixes from the security and code review (2026-11-28, notes in the git-ignored `private/` folder): only an admin picks a ride's driver (any user's phone and email could be read), public bus pages hide who added the bus, emails are confirmed with a code before Forgot password uses them (`POST /users/me/email/code`, `/users/me/email/confirm`, column `users.email_confirmed_at`, table `email_codes`), reset codes capped per hour and day and each guess counted first, 10 wrong passwords per account per 15 minutes, the photo address can only be removed (old photos deleted on replace, uploads 30 an hour), game rooms locked while they change (points were sometimes counted twice), a typed stop name prefers the exact name and the busiest stop, the stop page reads its buses in 2 queries
+8. Home: the app version (e.g. v1.13) shows next to the notification bell
+9. Same place: Admin > Bus Stops > "Same place as..." joins two names for one place (Chandrakona into Chandrakona Town); the joined name stays as an other name for search, voice search and the Excel import
+- [ ] Owner: go through `docs/stop-pairs-to-check.md` (39 possible pairs) and join the ones that are really one place
 
 ## App v1.12 — mobile number check by SMS (2026-11-27)
 
-- [ ] Owner: set up the SMS phone (own phone, or a second SIM in it if the personal number should not be shown to users): install "SMS Gateway for Android", allow SMS, switch on Cloud Server and go Online, battery saving off for the app, RCS chats off in Google Messages (RCS messages never reach the app). Then in hPanel add `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` (from the app's Cloud Server section) and `SMS_RECEIVE_NUMBER` (that SIM's number), save and redeploy. `/api/health` then shows `"sms":"ok"`; test with Forgot password on a phone
+- [ ] (Switched off by the owner's choice, kept for later) SMS phone: own phone or a second SIM: install "SMS Gateway for Android", allow SMS, switch on Cloud Server and go Online, battery saving off for the app, RCS chats off in Google Messages (RCS messages never reach the app). Then in hPanel add `SMS_GATEWAY_USER`, `SMS_GATEWAY_PASSWORD` (from the app's Cloud Server section) and `SMS_RECEIVE_NUMBER` (that SIM's number), save and redeploy. `/api/health` then shows `"sms":"ok"`; test with Forgot password on a phone
 - [ ] Owner: set up Google sign-in (free): Google Cloud project "GO-GO Ride", Google Auth Platform branding + audience External, published; an Android client (package `com.gogoride.app`, SHA-1 of the release key `96:15:D2:5A:25:46:0C:B9:56:B8:68:02:46:81:97:00:74:FA:80:A4`) and a Web application client; put the Web client ID in hPanel as `GOOGLE_CLIENT_ID`. If the app later goes to Google Play with Play App Signing, add Play's SHA-1 too
 - [ ] Owner: test v1.12 on a phone (sign-up, Forgot password, Settings > Change Password, the SMS app opens with the message filled in, Continue with Google, Settings > Mobile Number)
 - Also in v1.12: Continue with Google on the opening screen and Login, no mobile number needed (owner's choice); the number can be added later in Settings > Mobile Number. A Gmail already on a phone account is refused (sign in with the number)
@@ -84,6 +102,7 @@ v1.9 released 2026-11-25 (1, 6, 7, 8 and the search-card fixes). v1.10 and v1.11
 - [ ] Check the server alarm scheduler: Hostinger stops idle apps, so background timers can miss their time. Phone reminders are not affected
 - [ ] When the app moves to Google Play: send the update popup to the Play listing instead of the APK download
 - [ ] Running Car shows "Live" when only past rides exist — count future rides only
+- [ ] Review phase 3 (the phone app) and phase 4 (look and ease of use); phases 1-2 are in `private/`, and their nice-to-have items are still open there
 - [ ] Owners cannot resubmit a rejected bus — move it back to "Under review" when edited
 - [ ] Local cars deactivated by an admin disappear from the admin list — show them with a filter
 - [ ] Broadcast notifications share one "read" flag for all users — make read state per user

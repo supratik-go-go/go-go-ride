@@ -1,0 +1,204 @@
+{
+ "register: no email": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "email",
+     "message": "Enter your email address"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "register: bad email": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "email",
+     "message": "Enter a valid email address"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: remove the email": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Email is required: Forgot password sends its code there",
+   "success": false
+  }
+ },
+ "profile: bad email": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Enter a valid email address",
+   "success": false
+  }
+ },
+ "email reset: unknown number": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "No account with this mobile number or email",
+   "success": false
+  }
+ },
+ "email reset: unknown email": {
+  "status": 404,
+  "body": {
+   "code": "NOT_FOUND",
+   "message": "No account with this mobile number or email",
+   "success": false
+  }
+ },
+ "email reset: nothing typed": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "email reset: account without email": {
+  "status": 400,
+  "body": {
+   "code": "NO_EMAIL",
+   "message": "This account has no email address. Contact GO-GO Ride support to reset your password.",
+   "success": false
+  }
+ },
+ "email reset: Google account without a number": {
+  "status": 400,
+  "body": {
+   "code": "GOOGLE_ACCOUNT",
+   "message": "This account signs in with Google. Tap Continue with Google instead.",
+   "success": false
+  }
+ },
+ "email reset: code by number": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 600,
+    "sentTo": "a***@example.com"
+   },
+   "message": "Code sent",
+   "success": true
+  }
+ },
+ "email reset: code by email": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 600,
+    "sentTo": "a***@example.com"
+   },
+   "message": "Code sent",
+   "success": true
+  }
+ },
+ "email reset: wrong code": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Wrong code. Check the email and try again.",
+   "success": false
+  }
+ },
+ "email reset: short new password": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "email reset: right code signs in": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": "***@example.com",
+     "emailConfirmed": true,
+     "name": "Asha Roy",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Password changed. You are signed in.",
+   "success": true
+  }
+ },
+ "email reset: the code is used up": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Wrong code. Check the email and try again.",
+   "success": false
+  }
+ },
+ "email reset: the new password works": {
+  "status": 200,
+  "body": {
+   "data": {
+    "user": {
+     "avatarUrl": null,
+     "createdAt": "2026-09-22T04:30:00.000Z",
+     "email": "***@example.com",
+     "emailConfirmed": true,
+     "name": "Asha Roy",
+     "phone": "90********",
+     "phoneVerified": true,
+     "role": "PASSENGER",
+     "status": "ACTIVE"
+    }
+   },
+   "message": "Logged in successfully",
+   "success": true
+  }
+ },
+ "email reset: too many in a minute": {
+  "status": 429,
+  "body": {
+   "code": "TOO_MANY_REQUESTS",
+   "message": "Please wait a minute before asking for another code",
+   "success": false
+  }
+ },
+ "recent: search by picked stops": {
+  "status": 200,
+  "body": {
+   "code": null
+  }
+ },
+ "recent: the same search again": {
+  "status": 200,
+  "body": {
+   "code": null
+  }
+ },
+ "recent: names kept, no copy": {
+  "status": 200,
+  "body": {
+   "data": [
+    {
+     "fromText": "Airport",
+     "query": null,
+     "searchType": "ROUTE",
+     "searchedAt": "2026-09-22T04:30:00.000Z",
+     "toText": "Bandel"
+    }
+   ],
+   "message": "Success",
+   "success": true
+  }
+ }
+}

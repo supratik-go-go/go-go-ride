@@ -1,7 +1,7 @@
 // Search, details, owner submission and verification documents (port of app/api/buses.py).
 import { Router } from 'express'
 import { isAdmin, optionalUser, requireUser } from '../auth.js'
-import { all, byId, day, get, insert, run, scalar, tx, update } from '../db.js'
+import { all, byId, day, get, insert, placeholders, run, scalar, tx, update } from '../db.js'
 import { ApiError } from '../errors.js'
 import { ok, okPage } from '../http.js'
 import { newId } from '../ids.js'
@@ -102,6 +102,32 @@ const serviceDaysCsv = (days) => [...new Set(days)].join(',')
 
 // ---------------------------------------------------------------- search
 
+/**
+ * Keeps the search for Recent Searches. Stops picked from the suggestions arrive as ids only, so
+ * their names are looked up (the list showed "Anywhere -> Anywhere" without them). The same search
+ * again moves to the top instead of adding a copy; a search with nothing in it is not kept.
+ */
+async function saveRecentSearch(userId, { searchType, from, to, text, fromStopId, toStopId }) {
+  const ids = [fromStopId, toStopId].filter(Boolean)
+  const names = new Map(ids.length ? (await all(`SELECT id, name FROM bus_stops WHERE id IN (${placeholders(ids)})`, ...ids)).map((s) => [s.id, s.name]) : [])
+  const entry = {
+    searchType,
+    fromText: from || names.get(fromStopId) || null,
+    toText: to || names.get(toStopId) || null,
+    searchText: text || null,
+  }
+  if (!entry.fromText && !entry.toText && !entry.searchText) return
+  await run(
+    'DELETE FROM recent_searches WHERE user_id = ? AND search_type = ? AND from_text <=> ? AND to_text <=> ? AND search_text <=> ?',
+    userId,
+    entry.searchType,
+    entry.fromText,
+    entry.toText,
+    entry.searchText,
+  )
+  await insert('recent_searches', { id: newId(), userId, ...entry, searchedAt: Date.now() })
+}
+
 router.get('/buses/search', optionalUser, async (req, res) => {
   const d = []
   const query = req.query
@@ -140,17 +166,7 @@ router.get('/buses/search', optionalUser, async (req, res) => {
     includeNotRunning,
   })
 
-  if (req.user) {
-    await insert('recent_searches', {
-      id: newId(),
-      userId: req.user.id,
-      searchType,
-      fromText: from,
-      toText: to,
-      searchText: text,
-      searchedAt: Date.now(),
-    })
-  }
+  if (req.user) await saveRecentSearch(req.user.id, { searchType, from, to, text, fromStopId, toStopId })
 
   ok(res, result, `${result.total} buses found`)
 })

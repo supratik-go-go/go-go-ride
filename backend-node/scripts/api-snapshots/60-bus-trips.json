@@ -868,7 +868,7 @@
      "name": "Operations Admin",
      "phone": null
     },
-    "ownerId": "cmua7ig2h00022qtjqg7pglpb",
+    "ownerId": null,
     "ratingAvg": 0,
     "ratingCount": 0,
     "rejectionReason": null,
@@ -1055,7 +1055,7 @@
       "name": "Operations Admin",
       "phone": null
      },
-     "ownerId": "cmua7ig2h00022qtjqg7pglpb",
+     "ownerId": null,
      "ratingAvg": 0,
      "ratingCount": 0,
      "rejectionReason": null,

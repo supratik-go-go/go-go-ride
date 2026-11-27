@@ -215,6 +215,7 @@
 [data-theme='dark'] .px-result.is-off { background: var(--surface-2); }
 [data-theme='dark'] .px-result.is-off .px-result-icon { background: var(--neutral-50); color: var(--muted); }
 [data-theme='dark'] .px-result.is-off .px-result-badge { color: var(--muted); }
+[data-theme='dark'] .px-result-leg { color: #ff9466; }
 [data-theme='dark'] .px-pill-danger { border-color: var(--danger-line); }
 [data-theme='dark'] .px-tl-item.is-muted .px-tl-dot { border-color: #3d5089; }
 [data-theme='dark'] .px-car-photo,

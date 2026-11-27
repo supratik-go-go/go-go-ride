@@ -266,9 +266,11 @@ try {
       if (c.name in fresh) throw new Error(`Two cases in ${file} are named "${c.name}". Give each a unique name.`)
       const method = (c.method || 'GET').toUpperCase()
       if (c.prepare) {
-        const get = async (q, role = 'public') => (await call('GET', q, role === 'public' ? null : tokens[role].accessToken)).json?.data
-        const post = async (q, b, role = 'public') => (await call('POST', q, role === 'public' ? null : tokens[role].accessToken, b)).json?.data
-        Object.assign(ctx, await c.prepare(get, post))
+        // `role`: a demo role, 'public', or the access token of an account an earlier case signed in.
+        const bearer = (role) => (role === 'public' ? null : (tokens[role]?.accessToken ?? role))
+        const get = async (q, role = 'public') => (await call('GET', q, bearer(role))).json?.data
+        const post = async (q, b, role = 'public') => (await call('POST', q, bearer(role), b)).json?.data
+        Object.assign(ctx, await c.prepare(get, post, ctx))
       }
       const p = typeof c.path === 'function' ? c.path(ctx) : c.path
       if (p == null || p.includes('undefined')) {

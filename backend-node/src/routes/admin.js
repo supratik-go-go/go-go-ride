@@ -386,7 +386,9 @@ router.patch('/admin/users/:userId', requireAdmin, async (req, res) => {
     const now = Date.now()
     // Every field the client sent is written, nulls included (a null name/role/status
     // fails the NOT NULL constraint -> 400 DB_ERROR, as in Python).
-    if (Object.keys(b).length) await update('users', user.id, { ...b, updatedAt: now })
+    // A new email has to be confirmed by its owner before Forgot password uses it.
+    const unconfirm = 'email' in b && b.email !== user.email ? { emailConfirmedAt: null } : {}
+    if (Object.keys(b).length) await update('users', user.id, { ...b, ...unconfirm, updatedAt: now })
     // A blocked user's sessions must die immediately.
     if (b.status && b.status !== 'ACTIVE') {
       await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE user_id = ? AND revoked_at IS NULL', at(now), user.id)

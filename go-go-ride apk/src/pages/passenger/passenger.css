@@ -36,13 +36,24 @@
 /* =================================================================== HOME */
 .px-home-top {
   display: grid;
-  grid-template-columns: 64px 1fr 64px;
+  grid-template-columns: 92px 1fr 92px;
   align-items: center;
   padding: 2px 0 6px;
 }
 .px-home-top > :last-child { justify-self: end; }
 .px-home-top .icon-btn { width: 44px; height: 44px; }
 .px-home-logo { justify-self: center; display: flex; }
+.px-home-right { display: flex; align-items: center; gap: 2px; }
+.px-home-version {
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .px-home-avatar { display: inline-flex; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--primary-100); width: fit-content; }
 @media (min-width: 768px) {
   .px-home-top { display: none; }
@@ -642,6 +653,7 @@
   box-shadow: 0 12px 30px rgba(15, 27, 61, 0.16);
 }
 .px-bus-actions .btn { min-height: 48px; }
+.px-bus-actions-one { grid-template-columns: 1fr; }
 @media (min-width: 768px) {
   .px-bus-actions { bottom: 16px; }
 }

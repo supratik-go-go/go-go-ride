@@ -17,6 +17,10 @@ export const authService = {
   verifyOtp: (body) => http.post('/auth/otp/verify', body).then(keep),
   /** Forgot password: { phone, newPassword, checkId, checkToken } -> signed in. */
   resetPassword: (body) => http.post('/auth/password/reset', body).then(keep),
+  /** Forgot password by email: login is the mobile number or email -> { sentTo: 'r***@gmail.com' } */
+  requestResetEmail: (login) => http.post('/auth/password/email-code', { login }),
+  /** { login, code, newPassword } -> signed in. */
+  resetByEmail: (body) => http.post('/auth/password/reset-by-email', body).then(keep),
   me: () => http.get('/auth/me'),
   /** check: { checkId, checkToken } from a mobile number check, once the server asks for one. */
   changePassword: (currentPassword, newPassword, check) =>

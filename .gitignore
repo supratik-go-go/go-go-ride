@@ -62,3 +62,6 @@ go-go-ride apk/android/keystore/
 # Hostinger data backups (users, bookings) - never push
 gogoride-data*.zip
 backups/
+
+# Security review notes: they describe open holes, and both GitHub repos are public
+private/

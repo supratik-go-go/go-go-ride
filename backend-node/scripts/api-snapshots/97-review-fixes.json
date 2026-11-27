@@ -1,0 +1,538 @@
+{
+ "ride: a passenger names someone else as driver": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "Only an admin can choose the driver",
+   "success": false
+  }
+ },
+ "ride: an admin names the driver": {
+  "status": 201,
+  "body": {
+   "data": {
+    "availableSeats": 4,
+    "departureAt": "2026-09-23T09:00:00.000Z",
+    "driver": {
+     "avatarUrl": null,
+     "email": null,
+     "name": "Suvajit Dey",
+     "phone": "90********"
+    },
+    "farePerSeat": 40,
+    "fromStop": {
+     "area": "Dumdum",
+     "city": "Kolkata",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "latitude": 22.6547,
+     "longitude": 88.4467,
+     "name": "Airport",
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "route": null,
+    "routeId": null,
+    "status": "SCHEDULED",
+    "toStop": {
+     "area": "Hooghly",
+     "city": "Kolkata",
+     "createdAt": "2026-09-20T19:26:01.605Z",
+     "latitude": 22.9333,
+     "longitude": 88.3833,
+     "name": "Bandel",
+     "status": "ACTIVE",
+     "updatedAt": "2026-09-20T19:26:01.605Z"
+    },
+    "totalSeats": 4,
+    "vehicleType": "CAR"
+   },
+   "message": "Ride published",
+   "success": true
+  }
+ },
+ "ride: the driver hands it to someone else": {
+  "status": 403,
+  "body": {
+   "code": "FORBIDDEN",
+   "message": "Only an admin can choose the driver",
+   "success": false
+  }
+ },
+ "bus: the public page hides who added it": {
+  "status": 200,
+  "body": {
+   "data": {
+    "availability": {
+     "date": "2026-09-22",
+     "isRunning": true,
+     "reason": null
+    },
+    "busName": "S12 Howrah Express",
+    "busNumber": "WB 01 AB 1234",
+    "category": "NORMAL",
+    "contactEnd": "22:00",
+    "contactNumber": "03324567890",
+    "contactStart": "06:00",
+    "createdAt": "2026-09-20T19:26:01.614Z",
+    "documents": [],
+    "exceptions": [
+     {
+      "busId": "cmua7ihe6001sx4rgeb0nvsvb",
+      "date": "2026-09-23T00:00:00.000Z",
+      "id": "cmua7ihf1003agt7j2e9oaxl6",
+      "reason": "Scheduled maintenance at the depot"
+     }
+    ],
+    "fare": 20,
+    "id": "cmua7ihe6001sx4rgeb0nvsvb",
+    "imageUrl": null,
+    "journey": {
+     "arrivalTime": "08:45",
+     "departureTime": "07:30",
+     "durationLabel": "1h 15m",
+     "durationMinutes": 75,
+     "totalDistanceKm": 11.2
+    },
+    "operator": "WBTC",
+    "owner": {
+     "avatarUrl": null,
+     "email": null,
+     "id": null,
+     "name": "Rakesh Sharma",
+     "phone": null
+    },
+    "ownerId": null,
+    "ratingAvg": 4.6,
+    "ratingCount": 256,
+    "rejectionReason": null,
+    "reviewedAt": null,
+    "reviewedById": "cmua7ig2h00015xwt9nft5jh8",
+    "reviews": [],
+    "route": {
+     "distanceKm": 11.2,
+     "id": "cmua7ihdz000w2luvopqiq91y",
+     "name": "Howrah Station - Esplanade",
+     "routeNumber": "S12"
+    },
+    "routeId": "cmua7ihdz000w2luvopqiq91y",
+    "serviceDays": "MON,TUE,WED,THU,FRI,SAT,SUN",
+    "status": "APPROVED",
+    "stopages": [
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "busId": null,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "distanceKm": 0,
+      "id": "cmua7ihe9002075dfxnzi1qvt",
+      "isEnd": false,
+      "isStart": true,
+      "sequence": 1,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "07:40",
+      "arrivalTime12h": "07:40 AM",
+      "busId": null,
+      "departureTime": "07:42",
+      "departureTime12h": "07:42 AM",
+      "distanceKm": 2.5,
+      "id": "cmua7ihe90021beal9ib64q7h",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000f1c86jmk4qop5",
+       "latitude": 22.5851,
+       "longitude": 88.3468,
+       "name": "Howrah Bridge",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "07:55",
+      "arrivalTime12h": "07:55 AM",
+      "busId": null,
+      "departureTime": "07:57",
+      "departureTime12h": "07:57 AM",
+      "distanceKm": 5.5,
+      "id": "cmua7ihe90022vsi7f6ft1ash",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 3,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000gd6eumd9doffp",
+       "latitude": 22.5551,
+       "longitude": 88.3453,
+       "name": "Maidan",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "08:15",
+      "arrivalTime12h": "08:15 AM",
+      "busId": null,
+      "departureTime": "08:17",
+      "departureTime12h": "08:17 AM",
+      "distanceKm": 8.1,
+      "id": "cmua7ihe90023xvtzmg1nvupi",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 4,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000h8rnb05tqbud2",
+       "latitude": 22.5525,
+       "longitude": 88.3529,
+       "name": "Park Street",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "08:45",
+      "arrivalTime12h": "08:45 AM",
+      "busId": null,
+      "departureTime": "08:45",
+      "departureTime12h": "08:45 AM",
+      "distanceKm": 11.2,
+      "id": "cmua7ihe90024b6twcd4j0kgw",
+      "isEnd": true,
+      "isStart": false,
+      "sequence": 5,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000isb1mz8nyi6x0",
+       "latitude": 22.5653,
+       "longitude": 88.3512,
+       "name": "Esplanade",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     }
+    ],
+    "submittedAt": "2026-09-20T19:26:01.614Z",
+    "timetable": [
+     {
+      "arrivalTime": "07:30",
+      "arrivalTime12h": "07:30 AM",
+      "busId": null,
+      "departureTime": "07:30",
+      "departureTime12h": "07:30 AM",
+      "distanceKm": 0,
+      "id": "cmua7ihe9002075dfxnzi1qvt",
+      "isEnd": false,
+      "isStart": true,
+      "sequence": 1,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000e1j9kasf7h8qe",
+       "latitude": 22.5839,
+       "longitude": 88.3425,
+       "name": "Howrah Station",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "07:40",
+      "arrivalTime12h": "07:40 AM",
+      "busId": null,
+      "departureTime": "07:42",
+      "departureTime12h": "07:42 AM",
+      "distanceKm": 2.5,
+      "id": "cmua7ihe90021beal9ib64q7h",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 2,
+      "stop": {
+       "area": "Howrah",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000f1c86jmk4qop5",
+       "latitude": 22.5851,
+       "longitude": 88.3468,
+       "name": "Howrah Bridge",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "07:55",
+      "arrivalTime12h": "07:55 AM",
+      "busId": null,
+      "departureTime": "07:57",
+      "departureTime12h": "07:57 AM",
+      "distanceKm": 5.5,
+      "id": "cmua7ihe90022vsi7f6ft1ash",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 3,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000gd6eumd9doffp",
+       "latitude": 22.5551,
+       "longitude": 88.3453,
+       "name": "Maidan",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "08:15",
+      "arrivalTime12h": "08:15 AM",
+      "busId": null,
+      "departureTime": "08:17",
+      "departureTime12h": "08:17 AM",
+      "distanceKm": 8.1,
+      "id": "cmua7ihe90023xvtzmg1nvupi",
+      "isEnd": false,
+      "isStart": false,
+      "sequence": 4,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000h8rnb05tqbud2",
+       "latitude": 22.5525,
+       "longitude": 88.3529,
+       "name": "Park Street",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     },
+     {
+      "arrivalTime": "08:45",
+      "arrivalTime12h": "08:45 AM",
+      "busId": null,
+      "departureTime": "08:45",
+      "departureTime12h": "08:45 AM",
+      "distanceKm": 11.2,
+      "id": "cmua7ihe90024b6twcd4j0kgw",
+      "isEnd": true,
+      "isStart": false,
+      "sequence": 5,
+      "stop": {
+       "area": "Kolkata",
+       "city": "Kolkata",
+       "createdAt": "2026-09-20T19:26:01.605Z",
+       "id": "cmua7ihdx000isb1mz8nyi6x0",
+       "latitude": 22.5653,
+       "longitude": 88.3512,
+       "name": "Esplanade",
+       "status": "ACTIVE",
+       "updatedAt": "2026-09-20T19:26:01.605Z"
+      },
+      "stopId": null
+     }
+    ],
+    "totalSeats": 45,
+    "type": "NON_AC",
+    "updatedAt": "2026-09-20T19:26:01.614Z"
+   },
+   "message": "Success",
+   "success": true
+  }
+ },
+ "profile: photo set to another file": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "avatarUrl",
+     "message": "Upload the photo instead"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "profile: photo removed": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-20T19:25:59.897Z",
+    "email": null,
+    "emailConfirmed": false,
+    "id": "cmua7ig2h0008af67g99rwmsv",
+    "name": "Ritaban Guchait",
+    "phone": "91********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Profile updated",
+   "success": true
+  }
+ },
+ "email confirm: no password": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "password",
+     "message": "Enter your password"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "email confirm: wrong password": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "details": [
+    {
+     "field": "password",
+     "message": "Password is incorrect"
+    }
+   ],
+   "message": "Validation failed",
+   "success": false
+  }
+ },
+ "email confirm: bad email": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST"
+  }
+ },
+ "email confirm: confirmed on another account": {
+  "status": 409,
+  "body": {
+   "code": "CONFLICT",
+   "message": "An account with this email already exists",
+   "success": false
+  }
+ },
+ "email confirm: code sent": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 600,
+    "sentTo": "***@example.com"
+   },
+   "message": "Code sent",
+   "success": true
+  }
+ },
+ "email confirm: wrong code": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Wrong code. Check the email and try again.",
+   "success": false
+  }
+ },
+ "email confirm: right code": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "email": "***@example.com",
+    "emailConfirmed": true,
+    "name": "Asha Roy",
+    "phone": "90********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Email confirmed",
+   "success": true
+  }
+ },
+ "email confirm: the code is used up": {
+  "status": 400,
+  "body": {
+   "code": "BAD_REQUEST",
+   "message": "Wrong code. Check the email and try again.",
+   "success": false
+  }
+ },
+ "email confirm: a Google account needs no password": {
+  "status": 200,
+  "body": {
+   "data": {
+    "expiresInSeconds": 600,
+    "sentTo": "***@example.com"
+   },
+   "message": "Code sent",
+   "success": true
+  }
+ },
+ "email confirm: changing the email unconfirms it": {
+  "status": 200,
+  "body": {
+   "data": {
+    "avatarUrl": null,
+    "createdAt": "2026-09-22T04:30:00.000Z",
+    "email": "***@example.com",
+    "emailConfirmed": false,
+    "name": "Asha Roy",
+    "phone": "90********",
+    "phoneVerified": true,
+    "role": "PASSENGER",
+    "status": "ACTIVE"
+   },
+   "message": "Profile updated",
+   "success": true
+  }
+ },
+ "email reset: unconfirmed email": {
+  "status": 400,
+  "body": {
+   "code": "EMAIL_NOT_CONFIRMED",
+   "message": "This account's email isn't confirmed, so we can't send a code there. Contact GO-GO Ride support to reset your password.",
+   "success": false
+  }
+ },
+ "login: one account after 10 wrong passwords": {
+  "status": 429,
+  "body": {
+   "code": "TOO_MANY_REQUESTS",
+   "message": "Too many wrong passwords. Wait 15 minutes and try again.",
+   "success": false
+  }
+ }
+}

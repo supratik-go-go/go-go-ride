@@ -231,11 +231,19 @@ router.get('/stops/:stopId', async (req, res) => {
   if (!stop) throw ApiError.notFound('Bus stop not found')
 
   const stopages = await all('SELECT * FROM bus_timetable WHERE stop_id = ? ORDER BY departure_time, id', stop.id)
+  // Every bus and route in one question each: a busy stop has hundreds of bus times.
+  const byIds = async (table, ids) => {
+    const unique = [...new Set(ids.filter(Boolean))]
+    const rows = unique.length ? await all(`SELECT * FROM ${table} WHERE id IN (${placeholders(unique)})`, ...unique) : []
+    return new Map(rows.map((r) => [r.id, r]))
+  }
+  const busMap = await byIds('buses', stopages.map((s) => s.busId))
+  const routeMap = await byIds('bus_routes', [...busMap.values()].map((b) => b.routeId))
   const buses = []
   for (const s of stopages) {
-    const bus = await byId('buses', s.busId)
+    const bus = busMap.get(s.busId)
     if (!bus || bus.status !== 'APPROVED') continue
-    const route = await byId('bus_routes', bus.routeId)
+    const route = routeMap.get(bus.routeId)
     buses.push({
       id: bus.id,
       busNumber: bus.busNumber,
@@ -289,6 +297,59 @@ router.delete('/stops/:stopId', requireAdmin, async (req, res) => {
   if (inUse) throw new ApiError(400, 'Could not save the record', 'DB_ERROR')
   await run('DELETE FROM bus_stops WHERE id = ?', stop.id)
   ok(res, null, 'Bus stop deleted')
+})
+
+// "Same place": two names for one place (Chandrakona and Chandrakona Town). Everything that points at
+// this stop moves to the stop kept, this stop's names become other names of it (so search, voice
+// search and the Excel import still know them), and this stop is removed. Admins decide which pairs.
+const StopMergeBody = model({ intoStopId: str() })
+const STOP_COLUMNS = [
+  ['bus_routes', 'from_stop_id'],
+  ['bus_routes', 'to_stop_id'],
+  ['bus_trips', 'from_stop_id'],
+  ['bus_trips', 'to_stop_id'],
+  ['shared_rides', 'from_stop_id'],
+  ['shared_rides', 'to_stop_id'],
+  ['alarms', 'get_on_stop_id'],
+  ['alarms', 'get_off_stop_id'],
+]
+const namesOf = (text) => String(text || '').split(',').map((n) => n.trim()).filter(Boolean)
+
+router.post('/stops/:stopId/merge', requireAdmin, async (req, res) => {
+  const b = parseBody(req, StopMergeBody)
+  const from = await byId('bus_stops', req.params.stopId)
+  const into = await byId('bus_stops', b.intoStopId)
+  if (!from || !into) throw ApiError.notFound('Bus stop not found')
+  if (from.id === into.id) throw ApiError.badRequest('Choose a different stop to join it to')
+  const buses = Number((await scalar('SELECT COUNT(DISTINCT bus_id) FROM bus_timetable WHERE stop_id = ?', from.id)) || 0)
+  await tx(async () => {
+    // A trip or route that already passes the kept stop keeps that row; the other one goes.
+    await run('DELETE t FROM bus_timetable t JOIN bus_timetable k ON k.trip_id = t.trip_id AND k.stop_id = ? WHERE t.stop_id = ?', into.id, from.id)
+    await run('UPDATE bus_timetable SET stop_id = ? WHERE stop_id = ?', into.id, from.id)
+    await run('DELETE r FROM bus_route_stops r JOIN bus_route_stops k ON k.route_id = r.route_id AND k.stop_id = ? WHERE r.stop_id = ?', into.id, from.id)
+    await run('UPDATE bus_route_stops SET stop_id = ? WHERE stop_id = ?', into.id, from.id)
+    for (const [table, column] of STOP_COLUMNS) await run(`UPDATE ${table} SET ${column} = ? WHERE ${column} = ?`, into.id, from.id)
+    await run("DELETE f FROM favorites f JOIN favorites k ON k.user_id = f.user_id AND k.item_type = 'STOP' AND k.item_id = ? WHERE f.item_type = 'STOP' AND f.item_id = ?", into.id, from.id)
+    await run("UPDATE favorites SET item_id = ? WHERE item_type = 'STOP' AND item_id = ?", into.id, from.id)
+    // The joined stop's own name first, then names the kept stop already had, then the joined stop's
+    // other names, as far as the column holds (190 characters).
+    const names = []
+    for (const n of [from.name, ...namesOf(into.otherName), ...namesOf(from.otherName)]) {
+      if (n.toLowerCase() === into.name.toLowerCase() || names.some((x) => x.toLowerCase() === n.toLowerCase())) continue
+      if ([...names, n].join(', ').length > 190) continue
+      names.push(n)
+    }
+    await update('bus_stops', into.id, { otherName: names.join(', ') || null, updatedAt: Date.now() })
+    await run('DELETE FROM bus_stops WHERE id = ?', from.id)
+    await logActivity({
+      actorId: req.user.id,
+      action: 'STOP_MERGED',
+      entityType: 'STOP',
+      entityId: into.id,
+      message: `${from.name} joined to ${into.name} (${buses} buses moved)`,
+    })
+  })
+  ok(res, await stopById(into.id), `${from.name} is now part of ${into.name}`)
 })
 
 // ---------------------------------------------------------------- routes

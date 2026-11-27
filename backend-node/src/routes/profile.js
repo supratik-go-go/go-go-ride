@@ -34,7 +34,7 @@ async function refreshRatings(reviewed) {
 /** Personal rows that go with the account. Bookings and tickets stay, without a name attached. */
 const PERSONAL_TABLES = [
   'alarms', 'arcade_scores', 'favorites', 'leaderboard', 'login_history', 'notifications', 'notification_reads', 'recent_searches',
-  'sign_in_sessions', 'reviews', 'ride_waitlist', 'helper_points', 'user_logins',
+  'sign_in_sessions', 'reviews', 'ride_waitlist', 'helper_points', 'user_logins', 'reset_codes', 'email_codes',
 ]
 
 // Required by the App Store and Google Play. The row itself stays because old bookings point at it,
@@ -63,6 +63,7 @@ router.delete('/users/me', requireUser, async (req, res) => {
       name: 'Deleted user',
       phone: `deleted-${user.id}`,
       email: null,
+      emailConfirmedAt: null,
       password: null,
       pictureUrl: null,
       status: 'INACTIVE',
@@ -70,7 +71,7 @@ router.delete('/users/me', requireUser, async (req, res) => {
       updatedAt: Date.now(),
     })
   })
-  removeUpload(user.pictureUrl)
+  removeUpload(user.pictureUrl, 'avatars')
   ok(res, null, 'Your account has been deleted')
 })
 
@@ -85,13 +86,26 @@ router.patch('/users/me', requireUser, async (req, res) => {
   const user = req.user
   // The app sends "avatarUrl"; the column is picture_url.
   const updates = Object.fromEntries(set.map((k) => [k === 'avatarUrl' ? 'pictureUrl' : k, data[k] ?? null]))
+  // A photo comes only from POST /users/me/avatar; here it can only be removed. Any other address
+  // would show a stranger's picture, and deleting the account would delete the file it points at.
+  if (updates.pictureUrl && updates.pictureUrl !== user.pictureUrl) {
+    throw ApiError.badRequest('Validation failed', [{ field: 'avatarUrl', message: 'Upload the photo instead' }])
+  }
+  // Every account keeps an email since v1.13: Forgot password sends its code there.
+  if (set.includes('email')) {
+    if (!updates.email) throw ApiError.badRequest('Email is required: Forgot password sends its code there')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updates.email)) throw ApiError.badRequest('Enter a valid email address')
+  }
   if (updates.email) {
     const clash = await get('SELECT id FROM users WHERE email = ? AND id != ?', updates.email, user.id)
     if (clash) throw ApiError.conflict('An account with this email already exists')
   }
   // Only columns whose value actually changes are written (and bump updatedAt), like SQLAlchemy.
   const changed = Object.fromEntries(Object.entries(updates).filter(([k, v]) => v !== user[k]))
+  // A new email has to be confirmed again before Forgot password uses it.
+  if ('email' in changed) changed.emailConfirmedAt = null
   if (Object.keys(changed).length) await update('users', user.id, { ...changed, updatedAt: Date.now() })
+  if ('pictureUrl' in changed) removeUpload(user.pictureUrl, 'avatars')
   ok(res, userOut(await byId('users', user.id)), 'Profile updated')
 })
 
@@ -108,6 +122,8 @@ function avatarFile(req, res, next) {
 router.post('/users/me/avatar', requireUser, avatarFile, async (req, res) => {
   const url = saveUpload(req.file, 'avatars')
   await update('users', req.user.id, { pictureUrl: url, updatedAt: Date.now() })
+  // The old photo goes, or every change would keep another file on the disk.
+  removeUpload(req.user.pictureUrl, 'avatars')
   ok(res, userOut(await byId('users', req.user.id)), 'Photo updated')
 })
 

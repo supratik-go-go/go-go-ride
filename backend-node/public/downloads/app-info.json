@@ -1,7 +1,7 @@
 {
-  "version": "1.12",
-  "versionCode": 12,
-  "notes": "Sign in with Google, and prove your mobile number with one SMS when you create an account, forget or change your password.",
+  "version": "1.13",
+  "versionCode": 13,
+  "notes": "Forgot password by email (every account now needs an email), clearer search results (your trip in orange, approximate times), tap the phone icon to call, and Recent Searches show stop names again.",
   "sizeMB": 6.8,
-  "builtAt": "2026-11-27T18:22:15.532Z"
+  "builtAt": "2026-11-27T20:58:58.116Z"
 }

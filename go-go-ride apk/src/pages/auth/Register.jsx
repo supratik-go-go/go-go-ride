@@ -72,7 +72,9 @@ export default function Register() {
     if (name.length < 2) e.name = 'Enter your full name (at least 2 characters)'
     else if (name.length > 80) e.name = 'Name is too long'
     if (!isValidPhone(form.phone) || form.phone.length !== 10) e.phone = 'Enter a valid 10-digit mobile number'
-    if (form.email.trim() && !isValidEmail(form.email)) e.email = 'Enter a valid email address'
+    // Required since v1.13: Forgot password sends its code there.
+    if (!form.email.trim()) e.email = 'Enter your email address'
+    else if (!isValidEmail(form.email)) e.email = 'Enter a valid email address'
     if (form.password.length < 6) e.password = 'Use at least 6 characters'
     else if (form.password.length > 72) e.password = 'Use at most 72 characters'
     if (!form.confirm) e.confirm = 'Re-enter your password'
@@ -99,7 +101,7 @@ export default function Register() {
       const data = await authService.register({
         name: form.name.trim(),
         phone: form.phone,
-        email: form.email.trim() || undefined,
+        email: form.email.trim(),
         password: form.password,
         role,
         ...check,
@@ -237,7 +239,7 @@ export default function Register() {
         />
         <PhoneInput value={form.phone} onChange={set('phone')} error={errors.phone} required />
         <Input
-          label="Email (optional)"
+          label="Email"
           type="email"
           icon={<Mail size={18} />}
           placeholder="you@example.com"
@@ -245,7 +247,8 @@ export default function Register() {
           value={form.email}
           onChange={set('email')}
           error={errors.email}
-          hint="For booking receipts and account recovery."
+          hint="If you forget your password, we'll email you a code here."
+          required
         />
         <div className="auth-grid-2">
           <div className="stack" style={{ '--gap': '6px' }}>

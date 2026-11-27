@@ -18,7 +18,7 @@ App version, stats, settings, news, public pages. Code: `backend-node/src/routes
 | GET | `/settings` | anyone |
 | GET | `/internal/run-alarms` | the server timer (needs the CRON_KEY secret) |
 
-## auth (16)
+## auth (20)
 
 Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 
@@ -29,6 +29,10 @@ Sign up, sign in, OTP, tokens, password. Code: `backend-node/src/routes/auth.js`
 | POST | `/auth/otp/request` | anyone |
 | POST | `/auth/otp/verify` | anyone |
 | POST | `/auth/password/reset` | anyone |
+| POST | `/auth/password/email-code` | anyone |
+| POST | `/auth/password/reset-by-email` | anyone |
+| POST | `/users/me/email/code` | signed in |
+| POST | `/users/me/email/confirm` | signed in |
 | POST | `/auth/refresh` | anyone |
 | POST | `/auth/logout` | signed in |
 | GET | `/auth/me` | signed in |
@@ -78,7 +82,7 @@ Bus search, bus details, reviews, owner bus listings. Code: `backend-node/src/ro
 | GET | `/buses/:busId/reviews` | anyone |
 | POST | `/buses/:busId/reviews` | signed in |
 
-## network (13)
+## network (14)
 
 Routes, stops, nearby stops. Code: `backend-node/src/routes/network.js`
 
@@ -91,6 +95,7 @@ Routes, stops, nearby stops. Code: `backend-node/src/routes/network.js`
 | POST | `/stops` | signed in |
 | PATCH | `/stops/:stopId` | signed in |
 | DELETE | `/stops/:stopId` | signed in |
+| POST | `/stops/:stopId/merge` | signed in |
 | GET | `/routes` | anyone |
 | GET | `/routes/popular` | anyone |
 | GET | `/routes/:routeId` | anyone |

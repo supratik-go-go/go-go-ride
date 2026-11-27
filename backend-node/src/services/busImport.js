@@ -8,7 +8,7 @@ import { newId } from '../ids.js'
 import { haversineKm } from '../routes/network.js'
 import { getSettingsRow } from '../routes/platform.js'
 import { logActivity } from './common.js'
-import { insertStopages } from './buses.js'
+import { insertStopages, OTHER_NAME_IS } from './buses.js'
 import { applyTripImport, planTripImport, readTripSheets } from './busTripImport.js'
 
 const MAX_ROWS = 500
@@ -66,8 +66,10 @@ function readStops(raw) {
 }
 
 // The collation compares without case, so "esplanade" finds "Esplanade".
-const findStop = (name) =>
-  get(`SELECT id, name, latitude, longitude FROM bus_stops WHERE name = ? ORDER BY status = 'ACTIVE' DESC, created_at, id LIMIT 1`, name)
+// A known other name (a stop joined to another with "Same place") finds that stop too.
+const findStop = async (name) =>
+  (await get(`SELECT id, name, latitude, longitude FROM bus_stops WHERE name = ? ORDER BY status = 'ACTIVE' DESC, created_at, id LIMIT 1`, name)) ||
+  get(`SELECT s.id, s.name, s.latitude, s.longitude FROM bus_stops s WHERE ${OTHER_NAME_IS} ORDER BY s.status = 'ACTIVE' DESC, s.created_at, s.id LIMIT 1`, name)
 
 /**
  * Read the uploaded workbook into one object per filled row, keeping the Excel row number.

@@ -28,3 +28,9 @@
   text-align: left;
 }
 .auth-check-status.is-done { color: var(--success); font-weight: 600; }
+
+/* "Add your email" in place of the app (AddEmail.jsx), for accounts made before email was required. */
+.auth-email-gate { display: flex; justify-content: center; padding: 32px 16px; }
+.auth-email-gate-card { width: 100%; max-width: 440px; padding: 28px 22px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.auth-email-gate-card h1 { font-size: var(--fs-xl, 1.5rem); margin: 4px 0 0; }
+.auth-email-gate-card .auth-check { width: 100%; text-align: left; margin-top: 8px; }

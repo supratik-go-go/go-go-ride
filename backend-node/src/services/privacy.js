@@ -15,9 +15,11 @@ export function publicPerson(person, { keepPhone = false } = {}) {
 
 export const publicReview = (review) => ({ ...review, user: publicPerson(review.user) })
 
+// Who added a bus stays private too: imported buses would otherwise all name the admin's account.
 export function publicBus(bus) {
   if (!bus) return bus
-  const out = { ...bus, owner: publicPerson(bus.owner), documents: [], rejectionReason: null }
+  const owner = bus.owner && { ...publicPerson(bus.owner), id: null }
+  const out = { ...bus, ownerId: null, owner, documents: [], rejectionReason: null }
   if ('reviews' in out) out.reviews = (out.reviews || []).map(publicReview)
   return out
 }

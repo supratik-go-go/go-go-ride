@@ -1,6 +1,6 @@
 // Registration, password and OTP sign-in, token rotation (port of app/api/auth.py), the free
-// mobile number check by SMS (services/phoneCheck.js) for sign-up and password changes, and
-// Sign in with Google (services/google.js).
+// mobile number check by SMS (services/phoneCheck.js) for sign-up and password changes, Sign in
+// with Google (services/google.js), and forgot-password codes by email (services/mail.js).
 import crypto from 'node:crypto'
 import { Router } from 'express'
 import { config } from '../config.js'
@@ -23,9 +23,10 @@ import {
 } from '../auth.js'
 import { userOut } from '../serialize.js'
 import { googleOn, verifyGoogleToken } from '../services/google.js'
+import { mailReady, sendMail } from '../services/mail.js'
 import { checkStatus, smsReceived, startCheck, useCheck } from '../services/phoneCheck.js'
 import { linkSmsPhone, phoneChecksOn } from '../services/sms.js'
-import { body, email, ENUMS, name, oneOf, opt, password, phone, z } from '../validate.js'
+import { body, ENUMS, name, oneOf, opt, password, phone, z } from '../validate.js'
 
 const router = Router()
 
@@ -60,10 +61,16 @@ const updateApp = () => new ApiError(400, 'Verify your mobile number first: upda
 
 // ---------------------------------------------------------------- register
 
+// Email is required since v1.13: Forgot password sends its code there (owner's choice, no SMS).
+const requiredEmail = z.preprocess(
+  (v) => (typeof v === 'string' ? v.trim() : v),
+  z.string({ error: 'Enter your email address' }).min(1, 'Enter your email address').email('Enter a valid email address'),
+)
+
 const RegisterBody = z.object({
   name,
   phone,
-  email: opt(email),
+  email: requiredEmail,
   password,
   role: oneOf(ENUMS.publicRole).default('PASSENGER'),
   ...checkFields,
@@ -104,11 +111,19 @@ const LoginBody = z.object({
   password: z.preprocess((v) => (typeof v === 'string' ? v.trim() : v), z.string().min(1, 'Field required')),
 })
 
+// Per account as well as per internet address (app.js): someone using many addresses still gets
+// only this many guesses at one account's password.
+const WRONG_PASSWORDS = 10
+const WRONG_PASSWORD_MINUTES = 15
+
 router.post('/auth/login', async (req, res) => {
   const b = body(req, LoginBody)
   const ctx = clientContext(req)
   const user = await findByPhone(b.phone)
   if (!user || !user.password) throw ApiError.unauthorized('Invalid mobile number or password')
+  const since = at(Date.now() - WRONG_PASSWORD_MINUTES * 60000)
+  const wrong = Number((await scalar("SELECT COUNT(id) FROM login_history WHERE user_id = ? AND status = 'FAILED' AND created_at >= ?", user.id, since)) || 0)
+  if (wrong >= WRONG_PASSWORDS) throw ApiError.tooMany(`Too many wrong passwords. Wait ${WRONG_PASSWORD_MINUTES} minutes and try again.`)
   if (!verifyPassword(b.password, user.password)) {
     await insert('login_history', { id: newId(), userId: user.id, device: ctx.device, ipAddress: ctx.ip, location: null, status: 'FAILED', createdAt: Date.now() })
     throw ApiError.unauthorized('Invalid mobile number or password')
@@ -229,6 +244,161 @@ router.post('/auth/password/reset', async (req, res) => {
   if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
   const session = await issueSession(await byId('users', user.id), clientContext(req))
   ok(res, session, 'Password changed. You are signed in.')
+})
+
+// ---------------------------------------------------------------- forgot password by email
+
+// Free: a 6-digit code goes to the email on the account (owner's choice 2026-11-28: no SMS, no phone).
+const RESET_MINUTES = 10
+const ResetLoginBody = z.object({ login: z.string().trim().min(3, 'Enter your mobile number or email').max(190) })
+
+/** The account for what was typed on Forgot password: a mobile number or an email address. */
+function findByLogin(login) {
+  const digits = login.replace(/[\s-]/g, '').replace(/^\+?91(?=\d{10}$)/, '')
+  if (/^[6-9]\d{9}$/.test(digits)) return findByPhone(digits)
+  return get('SELECT * FROM users WHERE email = ?', login)
+}
+
+const maskEmail = (email) => {
+  const [name, domain] = String(email).split('@')
+  return `${name.slice(0, 1)}***@${domain}`
+}
+
+// A typed email is only trusted once its code came back (/users/me/email/confirm): otherwise a
+// stranger's address typed by mistake, or one put in by someone holding the phone, could reset it.
+const notConfirmed = () =>
+  new ApiError(400, "This account's email isn't confirmed, so we can't send a code there. Contact GO-GO Ride support to reset your password.", 'EMAIL_NOT_CONFIRMED')
+
+/** Codes by email: a few a minute and a cap per hour and per day, so nobody can flood a mailbox or use up its daily sending limit. */
+async function assertCodeQuota(table, userId) {
+  const count = async (ms) => Number((await scalar(`SELECT COUNT(id) FROM ${table} WHERE user_id = ? AND created_at >= ?`, userId, at(Date.now() - ms))) || 0)
+  if ((await count(60000)) >= 3) throw ApiError.tooMany('Please wait a minute before asking for another code')
+  if ((await count(3600000)) >= 5) throw ApiError.tooMany('You asked for many codes. Try again in an hour.')
+  if ((await count(86400000)) >= 10) throw ApiError.tooMany('You asked for many codes today. Try again tomorrow.')
+}
+
+/** The guess is counted in the same step that checks the limit, so guesses sent all at once can't slip past it. */
+async function guessCode(table, record, code) {
+  const { changes } = await run(`UPDATE ${table} SET attempts = attempts + 1 WHERE id = ? AND attempts < ?`, record.id, config.otpMaxAttempts)
+  if (!changes) throw ApiError.tooMany('Too many wrong codes. Ask for a new one.')
+  if (!verifyCode(code, record.codeHash)) throw ApiError.badRequest('Wrong code. Check the email and try again.')
+}
+
+/** Inside the caller's transaction: a code works once, even when two requests bring it at the same time. */
+async function spendCode(table, record) {
+  const { changes } = await run(`UPDATE ${table} SET used_at = ? WHERE id = ? AND used_at IS NULL`, at(Date.now()), record.id)
+  if (!changes) throw ApiError.badRequest('Ask for a new code')
+}
+
+router.post('/auth/password/email-code', async (req, res) => {
+  const b = body(req, ResetLoginBody)
+  const user = await findByLogin(b.login)
+  if (!user || user.status === 'INACTIVE') throw ApiError.notFound('No account with this mobile number or email')
+  // A Google account has no password to reset until it has a number (sign-in is number + password).
+  if (!user.phone) throw new ApiError(400, 'This account signs in with Google. Tap Continue with Google instead.', 'GOOGLE_ACCOUNT')
+  if (!user.email) throw new ApiError(400, 'This account has no email address. Contact GO-GO Ride support to reset your password.', 'NO_EMAIL')
+  if (!user.emailConfirmedAt) throw notConfirmed()
+  if (config.isProd && !mailReady()) throw new ApiError(503, "Reset by email isn't switched on yet. Contact GO-GO Ride support.", 'MAIL_NOT_READY')
+  await assertCodeQuota('reset_codes', user.id)
+  const code = generateOtp()
+  const now = Date.now()
+  await insert('reset_codes', { id: newId(), userId: user.id, codeHash: hashCode(code), attempts: 0, expiresAt: now + RESET_MINUTES * 60000, usedAt: null, createdAt: now })
+  if (mailReady()) {
+    await sendMail({
+      to: user.email,
+      subject: `${code} is your GO-GO Ride code`,
+      text: `Hello ${user.name},\n\nYour code to reset your GO-GO Ride password is ${code}. It expires in ${RESET_MINUTES} minutes.\n\nIf you didn't ask for this, ignore this email: your password stays the same.\n\nGO-GO Ride`,
+    })
+  }
+  const data = { sentTo: maskEmail(user.email), expiresInSeconds: RESET_MINUTES * 60 }
+  if (config.echoOtp) data.devCode = code
+  ok(res, data, 'Code sent')
+})
+
+const EmailResetBody = z.object({
+  login: z.string().trim().min(3, 'Enter your mobile number or email').max(190),
+  code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code'),
+  newPassword: password,
+})
+
+// The latest code for the account proves the person; every other sign-in of the account ends.
+router.post('/auth/password/reset-by-email', async (req, res) => {
+  const b = body(req, EmailResetBody)
+  const user = await findByLogin(b.login)
+  if (!user || user.status === 'INACTIVE') throw ApiError.notFound('No account with this mobile number or email')
+  if (!user.emailConfirmedAt) throw notConfirmed()
+  const record = await get('SELECT * FROM reset_codes WHERE user_id = ? AND used_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 1', user.id)
+  if (!record) throw ApiError.badRequest('Ask for a new code')
+  if (record.expiresAt < Date.now()) throw ApiError.badRequest('This code has expired. Ask for a new one.')
+  await guessCode('reset_codes', record, b.code)
+  const now = Date.now()
+  await tx(async () => {
+    await spendCode('reset_codes', record)
+    await update('users', user.id, { password: hashPassword(b.newPassword), updatedAt: now })
+    await run('UPDATE sign_in_sessions SET revoked_at = ? WHERE revoked_at IS NULL AND user_id = ?', at(now), user.id)
+  })
+  if (user.status !== 'ACTIVE') throw ApiError.forbidden(`Account is ${String(user.status).toLowerCase()}`)
+  ok(res, await issueSession(await byId('users', user.id), clientContext(req)), 'Password changed. You are signed in.')
+})
+
+// ---------------------------------------------------------------- confirming the email
+
+const EmailCodeBody = z.object({
+  email: z.preprocess((v) => (typeof v === 'string' ? v.trim() : v), z.string({ error: 'Enter your email address' }).email('Enter a valid email address').max(190)),
+  password: opt(z.preprocess((v) => (typeof v === 'string' ? v.trim() : v), z.string())),
+})
+
+/** Another account with this email, if any (with whether it confirmed it). */
+const emailHolder = (address, userId) => get('SELECT id, email_confirmed_at FROM users WHERE email = ? AND id != ?', address, userId)
+
+// The password is asked for, or someone holding an unlocked phone could confirm their own email and
+// reset the password later. The email may be a new one: it replaces the old one once confirmed.
+router.post('/users/me/email/code', requireUser, async (req, res) => {
+  const b = body(req, EmailCodeBody)
+  const user = req.user
+  if (user.password) {
+    if (!b.password) throw ApiError.badRequest('Validation failed', [{ field: 'password', message: 'Enter your password' }])
+    if (!verifyPassword(b.password, user.password)) throw ApiError.badRequest('Validation failed', [{ field: 'password', message: 'Password is incorrect' }])
+  }
+  if ((await emailHolder(b.email, user.id))?.emailConfirmedAt) throw ApiError.conflict('An account with this email already exists')
+  if (config.isProd && !mailReady()) throw new ApiError(503, "Email confirmation isn't switched on yet. Please try again later.", 'MAIL_NOT_READY')
+  await assertCodeQuota('email_codes', user.id)
+  const code = generateOtp()
+  const now = Date.now()
+  await insert('email_codes', { id: newId(), userId: user.id, email: b.email, codeHash: hashCode(code), attempts: 0, expiresAt: now + RESET_MINUTES * 60000, usedAt: null, createdAt: now })
+  if (mailReady()) {
+    await sendMail({
+      to: b.email,
+      subject: `${code} is your GO-GO Ride code`,
+      text: `Hello ${user.name},\n\nYour code to confirm this email for GO-GO Ride is ${code}. It expires in ${RESET_MINUTES} minutes.\n\nOnce it is confirmed, Forgot password can send you a code here.\n\nIf you didn't ask for this, ignore this email.\n\nGO-GO Ride`,
+    })
+  }
+  const data = { sentTo: b.email, expiresInSeconds: RESET_MINUTES * 60 }
+  if (config.echoOtp) data.devCode = code
+  ok(res, data, 'Code sent')
+})
+
+const EmailConfirmBody = z.object({ code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code') })
+
+// Another account that only had this email typed in gives it up: its owner never proved it theirs.
+router.post('/users/me/email/confirm', requireUser, async (req, res) => {
+  const b = body(req, EmailConfirmBody)
+  const user = req.user
+  const record = await get('SELECT * FROM email_codes WHERE user_id = ? AND used_at IS NULL ORDER BY created_at DESC, id DESC LIMIT 1', user.id)
+  if (!record) throw ApiError.badRequest('Ask for a new code')
+  if (record.expiresAt < Date.now()) throw ApiError.badRequest('This code has expired. Ask for a new one.')
+  await guessCode('email_codes', record, b.code)
+  await tx(async () => {
+    await spendCode('email_codes', record)
+    const other = await emailHolder(record.email, user.id)
+    if (other?.emailConfirmedAt) throw ApiError.conflict('An account with this email already exists')
+    const now = Date.now()
+    if (other) await update('users', other.id, { email: null, updatedAt: now })
+    await update('users', user.id, { email: record.email, emailConfirmedAt: now, updatedAt: now })
+    // Reset codes sent to an earlier email stop working.
+    await run('DELETE FROM reset_codes WHERE user_id = ?', user.id)
+  })
+  ok(res, userOut(await byId('users', user.id)), 'Email confirmed')
 })
 
 // ---------------------------------------------------------------- refresh / logout
@@ -371,6 +541,8 @@ router.post('/auth/google', async (req, res) => {
         name: google.name,
         phone: null,
         email: google.email,
+        // Google has confirmed the Gmail.
+        emailConfirmedAt: now,
         password: null,
         role: 'PASSENGER',
         pictureUrl: null,

@@ -39,6 +39,8 @@ export async function bestScore(userId) {
 
 export async function recordScore(user, score) {
   return tx(async () => {
+    // One run at a time per person, or runs sent all at once could each count as a paid run.
+    await get('SELECT id FROM users WHERE id = ? FOR UPDATE', user.id)
     const points = pointsFor(score, await paidRunsToday(user.id))
     // Anyone can post scores all day, so a run that pays nothing and beats nothing leaves no row.
     if (points > 0 || score > (await bestScore(user.id))) {

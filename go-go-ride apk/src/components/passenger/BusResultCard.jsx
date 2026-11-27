@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, BusFront, CalendarDays, ChevronRight, Clock, Clock3, IndianRupee, Info, Star, Timer, CircleX } from 'lucide-react'
+import { ArrowRight, BusFront, CalendarDays, ChevronRight, Clock, Clock3, IndianRupee, Info, MapPin, Route as RouteIcon, Star, Timer, CircleX } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { busBadge, formatDateLong, formatMinutes } from '../../utils/format'
 import { ratingText } from './helpers'
@@ -36,10 +36,21 @@ export function BusResultCard({ bus, date, onChangeDate, onViewOthers }) {
         </span>
         <Link to={url} className="px-result-title">
           <span className={`px-result-badge ${bus.routeNumber || bus.route?.routeNumber || bus.busNumber ? '' : 'is-name'}`}>{busBadge(bus)}</span>
-          <span className="px-result-route">{bus.routeName}</span>
+          {/* Two lines people mixed up: the bus's whole route (grey) and their own trip on it (orange). */}
+          {bus.routeName && (
+            <span className="px-result-route">
+              <RouteIcon size={13} aria-hidden="true" />
+              <span className="px-result-label">Bus route</span>
+              <span>{bus.routeName}</span>
+            </span>
+          )}
           {showLeg && (
             <span className="px-result-leg">
-              {bus.from.name} <ArrowRight size={12} /> {bus.to.name}
+              <MapPin size={14} aria-hidden="true" />
+              <span className="px-result-label">Your trip</span>
+              <span className="px-result-leg-stops">
+                {bus.from.name} <ArrowRight size={14} aria-label="to" /> {bus.to.name}
+              </span>
             </span>
           )}
         </Link>
@@ -65,19 +76,19 @@ export function BusResultCard({ bus, date, onChangeDate, onViewOthers }) {
           <span className="px-stat-value">
             <Clock size={15} color="var(--primary)" /> {bus.departureTime12h}
           </span>
-          <span className="px-stat-label">Departure</span>
+          <span className="px-stat-label">Approx. Departure</span>
         </div>
         <div className="px-stat">
           <span className="px-stat-value">
             <Clock3 size={15} color="var(--accent)" /> {bus.arrivalTime12h}
           </span>
-          <span className="px-stat-label">Arrival</span>
+          <span className="px-stat-label">Approx. Arrival</span>
         </div>
         <div className="px-stat">
           <span className="px-stat-value">
             <Timer size={15} color="var(--success)" /> {bus.durationLabel || formatMinutes(bus.durationMinutes)}
           </span>
-          <span className="px-stat-label">Duration</span>
+          <span className="px-stat-label">Approx. Duration</span>
         </div>
         {bus.fare != null && (
           <div className="px-stat">

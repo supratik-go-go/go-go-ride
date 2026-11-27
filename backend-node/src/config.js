@@ -89,6 +89,17 @@ export const config = {
     certsUrl: env('GOOGLE_CERTS_URL', 'https://www.googleapis.com/oauth2/v3/certs'),
   },
 
+  // Forgot-password codes go by email (free): any mailbox that allows SMTP, e.g. one on the
+  // go-goride.com domain from hPanel > Emails (smtp.hostinger.com) or a Gmail with an app password
+  // (smtp.gmail.com). Until host, user and password are set, the live server sends no email.
+  mail: {
+    host: env('SMTP_HOST', ''),
+    port: num('SMTP_PORT', 465),
+    user: env('SMTP_USER', ''),
+    password: env('SMTP_PASSWORD', ''),
+    from: env('MAIL_FROM', ''),
+  },
+
   busExceptionMinDays: num('BUS_EXCEPTION_MIN_DAYS', 5),
   cronKey: env('CRON_KEY', ''),
 

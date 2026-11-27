@@ -6,6 +6,7 @@
     "avatarUrl": null,
     "createdAt": "2026-09-20T19:25:59.897Z",
     "email": null,
+    "emailConfirmed": false,
     "id": "cmua7ig2h0008af67g99rwmsv",
     "lastLoginAt": "2026-09-22T04:30:00.000Z",
     "name": "Ritaban Guchait",
@@ -25,6 +26,7 @@
     "avatarUrl": null,
     "createdAt": "2026-09-20T19:25:59.897Z",
     "email": "***@gmail.com",
+    "emailConfirmed": false,
     "id": "cmua7ig2h00030d5ia9e9j3el",
     "lastLoginAt": "2026-09-22T04:30:00.000Z",
     "name": "Rakesh Sharma",
@@ -44,6 +46,7 @@
     "avatarUrl": null,
     "createdAt": "2026-09-20T19:25:59.897Z",
     "email": "***@gogoride.com",
+    "emailConfirmed": false,
     "id": "cmua7ig2h00022qtjqg7pglpb",
     "lastLoginAt": "2026-09-22T04:30:00.000Z",
     "name": "Operations Admin",
@@ -495,22 +498,6 @@
   "status": 200,
   "body": {
    "data": [
-    {
-     "fromText": null,
-     "id": "cmvcegcio0012jtyxcn1qwpy1",
-     "query": null,
-     "searchType": "ROUTE",
-     "searchedAt": "2026-10-17T12:55:33.984Z",
-     "toText": null
-    },
-    {
-     "fromText": null,
-     "id": "cmvcegber00118oggoxr12l15",
-     "query": null,
-     "searchType": "ROUTE",
-     "searchedAt": "2026-10-17T12:55:32.547Z",
-     "toText": null
-    },
     {
      "fromText": null,
      "id": "cmvcefy020010l068aun37t8g",

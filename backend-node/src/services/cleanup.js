@@ -18,6 +18,8 @@ export async function cleanUp(now = Date.now()) {
   await del('sign_in_sessions', 'DELETE FROM sign_in_sessions WHERE (expires_at < ? OR revoked_at IS NOT NULL) AND created_at < ?', at(now), at(now - 30 * DAY_MS))
   await del('otp_codes', 'DELETE FROM otp_codes WHERE expires_at < ?', at(now - DAY_MS))
   await del('phone_checks', 'DELETE FROM phone_checks WHERE expires_at < ?', at(now - DAY_MS))
+  await del('reset_codes', 'DELETE FROM reset_codes WHERE expires_at < ?', at(now - DAY_MS))
+  await del('email_codes', 'DELETE FROM email_codes WHERE expires_at < ?', at(now - DAY_MS))
   // Notifications: 15 days.
   await del('notifications', 'DELETE FROM notifications WHERE created_at < ?', at(now - 15 * DAY_MS))
   // Recent searches: the last 10 per person.

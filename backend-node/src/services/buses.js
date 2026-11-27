@@ -110,10 +110,31 @@ function passesThrough(stopages, viaStopId, fromStopId, toStopId) {
 
 // ---------------------------------------------------------------- stops
 
+/**
+ * The stop someone typed (without picking it from the list). Best first: the exact name, a shown
+ * stop, a name that starts with the words, the stop most buses use, the shortest name. So "Sealdah"
+ * is Sealdah, not North Sealdah, and "Howrah" is the busy Howrah Station. The second-language name
+ * counts too, so "হাওড়া" finds Howrah Station.
+ */
+/** SQL: is ? exactly one of the stop's other names (a comma-separated list, e.g. after "Same place")? */
+export const OTHER_NAME_IS = "FIND_IN_SET(?, REPLACE(REPLACE(s.other_name, ', ', ','), ' ,', ',')) > 0"
+
 export async function resolveStopIdByName(name) {
-  if (!name) return null
-  // The second-language name counts too, so "হাওড়া" finds Howrah Station.
-  const stop = await get('SELECT id FROM bus_stops WHERE name LIKE ? OR other_name LIKE ? ORDER BY name, id LIMIT 1', like(name), like(name))
+  const text = String(name ?? '').trim()
+  if (!text) return null
+  // A stop joined to another ("Chandrakona" into "Chandrakona Town") lives on as an other name, and
+  // counts as an exact match right after a real name.
+  const stop = await get(
+    `SELECT s.id FROM bus_stops s WHERE s.name LIKE ? OR s.other_name LIKE ?
+     ORDER BY s.name = ? DESC, ${OTHER_NAME_IS} DESC, s.status = 'ACTIVE' DESC, s.name LIKE ? DESC,
+       (SELECT COUNT(DISTINCT t.bus_id) FROM bus_timetable t WHERE t.stop_id = s.id) DESC, CHAR_LENGTH(s.name), s.name, s.id
+     LIMIT 1`,
+    like(text),
+    like(text),
+    text,
+    text,
+    `${text}%`,
+  )
   return stop ? stop.id : null
 }
 
@@ -125,7 +146,9 @@ export async function resolveStopId({ stopId, stopName }, status = 'ACTIVE') {
     return stop.id
   }
   const name = (stopName || '').trim()
-  const existing = await get('SELECT id FROM bus_stops WHERE name = ? ORDER BY created_at, id LIMIT 1', name)
+  const existing =
+    (await get('SELECT id FROM bus_stops WHERE name = ? ORDER BY created_at, id LIMIT 1', name)) ||
+    (await get(`SELECT s.id FROM bus_stops s WHERE ${OTHER_NAME_IS} ORDER BY s.created_at, s.id LIMIT 1`, name))
   if (existing) return existing.id
   const now = Date.now()
   const created = await insert('bus_stops', {
